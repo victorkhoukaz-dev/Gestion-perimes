@@ -1,0 +1,246 @@
+{
+  "products": [
+    {
+      "id": "prod-1783369537070-bap3u",
+      "section": "CRÈMES, ONG., SUPPOS.",
+      "din": "716650",
+      "product": "BETADERM",
+      "quantity": "1",
+      "expiryDate": "2027-01",
+      "status": "active",
+      "dateAdded": "2026-07-06T20:25:37.070Z",
+      "techInitials": "SB",
+      "removalDate": null,
+      "removedBy": null,
+      "notes": "Gros pot",
+      "dosage": "0.1 %",
+      "format": ""
+    },
+    {
+      "id": "prod-1783369894262-c1ozy",
+      "section": "CRÈMES, ONG., SUPPOS.",
+      "din": "2359685",
+      "product": "BIACNA",
+      "quantity": "4",
+      "expiryDate": "2027-01",
+      "status": "active",
+      "dateAdded": "2026-07-06T20:31:34.262Z",
+      "techInitials": "SB",
+      "removalDate": null,
+      "removedBy": null,
+      "notes": "",
+      "dosage": "1.2-0.025 %",
+      "format": ""
+    },
+    {
+      "id": "prod-1783369937393-k4qrv",
+      "section": "CRÈMES, ONG., SUPPOS.",
+      "din": "2245523",
+      "product": "TARO CLOBETASOL",
+      "quantity": "2",
+      "expiryDate": "2026-09",
+      "status": "active",
+      "dateAdded": "2026-07-06T20:32:17.393Z",
+      "techInitials": "SB",
+      "removalDate": null,
+      "removedBy": null,
+      "notes": "",
+      "dosage": "0.05 % 15g",
+      "format": ""
+    },
+    {
+      "id": "prod-1783369965972-4u2j9",
+      "section": "CRÈMES, ONG., SUPPOS.",
+      "din": "2244126",
+      "product": "DOVOBET",
+      "quantity": "2",
+      "expiryDate": "2026-12",
+      "status": "active",
+      "dateAdded": "2026-07-06T20:32:45.972Z",
+      "techInitials": "SB",
+      "removalDate": null,
+      "removedBy": null,
+      "notes": "",
+      "dosage": "120g",
+      "format": ""
+    },
+    {
+      "id": "prod-1783370025523-ii376",
+      "section": "CRÈMES, ONG., SUPPOS.",
+      "din": "2496410",
+      "product": "TARO CLOTRIMAZOLE/BETAMETHASO.",
+      "quantity": "1",
+      "expiryDate": "2026-11",
+      "status": "active",
+      "dateAdded": "2026-07-06T20:33:45.523Z",
+      "techInitials": "SB",
+      "removalDate": null,
+      "removedBy": null,
+      "notes": "",
+      "dosage": "1%-0.05 %",
+      "format": ""
+    },
+    {
+      "id": "prod-1783370052313-cncbq",
+      "section": "CRÈMES, ONG., SUPPOS.",
+      "din": "N/A",
+      "product": "newman EJM",
+      "quantity": "7",
+      "expiryDate": "2026-10",
+      "status": "active",
+      "dateAdded": "2026-07-06T20:34:12.313Z",
+      "techInitials": "SB",
+      "removalDate": null,
+      "removedBy": null,
+      "notes": "(EJM)",
+      "dosage": "N/A",
+      "format": ""
+    },
+    {
+      "id": "prod-1783370100079-wb1g8",
+      "section": "CRÈMES, ONG., SUPPOS.",
+      "din": "2338572",
+      "product": "silkis crème",
+      "quantity": "1",
+      "expiryDate": "2026-12",
+      "status": "active",
+      "dateAdded": "2026-07-06T20:35:00.079Z",
+      "techInitials": "SB",
+      "removalDate": null,
+      "removedBy": null,
+      "notes": "",
+      "dosage": "N/A",
+      "format": ""
+    },
+    {
+      "id": "prod-1783370146979-060dh",
+      "section": "CRÈMES, ONG., SUPPOS.",
+      "din": "2221934",
+      "product": "TOPICORT TUBE",
+      "quantity": "1",
+      "expiryDate": "2026-10",
+      "status": "active",
+      "dateAdded": "2026-07-06T20:35:46.979Z",
+      "techInitials": "SB",
+      "removalDate": null,
+      "removedBy": null,
+      "notes": "",
+      "dosage": "0.25 %",
+      "format": ""
+    },
+    {
+      "id": "prod-1783370186601-02ef8",
+      "section": "CRÈMES, ONG., SUPPOS.",
+      "din": "80079151",
+      "product": "M UREA 20",
+      "quantity": "1",
+      "expiryDate": "2026-11",
+      "status": "active",
+      "dateAdded": "2026-07-06T20:36:26.601Z",
+      "techInitials": "SB",
+      "removalDate": null,
+      "removedBy": null,
+      "notes": "",
+      "dosage": "20%",
+      "format": ""
+    },
+    {
+      "id": "prod-1783370303678-90gtr",
+      "section": "CRÈMES, ONG., SUPPOS.",
+      "din": "2112760",
+      "product": "SALOFALK",
+      "quantity": "4",
+      "expiryDate": "2026-12",
+      "status": "active",
+      "dateAdded": "2026-07-06T20:38:23.678Z",
+      "techInitials": "SB",
+      "removalDate": null,
+      "removedBy": null,
+      "notes": "",
+      "dosage": "500 MG",
+      "format": ""
+    }
+  ],
+  "config": {
+    "expiryWindowMonths": 6,
+    "sections": [
+      "A - Z (COMPRIMÉS)",
+      "ANNEXE 2",
+      "ARMOIRE NARCOTIQUES",
+      "CRÈMES, ONG., SUPPOS.",
+      "CYTOTOXIQUES",
+      "DISPILLS - A - Z",
+      "DISPILLS - CYTOTOXIQUES",
+      "DISPILLS - SUBS. CIBLÉES",
+      "FRIGO",
+      "GOUTTES OPHTALMIQUES",
+      "INJECTIONS",
+      "LAB.",
+      "LAIT MATERNISÉS",
+      "LIQUIDES ET SUSPENSIONS",
+      "MAGISTRALES",
+      "PANSEMENTS",
+      "VAPORISATEURS / INHALATEURS",
+      "VITAMINES / SUPPLÉMENTS"
+    ],
+    "stickerColors": {
+      "10": {
+        "name": "Bleu",
+        "color": "#0977ec"
+      },
+      "11": {
+        "name": "Rose",
+        "color": "#d41698"
+      },
+      "12": {
+        "name": "Orange",
+        "color": "#ed832c"
+      },
+      "01": {
+        "name": "Rouge",
+        "color": "#ec3722"
+      },
+      "02": {
+        "name": "Rose",
+        "color": "#EC407A"
+      },
+      "03": {
+        "name": "Violet",
+        "color": "#AB47BC"
+      },
+      "04": {
+        "name": "Bleu Foncé",
+        "color": "#5C6BC0"
+      },
+      "05": {
+        "name": "Bleu Clair",
+        "color": "#29B6F6"
+      },
+      "06": {
+        "name": "Vert",
+        "color": "#66BB6A"
+      },
+      "07": {
+        "name": "Jaune",
+        "color": "#FFCA28"
+      },
+      "08": {
+        "name": "Turquoise",
+        "color": "#24abff"
+      },
+      "09": {
+        "name": "Jaune",
+        "color": "#eff312"
+      }
+    }
+  },
+  "currentDate": "2026-06-23T00:00:00.000Z",
+  "targetMonthDate": "2026-06-23T00:00:00.000Z",
+  "sessionInitials": "SB",
+  "tourneeStartMonth": "2026-08",
+  "tourneeDuration": 6,
+  "sorting": {
+    "key": "expiryDate",
+    "direction": "asc"
+  }
+}
