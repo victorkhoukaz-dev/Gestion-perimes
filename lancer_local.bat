@@ -9,8 +9,8 @@ echo.
 echo Pour fermer le serveur, fermez simplement cette fenetre.
 echo.
 
-:: Ouvre le navigateur sur localhost:8001
-start "" "http://localhost:8001"
+:: Ouvre le navigateur sur localhost:8001 avec le nouveau chemin d'accès
+start "" "http://localhost:8001/App/Application%%20-%%20p%%C3%%A9rim%%C3%%A9s.html"
 
 :: Lance le serveur web de Python
 python serve.py
