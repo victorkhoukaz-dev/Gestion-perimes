@@ -1,6 +1,6 @@
-# Guide d'utilisation - Gestion des Expirés de Laboratoire (V3.5)
+# Guide d'utilisation - Gestion des Expirés de Laboratoire (V3.6)
 
-Félicitations ! Votre application de gestion des expirés a été mise à jour en version V3.5 avec l'intégration d'un **Tutoriel de démarrage interactif** (popup lors de la connexion) et d'un **nouvel onglet Guide permanent** contenant toutes les procédures sous forme d'accordéons.
+Félicitations ! Votre application de gestion des expirés a été mise à jour en version V3.6 avec l'intégration d'un **Suivi de l'avancement par section** (checklist de tournée collaborative) et l'harmonisation de l'ergonomie.
 
 Ce document vous explique comment l'utiliser au quotidien pour vos tournées de saisie et vos retraits mensuels.
 
@@ -21,7 +21,7 @@ C'est extrêmement simple :
 * **Sauvegarde Automatique Cloud** : Toutes vos données sont synchronisées en temps réel de manière sécurisée sur votre base de données en ligne Supabase. En cas de changement d'ordinateur ou de panne, il vous suffit de vous connecter à votre compte sur le nouveau poste pour retrouver instantanément votre inventaire, vos sections et vos pastilles colorées.
 * **Préchargement Automatique pour les Inscriptions** : Lors de la création d'un nouveau compte pharmacie, le système clone automatiquement en arrière-plan le catalogue d'auto-complétion de référence. La pharmacie démarre ainsi immédiatement avec une base de données de milliers de produits préconfigurés (incluant les codes-barres associés), sans devoir importer de fichier au départ.
 * **Sauvegarde et partage de fichier (JSON)** : Dans l'onglet **Configuration** :
-  * Cliquez sur **Exporter Sauvegarde (fichier .json)** pour télécharger un fichier contenant toutes vos données.
+  * Cliquez sur **Exporter Sauvegarde (fichier .json)** pour télécharger un fichier contenant toutes vos données (produits, configurations et avancement des sections).
   * Pour importer ou fusionner le travail de plusieurs techniciens, cliquez sur **Importer Sauvegarde (fichier .json)**. Vous pouvez choisir de **fusionner** (combiner les deux listes intelligemment) ou d'**écraser** (remplacer).
 * **Exportation Excel (CSV)** : Vous pouvez exporter vos données sous forme de fichier CSV, directement compatible avec Microsoft Excel.
 
@@ -51,6 +51,10 @@ Cet onglet vous assiste lors de la tournée générale du laboratoire :
   4. Lorsque vous cliquez sur **Enregistrer le produit**, le système enregistre le produit ET crée automatiquement une **association permanente** entre ce code-barres et ce DIN dans le catalogue. L'association s'enregistre de manière permanente. Lors du prochain scan, il sera reconnu immédiatement !
 * **Bouton d'annulation d'association** : Si vous scannez un code-barres inconnu par erreur, cliquez sur le bouton rouge *[Annuler l'association]* ou sur *[Effacer la sélection]* (pour les produits connus) sous le champ de saisie pour réinitialiser le formulaire.
 * **Multi-UPC par DIN** : Plusieurs codes-barres distincts (par exemple un pour la bouteille de 100 comprimés et un autre pour celle de 500) peuvent être liés au même DIN. L'application chargera le format de conditionnement exact correspondant à l'UPC scanné.
+* **Suivi de l'avancement par section (Nouveau)** : Dans le panneau latéral de droite, un module « Suivi des Sections » vous indique en temps réel où vous en êtes pour la tournée en cours (3 ou 6 mois) :
+  * 🔴 **Non entamée** : Aucun produit n'a encore été saisi pour cette tournée dans cette section.
+  * 🟡 **En cours** : Affiche le nombre de produits actifs déjà enregistrés dans la section (ex: `(12)`).
+  * 🟢 **Complétée** : Cochez manuellement la case pour marquer la section comme terminée. La barre de progression et le pourcentage global d'avancement se mettront à jour pour l'ensemble du laboratoire (synchronisé en temps réel avec tous les ordinateurs connectés).
 * **Mémorisation de Section** : Le menu déroulant conserve la section active après chaque enregistrement.
 * **Derniers produits saisis** : Affiche les 20 derniers produits enregistrés avec un bouton de pliage/dépliage et des boutons d'édition (crayon bleu) et suppression rapide.
 
@@ -64,12 +68,12 @@ Cet onglet regroupe la totalité de l'historique et vous donne accès au catalog
 ### 4. ⚙️ Configuration
 Cet onglet vous permet de configurer l'outil pour vos besoins spécifiques :
 * **Importation du fichier d'inventaire** : Chargez un fichier CSV exporté de votre système informatique de pharmacie.
-* **Association des codes UPC aux DIN** : Chargez un fichier CSV contenant à la fois UPC et DIN pour populer en masse votre catalogue existant (Utile uniquement si votre fichier d'inventaire initial ne contenait pas de codes UPC).
+* **Association des codes UPC aux DIN** : Chargez un fichier CSV contenant à la fois UPC et DIN pour populer en masse votre catalogue existant.
 * **Gestion des Sections** : Ajoutez, retirez ou renommez des sections de laboratoire.
 * **Configuration des pastilles** : Ajustez la couleur et le nom des stickers pour chacun des 12 mois.
 * **Réactiver le Tutoriel** : Si vous avez coché par le passé *« Ne plus afficher ce tutoriel au démarrage »* et souhaitez revoir la popup de démarrage, cliquez sur ce bouton pour réinitialiser cette préférence.
 
-### 5. 📖 Guide & Tutoriel (Nouveau)
+### 5. 📖 Guide & Tutoriel
 Cet onglet interactif regroupe de manière permanente :
 * Un résumé visuel et interactif de toute la procédure opérationnelle.
 * Des sections dépliables (accordéons) pour consulter rapidement les instructions d'utilisation de la tournée de saisie, du retrait mensuel, ou du scan au scanner et de l'import CSV.
