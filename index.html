@@ -1248,6 +1248,41 @@
       background-color: #1e293b !important;
       color: #cbd5e1 !important;
     }
+
+    /* Suivi des sections progress tracker styling */
+    .section-progress-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background-color: var(--primary-light);
+      border: 1px solid rgba(15, 118, 110, 0.08);
+      font-size: 0.85rem;
+      transition: all 0.2s ease;
+    }
+    .section-progress-item:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      border-color: rgba(15, 118, 110, 0.25);
+    }
+    [data-theme="dark"] .section-progress-item {
+      background-color: #1e293b;
+      border-color: rgba(255, 255, 255, 0.05);
+    }
+    [data-theme="dark"] .section-progress-item:hover {
+      background-color: #334155;
+      border-color: rgba(15, 118, 110, 0.4);
+    }
+    
+    .status-dot-glow {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 4px;
+      box-shadow: 0 0 6px currentColor;
+    }
   </style>
 </head>
 <body>
@@ -1582,6 +1617,24 @@
             
             <h4 style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 8px;">Préparez vos pastilles :</h4>
             <div id="tournee-stickers-list" style="display: flex; flex-direction: column; gap: 8px;">
+              <!-- Rempli en JS -->
+            </div>
+          </div>
+
+          <!-- SUIVI DES SECTIONS (V3.6) -->
+          <div class="card" style="margin-bottom: 0;">
+            <h3 class="card-title" style="font-size: 1.1rem; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+              <span>Suivi des Sections</span>
+              <span id="tournee-progress-percent" style="font-size: 0.85rem; font-weight: bold; color: var(--primary-color);">0%</span>
+            </h3>
+            
+            <!-- Progress Bar -->
+            <div style="background-color: var(--border-color); height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: 12px;">
+              <div id="tournee-progress-bar" style="background-color: var(--primary-color); width: 0%; height: 100%; transition: width 0.3s ease;"></div>
+            </div>
+
+            <!-- List of Sections -->
+            <div id="tournee-sections-progress-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto; padding-right: 4px;">
               <!-- Rempli en JS -->
             </div>
           </div>
@@ -2144,7 +2197,8 @@
       sessionInitials: "",
       tourneeStartMonth: "2026-08",
       tourneeDuration: 6,
-      sorting: { key: 'expiryDate', direction: 'asc' }
+      sorting: { key: 'expiryDate', direction: 'asc' },
+      sectionsProgress: {}
     };
 
     let localCatalog = [];
@@ -2296,14 +2350,16 @@
           state.config = {
             expiryWindowMonths: configData.expiry_window_months,
             sections: configData.sections,
-            stickerColors: configData.sticker_colors
+            stickerColors: configData.sticker_colors || {}
           };
+          state.sectionsProgress = state.config.stickerColors._sectionsProgress || {};
         } else {
           state.config = {
             expiryWindowMonths: 6,
             sections: [...defaultSections],
             stickerColors: { ...defaultStickerColors }
           };
+          state.sectionsProgress = {};
           await saveConfigToSupabaseCloud();
         }
         
@@ -2445,6 +2501,7 @@
     async function saveConfigToSupabaseCloud() {
       if (!sessionPharmacy) return;
       try {
+        state.config.stickerColors._sectionsProgress = state.sectionsProgress || {};
         const { error } = await supabaseClient
           .from("configurations")
           .upsert({
@@ -2512,6 +2569,7 @@
             sections: localConfig.sections || state.config.sections,
             stickerColors: localConfig.stickerColors || state.config.stickerColors
           };
+          state.sectionsProgress = state.config.stickerColors._sectionsProgress || {};
           await saveConfigToSupabaseCloud();
         }
         
@@ -3951,6 +4009,102 @@
           listDiv.appendChild(item);
         }
       }
+      updateSectionsProgressUI();
+    }
+
+    function updateSectionsProgressUI() {
+      const progressList = document.getElementById("tournee-sections-progress-list");
+      if (!progressList) return;
+      
+      const sections = state.config.sections || [];
+      const tourKey = `${state.tourneeStartMonth}_${state.tourneeDuration}`;
+      
+      if (!state.sectionsProgress) {
+        state.sectionsProgress = {};
+      }
+      if (!state.sectionsProgress[tourKey]) {
+        state.sectionsProgress[tourKey] = {};
+      }
+      
+      // Calculer la période ciblée
+      const [startYear, startMonthZeroIdx] = state.tourneeStartMonth.split('-').map(Number);
+      const startDate = new Date(startYear, startMonthZeroIdx - 1, 1);
+      const endDate = new Date(startDate);
+      endDate.setMonth(endDate.getMonth() + state.tourneeDuration - 1);
+      
+      const startKey = `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}`;
+      const endKey = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, '0')}`;
+      
+      // Compter les produits actifs saisis dans chaque section pendant cette tournée
+      const sectionCounts = {};
+      sections.forEach(s => sectionCounts[s] = 0);
+      
+      (state.products || []).forEach(p => {
+        if (p.status === 'active' && p.expiryDate >= startKey && p.expiryDate <= endKey) {
+          if (sectionCounts[p.section] !== undefined) {
+            sectionCounts[p.section]++;
+          }
+        }
+      });
+      
+      let completedCount = 0;
+      progressList.innerHTML = "";
+      
+      sections.forEach(secName => {
+        let status = state.sectionsProgress[tourKey][secName];
+        const count = sectionCounts[secName] || 0;
+        
+        if (status === 'completed') {
+          completedCount++;
+        } else if (count > 0) {
+          status = 'in_progress';
+        } else {
+          status = 'not_started';
+        }
+        
+        let dotColor = "";
+        if (status === 'completed') {
+          dotColor = "#10b981"; // success / green
+        } else if (status === 'in_progress') {
+          dotColor = "#f59e0b"; // warning / amber
+        } else {
+          dotColor = "#ef4444"; // danger / red
+        }
+        
+        const item = document.createElement("div");
+        item.className = "section-progress-item";
+        
+        const isChecked = status === 'completed' ? 'checked' : '';
+        
+        item.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0;">
+            <span class="status-dot-glow" style="color: ${dotColor}; background-color: ${dotColor};"></span>
+            <span style="font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-color);" title="${secName}">${secName}</span>
+            <span style="font-size: 0.75rem; color: var(--text-muted); margin-left: 2px;">(${count})</span>
+          </div>
+          <label style="display: flex; align-items: center; cursor: pointer; margin-bottom: 0;">
+            <input type="checkbox" ${isChecked} style="width: 16px; height: 16px; accent-color: var(--primary-color);" class="sec-progress-cb">
+          </label>
+        `;
+        
+        item.querySelector(".sec-progress-cb").addEventListener("change", async (e) => {
+          if (e.target.checked) {
+            state.sectionsProgress[tourKey][secName] = 'completed';
+          } else {
+            delete state.sectionsProgress[tourKey][secName];
+          }
+          updateSectionsProgressUI();
+          await saveConfig();
+        });
+        
+        progressList.appendChild(item);
+      });
+      
+      // Mettre à jour la barre de progression
+      const totalSections = sections.length || 1;
+      const percent = Math.round((completedCount / totalSections) * 100);
+      document.getElementById("tournee-progress-percent").textContent = `${percent}%`;
+      document.getElementById("tournee-progress-bar").style.width = `${percent}%`;
     }
 
     function addNewProduct() {
@@ -4508,6 +4662,11 @@
       }
       if (confirm(msg)) {
         state.config.sections = state.config.sections.filter(s => s !== sectionName);
+        if (state.sectionsProgress) {
+          for (const tourKey in state.sectionsProgress) {
+            delete state.sectionsProgress[tourKey][sectionName];
+          }
+        }
         saveConfig();
         populateSectionDropdowns();
         renderConfigPanel();
@@ -4537,6 +4696,14 @@
       if (idx !== -1) {
         state.config.sections[idx] = formattedName;
         state.config.sections.sort();
+        if (state.sectionsProgress) {
+          for (const tourKey in state.sectionsProgress) {
+            if (state.sectionsProgress[tourKey][oldName]) {
+              state.sectionsProgress[tourKey][formattedName] = state.sectionsProgress[tourKey][oldName];
+              delete state.sectionsProgress[tourKey][oldName];
+            }
+          }
+        }
       }
 
       // Mettre à jour tous les produits concernés
