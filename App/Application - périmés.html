@@ -1448,6 +1448,102 @@
       display: none;
       pointer-events: none;
     }
+
+    /* RESPONSIVE DESIGN - MOBILE FIRST ADJUSTMENTS (V3.9) */
+    @media (max-width: 768px) {
+      body {
+        overflow-x: hidden;
+      }
+      .container {
+        padding: 12px;
+      }
+      
+      /* Header vertical stack */
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+        padding: 16px;
+      }
+      .header-right {
+        width: 100%;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .header-title h1 {
+        font-size: 1.25rem;
+      }
+      
+      /* Card padding reduction */
+      .card {
+        padding: 16px;
+        border-radius: 12px;
+        margin-bottom: 16px;
+      }
+      
+      /* Fix Modal Overflow & Make them fully scrollable */
+      .modal-overlay {
+        align-items: flex-start; /* Permet le scroll vertical si trop grand */
+        padding: 20px 10px;
+        overflow-y: auto;
+      }
+      .modal {
+        margin: auto; /* Centre verticalement */
+        max-height: 85vh;
+        display: flex;
+        flex-direction: column;
+        padding: 18px;
+        border-radius: 12px;
+      }
+      .modal-body {
+        overflow-y: auto;
+        flex: 1;
+        padding: 12px 0;
+        margin-bottom: 16px;
+      }
+      .modal-footer {
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: flex-end;
+      }
+      .modal-footer .btn {
+        flex: 1;
+        min-width: 100px;
+        text-align: center;
+      }
+      
+      /* Month selector wrapper */
+      .month-selector-bar {
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+      }
+      .month-navigation {
+        width: 100%;
+        justify-content: space-between;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      /* Form buttons wrap on smaller screens */
+      .action-btn-group {
+        flex-direction: column;
+        width: 100%;
+      }
+      .action-btn-group .btn {
+        width: 100%;
+      }
+      
+      /* Camera control buttons */
+      .camera-controls {
+        gap: 8px;
+      }
+      .btn-camera-action {
+        padding: 10px 16px;
+        font-size: 0.85rem;
+      }
+    }
   </style>
 </head>
 <body>
