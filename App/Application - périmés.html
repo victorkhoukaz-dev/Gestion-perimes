@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gestion des Expirés - Laboratoire</title>
   
   <!-- PWA & Mobile Web App support (V3.8) -->
@@ -1449,10 +1449,11 @@
       pointer-events: none;
     }
 
-    /* RESPONSIVE DESIGN - MOBILE FIRST ADJUSTMENTS (V3.9) */
+    /* RESPONSIVE DESIGN - MOBILE FIRST ADJUSTMENTS (V3.9.2) */
     @media (max-width: 768px) {
       body {
-        overflow-x: hidden;
+        /* Pas de verrouillage horizontal strict pour éviter de figer un décalage */
+        overflow-x: visible;
       }
       .container {
         padding: 12px;
@@ -1465,6 +1466,14 @@
       .form-group {
         min-width: 0 !important;
       }
+
+      /* Empêcher l'auto-zoom Chrome/Safari en forçant la police à 16px minimum (V3.9.2) */
+      .form-control, 
+      input, 
+      select, 
+      textarea {
+        font-size: 16px !important;
+      }
       
       /* Header vertical stack */
       header {
@@ -1473,11 +1482,24 @@
         gap: 16px;
         padding: 16px;
       }
+      
+      /* Sécuriser l'en-tête contre les emails longs ou noms de pharmacie */
       .header-right {
         width: 100%;
-        justify-content: space-between;
-        flex-wrap: wrap;
-        gap: 10px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+      .header-right > div:first-child {
+        text-align: left !important;
+        align-items: flex-start !important;
+      }
+      #header-pharmacy-name, 
+      #header-user-email {
+        text-align: left !important;
+        word-break: break-all;
+        white-space: normal;
+        max-width: 100%;
       }
       .header-title h1 {
         font-size: 1.25rem;
