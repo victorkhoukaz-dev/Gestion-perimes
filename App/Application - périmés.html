@@ -1467,12 +1467,24 @@
         min-width: 0 !important;
       }
 
-      /* Empêcher l'auto-zoom Chrome/Safari en forçant la police à 16px minimum (V3.9.2) */
+      /* Empêcher l'auto-zoom Chrome/Safari en forçant la police à 16px minimum et bloquer la largeur à 100% (V3.9.3) */
       .form-control, 
       input, 
       select, 
       textarea {
         font-size: 16px !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        box-sizing: border-box !important;
+      }
+      
+      .barcode-input-wrapper {
+        width: 100% !important;
+      }
+      .barcode-input-wrapper input {
+        flex: 1 !important;
+        min-width: 0 !important;
+        width: 100% !important;
       }
       
       /* Header vertical stack */
@@ -1807,7 +1819,7 @@
               <div class="form-group autocomplete-wrapper">
                 <label for="form-din">DIN ou code UPC</label>
                 <div class="barcode-input-wrapper">
-                  <input type="text" id="form-din" class="form-control" placeholder="Saisir DIN ou scanner code-barre (UPC)" autocomplete="off">
+                  <input type="text" id="form-din" class="form-control" placeholder="Saisir DIN ou UPC (Scanner)" autocomplete="off">
                   <button type="button" class="btn-scan-trigger" id="btn-scan-trigger" title="Scanner avec la caméra du téléphone">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
