@@ -1333,6 +1333,35 @@
       background-color: #000000;
       box-shadow: 0 10px 25px rgba(0,0,0,0.5);
     }
+    .scan-target-box {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80%;
+      height: 40%;
+      border: 3px dashed #29b6f6;
+      border-radius: 8px;
+      pointer-events: none;
+      box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6);
+      box-sizing: border-box;
+      z-index: 10;
+    }
+    .scan-target-box::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 50%;
+      height: 2px;
+      background-color: #ef4444;
+      box-shadow: 0 0 8px #ef4444;
+      animation: laser-scan 2s infinite ease-in-out;
+    }
+    @keyframes laser-scan {
+      0%, 100% { top: 10%; }
+      50% { top: 90%; }
+    }
     #reader {
       width: 100%;
     }
@@ -2312,7 +2341,10 @@
     
     <div class="camera-viewfinder-wrapper">
       <div id="reader"></div>
+      <div class="scan-target-box"></div>
     </div>
+    
+    <div id="camera-status" style="font-size: 0.8rem; color: #a8a29e; margin-top: 10px; height: 1.2rem; text-align: center;"></div>
     
     <div class="camera-controls">
       <button type="button" class="btn-camera-action" id="btn-camera-switch">
@@ -5563,27 +5595,44 @@
     let currentCameraFacingMode = "environment"; // "environment" = arrière, "user" = avant
 
     function startScanner() {
-      // 1. Afficher la modale
       document.getElementById("camera-modal").style.display = "flex";
+      const statusDiv = document.getElementById("camera-status");
+      if (statusDiv) statusDiv.textContent = "Démarrage de la caméra...";
       
-      // 2. Initialiser html5-qrcode
       if (!html5QrcodeScanner) {
         html5QrcodeScanner = new Html5Qrcode("reader");
       }
       
+      // Récupérer les formats supportés de manière sécurisée (V3.8)
+      let formats = [];
+      if (window.Html5QrcodeSupportedFormats) {
+        formats = [
+          Html5QrcodeSupportedFormats.QR_CODE,
+          Html5QrcodeSupportedFormats.UPC_A,
+          Html5QrcodeSupportedFormats.UPC_E,
+          Html5QrcodeSupportedFormats.EAN_13,
+          Html5QrcodeSupportedFormats.EAN_8,
+          Html5QrcodeSupportedFormats.CODE_128,
+          Html5QrcodeSupportedFormats.CODE_39,
+          Html5QrcodeSupportedFormats.CODE_93,
+          Html5QrcodeSupportedFormats.ITF
+        ];
+      }
+      
       const config = {
-        fps: 24, // Plus de FPS pour une détection plus rapide
+        fps: 24,
         qrbox: (width, height) => {
-          // Zone de scan horizontale optimisée pour les codes-barres 1D
-          const sizeWidth = Math.min(width * 0.85, 400);
-          const sizeHeight = Math.min(height * 0.45, 180);
+          // Doit correspondre à la boîte CSS .scan-target-box (80% de large, 40% de haut)
+          const sizeWidth = width * 0.8;
+          const sizeHeight = height * 0.4;
           return { width: sizeWidth, height: sizeHeight };
         },
         videoConstraints: {
           width: { ideal: 1280 },
           height: { ideal: 720 },
           facingMode: currentCameraFacingMode
-        }
+        },
+        formatsToSupport: formats
       };
       
       html5QrcodeScanner.start(
@@ -5591,9 +5640,12 @@
         config,
         onScanSuccess,
         onScanFailure
-      ).catch(err => {
+      ).then(() => {
+        if (statusDiv) statusDiv.textContent = "Scanner actif. Alignez le code-barres.";
+      }).catch(err => {
         console.error("Erreur de démarrage du scanner :", err);
         showToast("Impossible d'accéder à la caméra : " + err, "danger");
+        if (statusDiv) statusDiv.textContent = "Erreur : " + err.message;
         stopScanner();
       });
     }
