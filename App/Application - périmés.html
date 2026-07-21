@@ -1458,6 +1458,14 @@
         padding: 12px;
       }
       
+      /* Force form rows to stack vertically on mobile (V3.9.1) */
+      .form-row {
+        grid-template-columns: 1fr !important;
+      }
+      .form-group {
+        min-width: 0 !important;
+      }
+      
       /* Header vertical stack */
       header {
         flex-direction: column;
