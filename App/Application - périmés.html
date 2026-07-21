@@ -2,8 +2,14 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Gestion des Expirés - Laboratoire</title>
+  
+  <!-- PWA & Mobile Web App support (V3.8) -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0f766e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <style>
     /* VARIABLES DE CONCEPTION */
     :root {
@@ -1283,6 +1289,138 @@
       margin-right: 4px;
       box-shadow: 0 0 6px currentColor;
     }
+
+    /* CAMERA SCANNER MODAL (V3.8) */
+    .camera-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(0, 0, 0, 0.95);
+      z-index: 100000;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px;
+      box-sizing: border-box;
+      color: #ffffff;
+    }
+    .camera-header {
+      width: 100%;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .camera-header h3 {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #29b6f6;
+    }
+    .camera-header p {
+      margin: 5px 0 0 0;
+      font-size: 0.85rem;
+      color: #a8a29e;
+    }
+    .camera-viewfinder-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 450px;
+      aspect-ratio: 1 / 1;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 3px solid #0f766e;
+      background-color: #000000;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    }
+    #reader {
+      width: 100%;
+      height: 100%;
+    }
+    #reader img {
+      display: none !important;
+    }
+    #reader select {
+      display: none !important;
+    }
+    #reader button {
+      display: none !important;
+    }
+    .camera-controls {
+      width: 100%;
+      max-width: 450px;
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      margin-top: 15px;
+      margin-bottom: 15px;
+    }
+    .btn-camera-action {
+      background-color: #1c1917;
+      border: 1px solid #44403c;
+      color: #ffffff;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background-color 0.2s;
+    }
+    .btn-camera-action:hover {
+      background-color: #292524;
+    }
+    .btn-camera-cancel {
+      background-color: #7f1d1d;
+      border: 1px solid #b91c1c;
+    }
+    .btn-camera-cancel:hover {
+      background-color: #991b1b;
+    }
+    .barcode-input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+    .barcode-input-wrapper input {
+      padding-right: 48px;
+    }
+    .btn-scan-trigger {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--primary-color);
+      cursor: pointer;
+      padding: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      transition: background-color 0.2s, color 0.2s;
+      z-index: 10;
+    }
+    .btn-scan-trigger:hover {
+      background-color: var(--primary-light);
+      color: var(--primary-hover);
+    }
+    .scan-flash-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(16, 185, 129, 0.4);
+      z-index: 100005;
+      display: none;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
@@ -1515,7 +1653,15 @@
               <!-- Wrapper Autocomplete DIN -->
               <div class="form-group autocomplete-wrapper">
                 <label for="form-din">DIN ou code UPC</label>
-                <input type="text" id="form-din" class="form-control" placeholder="Saisir DIN ou scanner code-barre (UPC)" autocomplete="off">
+                <div class="barcode-input-wrapper">
+                  <input type="text" id="form-din" class="form-control" placeholder="Saisir DIN ou scanner code-barre (UPC)" autocomplete="off">
+                  <button type="button" class="btn-scan-trigger" id="btn-scan-trigger" title="Scanner avec la caméra du téléphone">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                  </button>
+                </div>
                 <div class="autocomplete-suggestions" id="form-din-suggestions" style="display: none;"></div>
                 <div id="scan-helper-text" style="display: none; font-size: 0.75rem; color: var(--warning-color); font-weight: 600; margin-top: 6px;"></div>
               </div>
@@ -2159,7 +2305,38 @@
   <!-- TOAST NOTIFICATION CONTAINER -->
   <div class="toast-container" id="toast-container"></div>
 
+  <!-- CAMERA SCANNER MODAL (V3.8) -->
+  <div id="camera-modal" class="camera-modal">
+    <div class="camera-header">
+      <h3>Lecteur de Code-barres</h3>
+      <p>Centrez le code-barres du produit dans le carré ci-dessous</p>
+    </div>
+    
+    <div class="camera-viewfinder-wrapper">
+      <div id="reader"></div>
+    </div>
+    
+    <div class="camera-controls">
+      <button type="button" class="btn-camera-action" id="btn-camera-switch">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H17" />
+        </svg>
+        Caméra
+      </button>
+      <button type="button" class="btn-camera-action btn-camera-cancel" id="btn-camera-close">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+        Fermer
+      </button>
+    </div>
+  </div>
+
+  <!-- FLASH OVERLAY ON SUCCESS -->
+  <div id="scan-flash-overlay" class="scan-flash-overlay"></div>
+
   <!-- LOGIQUE JAVASCRIPT DE L'APPLICATION -->
+  <script src="html5-qrcode.min.js"></script>
   <script src="supabase.js?v=2"></script>
   <script>
     // ----------------------------------------------------
@@ -2259,6 +2436,13 @@
         
         // 3. Vérifier s'il y a une session active
         await checkAuthSession();
+
+        // 4. Enregistrer le Service Worker pour le support PWA (V3.8)
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.register('./sw.js')
+            .then(reg => console.log('[PWA] Service Worker enregistré', reg.scope))
+            .catch(err => console.error('[PWA] Erreur Service Worker', err));
+        }
       } catch (err) {
         console.error("Erreur critique d'initialisation :", err);
         alert("Erreur d'initialisation : " + err.message + "\n\n(Vérifiez que vous êtes connecté à internet)");
@@ -3046,6 +3230,17 @@
           document.getElementById("form-din").focus();
           showToast("Saisie effacée.", "info");
         }
+      });
+
+      // Scanner de code-barres par caméra (V3.8)
+      document.getElementById("btn-scan-trigger").addEventListener("click", () => {
+        startScanner();
+      });
+      document.getElementById("btn-camera-close").addEventListener("click", () => {
+        stopScanner();
+      });
+      document.getElementById("btn-camera-switch").addEventListener("click", () => {
+        switchCamera();
       });
 
       // Configuration de l'auto-complétion (V2)
@@ -5361,6 +5556,125 @@
           icon.style.transition = "transform 0.2s ease";
         }
       }
+    }
+
+    // ====================================================
+    // LECTEUR DE CODE-BARRES PAR CAMÉRA (V3.8)
+    // ====================================================
+    let html5QrcodeScanner = null;
+    let currentCameraFacingMode = "environment"; // "environment" = arrière, "user" = avant
+
+    function startScanner() {
+      // 1. Afficher la modale
+      document.getElementById("camera-modal").style.display = "flex";
+      
+      // 2. Initialiser html5-qrcode
+      if (!html5QrcodeScanner) {
+        html5QrcodeScanner = new Html5Qrcode("reader");
+      }
+      
+      const config = {
+        fps: 15,
+        qrbox: (width, height) => {
+          const sizeWidth = width * 0.8;
+          const sizeHeight = height * 0.4;
+          return { width: sizeWidth, height: sizeHeight };
+        },
+        aspectRatio: 1.0
+      };
+      
+      html5QrcodeScanner.start(
+        { facingMode: currentCameraFacingMode },
+        config,
+        onScanSuccess,
+        onScanFailure
+      ).catch(err => {
+        console.error("Erreur de démarrage du scanner :", err);
+        showToast("Impossible d'accéder à la caméra : " + err, "danger");
+        stopScanner();
+      });
+    }
+    
+    function stopScanner() {
+      document.getElementById("camera-modal").style.display = "none";
+      if (html5QrcodeScanner && html5QrcodeScanner.isScanning) {
+        html5QrcodeScanner.stop().then(() => {
+          console.log("[Scanner] Caméra arrêtée.");
+        }).catch(err => {
+          console.error("[Scanner] Erreur lors de l'arrêt de la caméra :", err);
+        });
+      }
+    }
+    
+    function switchCamera() {
+      currentCameraFacingMode = (currentCameraFacingMode === "environment") ? "user" : "environment";
+      showToast("Changement de caméra...", "info");
+      
+      if (html5QrcodeScanner && html5QrcodeScanner.isScanning) {
+        html5QrcodeScanner.stop().then(() => {
+          startScanner();
+        }).catch(err => {
+          console.error("Erreur switch caméra :", err);
+        });
+      } else {
+        startScanner();
+      }
+    }
+    
+    function playScanBeep() {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        
+        oscillator.type = "sine";
+        oscillator.frequency.value = 1200; // Bip aigu agréable
+        gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+        gainNode.gain.linearRampToValueAtTime(0.2, audioCtx.currentTime + 0.01);
+        gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.08);
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + 0.1);
+      } catch (err) {
+        console.log("Impossible d'émettre le son :", err);
+      }
+    }
+    
+    function triggerVisualFlash() {
+      const flash = document.getElementById("scan-flash-overlay");
+      if (flash) {
+        flash.style.display = "block";
+        setTimeout(() => {
+          flash.style.display = "none";
+        }, 150);
+      }
+    }
+    
+    function onScanSuccess(decodedText) {
+      console.log(`[Scanner] Code détecté : ${decodedText}`);
+      
+      playScanBeep();
+      triggerVisualFlash();
+      stopScanner();
+      
+      const dinInput = document.getElementById("form-din");
+      dinInput.value = decodedText;
+      
+      const event = new Event('input', { bubbles: true });
+      dinInput.dispatchEvent(event);
+      
+      const found = checkForExactCodeMatch(decodedText);
+      if (!found) {
+        document.getElementById("form-product").focus();
+        showToast("Code-barres inconnu. Saisissez le DIN associé pour l'enregistrer.", "warning");
+      }
+    }
+    
+    function onScanFailure() {
+      // Ignorer
     }
 
     // Lanceur au démarrage
