@@ -3209,6 +3209,24 @@
         document.getElementById("form-tech").value = initials;
       });
 
+      // Intercepter la touche Entrée sur le champ quantité si elle provient d'un scan automatique (V3.9)
+      document.getElementById("form-qty").addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && window.justScanned) {
+          e.preventDefault();
+          console.log("[Scanner] Touche Entrée bloquée sur la quantité suite au scan automatique.");
+        }
+      });
+
+      // Empêcher la soumission accidentelle du formulaire par Entrée sur les autres champs (V3.9)
+      document.getElementById("product-form").addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          const activeEl = document.activeElement;
+          if (activeEl && activeEl.id !== "form-qty" && activeEl.type !== "submit" && activeEl.tagName !== "BUTTON") {
+            e.preventDefault();
+          }
+        }
+      });
+
       // Navigation des mois de retrait
       document.getElementById("prev-target-month").addEventListener("click", () => {
         state.targetMonthDate.setMonth(state.targetMonthDate.getMonth() - 1);
@@ -3612,6 +3630,10 @@
         `;
         helperText.style.display = "block";
       }
+
+      // Activer un drapeau temporaire pour bloquer la touche Entrée automatisée de la douchette (V3.9)
+      window.justScanned = true;
+      setTimeout(() => { window.justScanned = false; }, 300);
 
       // Mettre le focus sur la quantité
       document.getElementById("form-qty").focus();
