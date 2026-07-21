@@ -1327,7 +1327,6 @@
       position: relative;
       width: 100%;
       max-width: 450px;
-      aspect-ratio: 1 / 1;
       border-radius: 12px;
       overflow: hidden;
       border: 3px solid #0f766e;
@@ -1336,7 +1335,6 @@
     }
     #reader {
       width: 100%;
-      height: 100%;
     }
     #reader img {
       display: none !important;
@@ -5574,13 +5572,18 @@
       }
       
       const config = {
-        fps: 15,
+        fps: 24, // Plus de FPS pour une détection plus rapide
         qrbox: (width, height) => {
-          const sizeWidth = width * 0.8;
-          const sizeHeight = height * 0.4;
+          // Zone de scan horizontale optimisée pour les codes-barres 1D
+          const sizeWidth = Math.min(width * 0.85, 400);
+          const sizeHeight = Math.min(height * 0.45, 180);
           return { width: sizeWidth, height: sizeHeight };
         },
-        aspectRatio: 1.0
+        videoConstraints: {
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          facingMode: currentCameraFacingMode
+        }
       };
       
       html5QrcodeScanner.start(
