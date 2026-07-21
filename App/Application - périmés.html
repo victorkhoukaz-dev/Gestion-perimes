@@ -1449,7 +1449,7 @@
       pointer-events: none;
     }
 
-    /* RESPONSIVE DESIGN - MOBILE FIRST ADJUSTMENTS (V3.9.2) */
+    /* RESPONSIVE DESIGN - MOBILE FIRST ADJUSTMENTS (V3.9.4) */
     @media (max-width: 768px) {
       body {
         /* Pas de verrouillage horizontal strict pour éviter de figer un décalage */
@@ -1457,6 +1457,14 @@
       }
       .container {
         padding: 12px;
+      }
+      
+      /* Empêcher les éléments de grille et cartes de déborder sur mobile (V3.9.4) */
+      .tournee-wizard, 
+      .grid-dashboard, 
+      .tournee-wizard > *, 
+      .grid-dashboard > * {
+        min-width: 0 !important;
       }
       
       /* Force form rows to stack vertically on mobile (V3.9.1) */
@@ -1517,11 +1525,12 @@
         font-size: 1.25rem;
       }
       
-      /* Card padding reduction */
+      /* Card padding reduction and min-width override (V3.9.4) */
       .card {
         padding: 16px;
         border-radius: 12px;
         margin-bottom: 16px;
+        min-width: 0 !important;
       }
       
       /* Fix Modal Overflow & Make them fully scrollable */
