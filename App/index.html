@@ -4776,27 +4776,20 @@
         const counts = isRetrait ? sectionCountsRetrait : sectionCountsTournee;
         
         sections.forEach(secName => {
-          let status = state.sectionsProgress[tourKey] ? state.sectionsProgress[tourKey][secName] : undefined;
+          let userStatus = state.sectionsProgress[tourKey] ? state.sectionsProgress[tourKey][secName] : undefined;
           const count = counts[secName] || 0;
           
-          if (status === 'completed') {
-            // Counted in loop
-          } else if (count > 0) {
-            status = 'in_progress';
-          } else {
-            status = 'not_started';
+          let isCompleted = false;
+          if (count === 0) {
+            isCompleted = true; // Auto-terminé si 0 produit restant
+          } else if (userStatus === 'completed') {
+            isCompleted = true; // Coché manuellement par l'utilisateur
+          } else if (userStatus === 'in_progress') {
+            isCompleted = false;
           }
           
-          let dotColor = "";
-          if (status === 'completed') {
-            dotColor = "#10b981";
-          } else if (status === 'in_progress') {
-            dotColor = "#f59e0b";
-          } else {
-            dotColor = "#ef4444";
-          }
-          
-          const isChecked = status === 'completed' ? 'checked' : '';
+          let dotColor = isCompleted ? "#10b981" : "#f59e0b";
+          const isChecked = isCompleted ? 'checked' : '';
 
           const item = document.createElement("div");
           item.className = "section-progress-item";
@@ -4818,7 +4811,7 @@
                 if (e.target.checked) {
                   state.sectionsProgress[tourKey][secName] = 'completed';
                 } else {
-                  delete state.sectionsProgress[tourKey][secName];
+                  state.sectionsProgress[tourKey][secName] = 'in_progress';
                 }
                 updateSectionsProgressUI();
                 await saveConfig();
@@ -4832,7 +4825,9 @@
       };
 
       sections.forEach(secName => {
-        if (state.sectionsProgress[tourKey] && state.sectionsProgress[tourKey][secName] === 'completed') {
+        const count = sectionCountsRetrait[secName] || 0;
+        const userStatus = state.sectionsProgress[tourKey] ? state.sectionsProgress[tourKey][secName] : undefined;
+        if (count === 0 || userStatus === 'completed') {
           completedCount++;
         }
       });
