@@ -1765,6 +1765,9 @@
         </div>
         <button type="submit" class="btn btn-login">Se connecter</button>
         <p class="switch-auth-mode">Nouveau ? <a href="#" id="link-show-register">Créer un compte de pharmacie</a></p>
+        <p class="switch-auth-mode" style="margin-top: 12px;">
+          <a href="#" id="link-reset-cache" style="color: var(--text-muted); font-size: 0.8rem;">🧹 Problème de connexion ? Réinitialiser le cache</a>
+        </p>
       </form>
 
       <form id="register-form" style="display: none;">
@@ -2763,6 +2766,24 @@
     const DB_NAME = "ExpiresLabDB";
     const DB_VERSION = 1;
 
+    window.addEventListener("error", (e) => {
+      console.error("Global JS Error:", e);
+      const errDiv = document.getElementById("login-error-msg");
+      if (errDiv) {
+        errDiv.textContent = "⚠️ Erreur Système : " + (e.message || e);
+        errDiv.style.display = "block";
+      }
+    });
+
+    window.addEventListener("unhandledrejection", (e) => {
+      console.error("Global Promise Rejection:", e);
+      const errDiv = document.getElementById("login-error-msg");
+      if (errDiv) {
+        errDiv.textContent = "⚠️ Erreur Réseau/Cloud : " + (e.reason?.message || e.reason || e);
+        errDiv.style.display = "block";
+      }
+    });
+
     // ----------------------------------------------------
     // INITIALISATION DE L'APPLICATION ET CLOUD
     // ----------------------------------------------------
@@ -3200,6 +3221,21 @@
         document.getElementById("login-header").querySelector("h2").textContent = "Gestion des Expirés";
         document.getElementById("login-error-msg").style.display = "none";
       });
+      
+      const linkResetCache = document.getElementById("link-reset-cache");
+      if (linkResetCache) {
+        linkResetCache.addEventListener("click", (e) => {
+          e.preventDefault();
+          try {
+            localStorage.clear();
+            sessionStorage.clear();
+            alert("Cache réinitialisé avec succès ! La page va se recharger.");
+            window.location.reload();
+          } catch (err) {
+            alert("Erreur lors de la réinitialisation : " + err.message);
+          }
+        });
+      }
       
       document.getElementById("login-form").addEventListener("submit", async (e) => {
         e.preventDefault();
