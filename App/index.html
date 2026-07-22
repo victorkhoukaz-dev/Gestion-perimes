@@ -1337,6 +1337,55 @@
       background-color: #334155;
       border-color: rgba(15, 118, 110, 0.4);
     }
+
+    /* Urgent Alert Card Styling */
+    .urgent-alert-card {
+      background-color: #fef2f2;
+      border: 1.5px solid #fca5a5;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    [data-theme="dark"] .urgent-alert-card {
+      background-color: #450a0a;
+      border-color: #991b1b;
+    }
+    .urgent-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .urgent-badge {
+      background-color: #ef4444;
+      color: #ffffff;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .urgent-items-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .urgent-item-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: #ffffff;
+      border: 1px solid #fee2e2;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+    }
+    [data-theme="dark"] .urgent-item-row {
+      background-color: #1e293b;
+      border-color: #7f1d1d;
+    }
     
     .status-dot-glow {
       display: inline-block;
@@ -4300,6 +4349,67 @@
           document.getElementById("filter-month").value = "ALL";
           renderInventoryTable();
           document.getElementById("filter-search").scrollIntoView({ behavior: 'smooth' });
+        });
+      }
+
+      // 🚨 ZONE D'URGENCE : Détecter les produits expirant dans < 30 jours ou en retard
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const currentMonth = now.getMonth() + 1;
+
+      const urgentProducts = state.products.filter(p => {
+        if (p.status !== 'active') return false;
+        if (!p.expiryDate) return false;
+        const [yStr, mStr] = p.expiryDate.split('-');
+        const expY = parseInt(yStr);
+        const expM = parseInt(mStr);
+        const totalMonthsExp = expY * 12 + expM;
+        const totalMonthsNow = currentYear * 12 + currentMonth;
+        return totalMonthsExp <= totalMonthsNow;
+      });
+
+      if (urgentProducts.length > 0) {
+        const urgentCard = document.createElement("div");
+        urgentCard.className = "urgent-alert-card";
+        
+        let itemsHtml = "";
+        urgentProducts.forEach(prod => {
+          itemsHtml += `
+            <div class="urgent-item-row">
+              <div>
+                <strong style="color: #991b1b;">${prod.product}</strong>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">
+                  DIN: ${prod.din || 'N/A'} | Section: ${prod.section} | Qté: <strong>${prod.quantity}</strong> | Expiration: <span style="color: #ef4444; font-weight: 600;">${prod.expiryDate}</span>
+                </div>
+              </div>
+              <button class="btn btn-urgent-remove" data-id="${prod.id}" style="background-color: #ef4444; color: white; padding: 6px 12px; font-size: 0.8rem; border-radius: 6px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                ✅ Retirer
+              </button>
+            </div>
+          `;
+        });
+
+        urgentCard.innerHTML = `
+          <div class="urgent-header">
+            <span class="urgent-badge">🚨 Retrait Immédiat</span>
+            <div>
+              <h4 style="margin: 0; color: #991b1b; font-size: 1rem;">Zone d'Urgence (Expiré ou Expiration Immédiate)</h4>
+              <p style="margin: 2px 0 0 0; font-size: 0.8rem; color: #7f1d1d;">${urgentProducts.length} produit(s) nécessitent un retrait immédiat des étagères.</p>
+            </div>
+          </div>
+          <div class="urgent-items-list">
+            ${itemsHtml}
+          </div>
+        `;
+        pastDueContainer.appendChild(urgentCard);
+
+        urgentCard.querySelectorAll(".btn-urgent-remove").forEach(btn => {
+          btn.addEventListener("click", (e) => {
+            const pId = e.target.getAttribute("data-id");
+            const prod = state.products.find(p => p.id === pId);
+            handleChecklistAction(pId, 'removed');
+            if (prod) showToast(`Produit ${prod.product} retiré d'urgence !`, "success");
+          });
         });
       }
 
