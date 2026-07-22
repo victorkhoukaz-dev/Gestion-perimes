@@ -4365,6 +4365,7 @@
               <div>
                 <span class="prod-title">${prod.product}</span>
                 ${prod.notes ? `<div style="font-size: 0.75rem; color: var(--warning-color); font-weight: 500;">Note: ${prod.notes}</div>` : ''}
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">Saisi par : <strong style="color: var(--text-color);">${prod.techInitials || 'N/A'}</strong></div>
               </div>
               <span class="prod-din">${prod.din || 'N/A'}</span>
               <span class="prod-format">${prod.dosage || 'N/A'}${prod.format && prod.format !== 'N/A' ? ' | ' + prod.format : ''}</span>
@@ -4794,7 +4795,7 @@
           <td>
             <span style="font-weight: 600; color: var(--text-color);">${prod.product}</span>
             <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">
-              DIN: ${prod.din || 'N/A'} | Dos: ${prod.dosage || 'N/A'} | Fmt: ${prod.format || 'N/A'}
+              DIN: ${prod.din || 'N/A'} | Dos: ${prod.dosage || 'N/A'} | Fmt: ${prod.format || 'N/A'} | Saisi par: <strong>${prod.techInitials || 'N/A'}</strong>
             </div>
           </td>
           <td>${formatMonthYearFrench(dateObj)}</td>
@@ -5024,7 +5025,10 @@
             </td>
             <td>
               <span class="prod-title">${prod.product}</span>
-              ${prod.notes ? `<div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500;">${prod.notes}</div>` : ''}
+              <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">
+                Saisi par : <strong>${prod.techInitials || 'N/A'}</strong> ${prod.status !== 'active' && prod.removedBy ? '| Retiré par : <strong>' + prod.removedBy + '</strong>' : ''}
+              </div>
+              ${prod.notes ? `<div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500;">Note: ${prod.notes}</div>` : ''}
             </td>
             <td style="font-family: monospace; font-size: 0.85rem;">${prod.din || 'N/A'}</td>
             <td style="color: var(--text-muted);">${prod.dosage || 'N/A'}</td>
