@@ -4742,26 +4742,42 @@
       const startKey = `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}`;
       const endKey = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, '0')}`;
       
-      const sectionCounts = {};
-      sections.forEach(s => sectionCounts[s] = 0);
+      // Mois ciblé pour l'onglet Retrait
+      const targetDate = state.targetMonthDate || new Date();
+      const targetMonthKey = `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, '0')}`;
+
+      const sectionCountsTournee = {};
+      const sectionCountsRetrait = {};
+      sections.forEach(s => {
+        sectionCountsTournee[s] = 0;
+        sectionCountsRetrait[s] = 0;
+      });
       
       (state.products || []).forEach(p => {
-        if (p.status === 'active' && p.expiryDate >= startKey && p.expiryDate <= endKey) {
-          if (sectionCounts[p.section] !== undefined) {
-            sectionCounts[p.section]++;
+        if (p.status === 'active') {
+          if (p.expiryDate >= startKey && p.expiryDate <= endKey) {
+            if (sectionCountsTournee[p.section] !== undefined) {
+              sectionCountsTournee[p.section]++;
+            }
+          }
+          if (p.expiryDate === targetMonthKey) {
+            if (sectionCountsRetrait[p.section] !== undefined) {
+              sectionCountsRetrait[p.section]++;
+            }
           }
         }
       });
       
       let completedCount = 0;
       
-      const populateContainer = (container) => {
+      const populateContainer = (container, isRetrait = false) => {
         if (!container) return;
         container.innerHTML = "";
+        const counts = isRetrait ? sectionCountsRetrait : sectionCountsTournee;
         
         sections.forEach(secName => {
           let status = state.sectionsProgress[tourKey] ? state.sectionsProgress[tourKey][secName] : undefined;
-          const count = sectionCounts[secName] || 0;
+          const count = counts[secName] || 0;
           
           if (status === 'completed') {
             // Counted in loop
@@ -4821,8 +4837,8 @@
         }
       });
 
-      populateContainer(progressListTournee);
-      populateContainer(progressListRetrait);
+      populateContainer(progressListTournee, false);
+      populateContainer(progressListRetrait, true);
 
       const totalSections = sections.length || 1;
       const percent = Math.round((completedCount / totalSections) * 100);
