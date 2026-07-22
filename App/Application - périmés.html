@@ -990,42 +990,97 @@
       to { opacity: 0; }
     }
 
-    /* PRINT LAYOUT (Pour imprimer la feuille de retrait) */
+    /* PRINT LAYOUT (Pour imprimer la feuille de retrait V3.9.5) */
+    .print-checkboxes {
+      display: none;
+    }
+
     @media print {
       body {
-        background-color: #fff;
-        color: #000;
-        font-size: 12pt;
+        background-color: #fff !important;
+        color: #000 !important;
+        font-size: 11pt;
       }
       .container {
-        width: 100%;
-        max-width: 100%;
-        margin: 0;
-        padding: 0;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
       }
-      header, .nav-tabs, .month-selector-bar, .theme-toggle, .btn, .btn-circle, .action-btn-group, .filter-bar, .toast-container, .modal-overlay, .checklist-actions {
+      header, .nav-tabs, .month-selector-bar, .theme-toggle, .btn, .btn-circle, .action-btn-group, .filter-bar, .toast-container, .modal-overlay, .checklist-actions, .btn-undo, .due-alert {
         display: none !important;
       }
       .card {
-        border: none;
-        box-shadow: none;
-        padding: 0;
-        margin: 0;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
       }
       .section-group {
         page-break-inside: avoid;
-        border: 1px solid #000;
-        margin-bottom: 20px;
+        border: 1.5px solid #000;
+        margin-bottom: 16px;
+        border-radius: 4px;
+        overflow: hidden;
       }
       .section-header {
-        background-color: #eee !important;
-        color: #000;
-        border-bottom: 1px solid #000;
+        background-color: #f1f5f9 !important;
+        color: #000 !important;
+        border-bottom: 1.5px solid #000;
+        font-weight: bold;
+        padding: 8px 12px;
+        font-size: 11pt;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
       }
       .product-row {
-        border-bottom: 1px solid #000;
+        border-bottom: 1px solid #ccc;
+        padding: 8px 12px;
+        background-color: #fff !important;
+        opacity: 1 !important;
+        page-break-inside: avoid;
+      }
+      .product-row:last-child {
+        border-bottom: none;
+      }
+      .resolution-badge {
+        display: none !important;
+      }
+      .print-checkboxes {
+        display: flex !important;
+        gap: 16px;
+        align-items: center;
+        margin-left: auto;
+        padding-left: 12px;
+        flex-shrink: 0;
+      }
+      .print-cb-option {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 9.5pt;
+        font-weight: 600;
+        color: #000;
+      }
+      .cb-box {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 15px;
+        height: 15px;
+        border: 1.5px solid #000;
+        border-radius: 2px;
+        font-size: 10pt;
+        font-weight: bold;
+        line-height: 1;
+        background-color: #fff;
+        color: #000;
+      }
+      .cb-box.checked {
+        background-color: #000 !important;
+        color: #fff !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
       }
       .sticker-badge {
         border: 1px solid #000;
@@ -1033,6 +1088,7 @@
         background: none !important;
         text-shadow: none;
         box-shadow: none;
+        font-size: 9pt;
       }
       .sticker-dot {
         border: 1px solid #000;
@@ -1044,25 +1100,26 @@
         border-bottom: 2px solid #000;
         padding-bottom: 10px;
       }
-      .print-header h1 {
-        font-size: 20pt;
-        font-weight: bold;
-      }
-      .print-header p {
-        font-size: 10pt;
-        color: #555;
-      }
       .print-signoff {
-        display: block !important;
-        margin-top: 40px;
-        display: flex;
-        justify-content: space-between;
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        margin-top: 35px !important;
+        page-break-inside: avoid;
+      }
+      .print-signoff-box {
+        width: 45%;
       }
       .print-signoff-line {
-        border-top: 1px solid #000;
-        width: 45%;
-        padding-top: 5px;
+        border-top: 1.5px solid #000;
+        padding-top: 6px;
         font-size: 10pt;
+        font-weight: bold;
+      }
+      .print-signoff-sub {
+        font-size: 8.5pt;
+        color: #444;
+        margin-top: 4px;
       }
     }
 
@@ -1658,11 +1715,18 @@
   <!-- ENVELOPPE VISUELLE DE L'APPLICATION (Masquée par défaut) -->
   <div id="main-app-wrapper" style="display: none;">
 
-  <!-- EN-TÊTE D'IMPRESSION UNIQUEMENT -->
+  <!-- EN-TÊTE D'IMPRESSION UNIQUEMENT (V3.9.5) -->
   <div class="print-header">
-    <h1>PROCÉDURE EXPIRÉS - RETRAIT MENSUEL</h1>
-    <p id="print-date-subtitle">Imprimé le : 2026-06-23</p>
-    <h2 id="print-month-title" style="margin-top: 10px; font-size: 16pt;">Mois à retirer : Juin 2026</h2>
+    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+      <div>
+        <h1 style="font-size: 16pt; margin: 0; font-weight: bold;">PROCÉDURE EXPIRÉS - FEUILLE DE RETRAIT</h1>
+        <p id="print-pharmacy-subtitle" style="font-size: 11pt; font-weight: bold; margin: 4px 0 0 0; color: #333;">Pharmacie...</p>
+      </div>
+      <div style="text-align: right;">
+        <h2 id="print-month-title" style="font-size: 13pt; margin: 0; font-weight: bold; color: #0f766e;">Mois à retirer : Juin 2026</h2>
+        <p id="print-date-subtitle" style="font-size: 9.5pt; margin: 4px 0 0 0; color: #555;">Imprimé le : 2026-07-22</p>
+      </div>
+    </div>
   </div>
 
   <div class="container">
@@ -2468,10 +2532,16 @@
     </div>
   </div>
 
-  <!-- SIGNATURES À L'IMPRESSION -->
+  <!-- SIGNATURES À L'IMPRESSION (V3.9.5) -->
   <div class="container print-signoff">
-    <div class="print-signoff-line">Signature du Technicien ayant fait la tournée</div>
-    <div class="print-signoff-line">Signature du Pharmacien (Vérification)</div>
+    <div class="print-signoff-box">
+      <div class="print-signoff-line">Signature du Technicien (Tournée)</div>
+      <div class="print-signoff-sub">Initiales / Date : ____________________</div>
+    </div>
+    <div class="print-signoff-box">
+      <div class="print-signoff-line">Signature du Pharmacien (Vérification)</div>
+      <div class="print-signoff-sub">Approuvé le : ________________________</div>
+    </div>
   </div>
 
   </div> <!-- FIN DU main-app-wrapper -->
@@ -2724,6 +2794,8 @@
         
         sessionPharmacy = pharmacy;
         document.getElementById("header-pharmacy-name").textContent = pharmacy.name;
+        const printPharm = document.getElementById("print-pharmacy-subtitle");
+        if (printPharm) printPharm.textContent = pharmacy.name;
         document.getElementById("header-user-email").textContent = user.email;
         
         if (profile.initials) {
@@ -4304,7 +4376,19 @@
               <span>${stickerInfo.name}</span>
             </div>
 
-            <!-- ACTIONS (Retirer vs Vendu) -->
+            <!-- CASES À COCHER IMPRESSION (Print Checkboxes V3.9.5) -->
+            <div class="print-checkboxes">
+              <span class="print-cb-option">
+                <span class="cb-box ${prod.status === 'removed' ? 'checked' : ''}">${prod.status === 'removed' ? '✓' : ''}</span>
+                <span class="cb-label">Retiré ${prod.status === 'removed' && prod.removedBy ? '(' + prod.removedBy + ')' : ''}</span>
+              </span>
+              <span class="print-cb-option">
+                <span class="cb-box ${prod.status === 'sold' ? 'checked' : ''}">${prod.status === 'sold' ? '✓' : ''}</span>
+                <span class="cb-label">Vendu ${prod.status === 'sold' && prod.removedBy ? '(' + prod.removedBy + ')' : ''}</span>
+              </span>
+            </div>
+
+            <!-- ACTIONS WEB (Retirer vs Vendu) -->
             ${!isResolved ? `
               <div class="checklist-actions">
                 <button class="btn-action retirer" data-id="${prod.id}" title="Marquer comme Retiré des tablettes">
