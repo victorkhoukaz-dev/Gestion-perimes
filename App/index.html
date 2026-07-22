@@ -1872,6 +1872,20 @@
             <p>Restants sur les tablettes</p>
           </div>
         </div>
+      <!-- CARTE DE SUIVI DE PROGRESSION DES SECTIONS (Onglet Retrait V3.9.6) -->
+      <div class="card" style="margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <h3 style="margin: 0; font-size: 1rem; color: var(--text-color); display: flex; align-items: center; gap: 8px;">
+            📊 Progression du retrait par section
+          </h3>
+          <span id="retrait-progress-percent" style="font-weight: 700; color: var(--primary-color);">0%</span>
+        </div>
+        <div class="progress-bar-bg" style="margin-bottom: 16px;">
+          <div id="retrait-progress-bar" class="progress-bar-fill" style="width: 0%;"></div>
+        </div>
+        <div id="retrait-sections-progress-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px;">
+          <!-- Dynamique -->
+        </div>
       </div>
 
       <div class="grid-dashboard">
@@ -4699,29 +4713,33 @@
     }
 
     function updateSectionsProgressUI() {
-      const progressList = document.getElementById("tournee-sections-progress-list");
-      if (!progressList) return;
+      const progressListTournee = document.getElementById("tournee-sections-progress-list");
+      const progressListRetrait = document.getElementById("retrait-sections-progress-list");
+      if (!progressListTournee && !progressListRetrait) return;
       
-      const sections = state.config.sections || [];
-      const tourKey = `${state.tourneeStartMonth}_${state.tourneeDuration}`;
+      const sections = (state.config && state.config.sections) ? state.config.sections : [];
+      const startMonth = state.tourneeStartMonth || `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
+      const duration = state.tourneeDuration || 6;
+      const tourKey = `${startMonth}_${duration}`;
       
-      if (!state.sectionsProgress) {
-        state.sectionsProgress = {};
+      if (!state.sectionsProgress) state.sectionsProgress = {};
+      if (!state.sectionsProgress[tourKey]) state.sectionsProgress[tourKey] = {};
+      
+      let startYear = new Date().getFullYear();
+      let startMonthZeroIdx = new Date().getMonth();
+      if (startMonth.includes('-')) {
+        const parts = startMonth.split('-').map(Number);
+        startYear = parts[0];
+        startMonthZeroIdx = parts[1] - 1;
       }
-      if (!state.sectionsProgress[tourKey]) {
-        state.sectionsProgress[tourKey] = {};
-      }
       
-      // Calculer la période ciblée
-      const [startYear, startMonthZeroIdx] = state.tourneeStartMonth.split('-').map(Number);
-      const startDate = new Date(startYear, startMonthZeroIdx - 1, 1);
+      const startDate = new Date(startYear, startMonthZeroIdx, 1);
       const endDate = new Date(startDate);
-      endDate.setMonth(endDate.getMonth() + state.tourneeDuration - 1);
+      endDate.setMonth(endDate.getMonth() + duration - 1);
       
       const startKey = `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}`;
       const endKey = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, '0')}`;
       
-      // Compter les produits actifs saisis dans chaque section pendant cette tournée
       const sectionCounts = {};
       sections.forEach(s => sectionCounts[s] = 0);
       
@@ -4734,63 +4752,88 @@
       });
       
       let completedCount = 0;
-      progressList.innerHTML = "";
       
-      sections.forEach(secName => {
-        let status = state.sectionsProgress[tourKey][secName];
-        const count = sectionCounts[secName] || 0;
+      const populateContainer = (container) => {
+        if (!container) return;
+        container.innerHTML = "";
         
-        if (status === 'completed') {
-          completedCount++;
-        } else if (count > 0) {
-          status = 'in_progress';
-        } else {
-          status = 'not_started';
-        }
-        
-        let dotColor = "";
-        if (status === 'completed') {
-          dotColor = "#10b981"; // success / green
-        } else if (status === 'in_progress') {
-          dotColor = "#f59e0b"; // warning / amber
-        } else {
-          dotColor = "#ef4444"; // danger / red
-        }
-        
-        const item = document.createElement("div");
-        item.className = "section-progress-item";
-        
-        const isChecked = status === 'completed' ? 'checked' : '';
-        
-        item.innerHTML = `
-          <div style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0;">
-            <span class="status-dot-glow" style="color: ${dotColor}; background-color: ${dotColor};"></span>
-            <span style="font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-color);" title="${secName}">${secName}</span>
-            <span style="font-size: 0.75rem; color: var(--text-muted); margin-left: 2px;">(${count})</span>
-          </div>
-          <label style="display: flex; align-items: center; cursor: pointer; margin-bottom: 0;">
-            <input type="checkbox" ${isChecked} style="width: 16px; height: 16px; accent-color: var(--primary-color);" class="sec-progress-cb">
-          </label>
-        `;
-        
-        item.querySelector(".sec-progress-cb").addEventListener("change", async (e) => {
-          if (e.target.checked) {
-            state.sectionsProgress[tourKey][secName] = 'completed';
+        sections.forEach(secName => {
+          let status = state.sectionsProgress[tourKey] ? state.sectionsProgress[tourKey][secName] : undefined;
+          const count = sectionCounts[secName] || 0;
+          
+          if (status === 'completed') {
+            // Counted in loop
+          } else if (count > 0) {
+            status = 'in_progress';
           } else {
-            delete state.sectionsProgress[tourKey][secName];
+            status = 'not_started';
           }
-          updateSectionsProgressUI();
-          await saveConfig();
+          
+          let dotColor = "";
+          if (status === 'completed') {
+            dotColor = "#10b981";
+          } else if (status === 'in_progress') {
+            dotColor = "#f59e0b";
+          } else {
+            dotColor = "#ef4444";
+          }
+          
+          const isChecked = status === 'completed' ? 'checked' : '';
+
+          const item = document.createElement("div");
+          item.className = "section-progress-item";
+          item.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0;">
+              <span class="status-dot-glow" style="color: ${dotColor}; background-color: ${dotColor};"></span>
+              <span style="font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-color);" title="${secName}">${secName}</span>
+              <span style="font-size: 0.75rem; color: var(--text-muted); margin-left: 2px;">(${count})</span>
+            </div>
+            <label style="display: flex; align-items: center; cursor: pointer; margin-bottom: 0;">
+              <input type="checkbox" ${isChecked} style="width: 16px; height: 16px; accent-color: var(--primary-color);" class="sec-progress-cb">
+            </label>
+          `;
+          
+          const cb = item.querySelector(".sec-progress-cb");
+          if (cb) {
+            cb.addEventListener("change", async (e) => {
+              try {
+                if (e.target.checked) {
+                  state.sectionsProgress[tourKey][secName] = 'completed';
+                } else {
+                  delete state.sectionsProgress[tourKey][secName];
+                }
+                updateSectionsProgressUI();
+                await saveConfig();
+              } catch (err) {
+                console.error("Erreur enregistrement progression section:", err);
+              }
+            });
+          }
+          container.appendChild(item);
         });
-        
-        progressList.appendChild(item);
+      };
+
+      sections.forEach(secName => {
+        if (state.sectionsProgress[tourKey] && state.sectionsProgress[tourKey][secName] === 'completed') {
+          completedCount++;
+        }
       });
-      
-      // Mettre à jour la barre de progression
+
+      populateContainer(progressListTournee);
+      populateContainer(progressListRetrait);
+
       const totalSections = sections.length || 1;
       const percent = Math.round((completedCount / totalSections) * 100);
-      document.getElementById("tournee-progress-percent").textContent = `${percent}%`;
-      document.getElementById("tournee-progress-bar").style.width = `${percent}%`;
+      
+      const tourneePercent = document.getElementById("tournee-progress-percent");
+      const tourneeBar = document.getElementById("tournee-progress-bar");
+      if (tourneePercent) tourneePercent.textContent = `${percent}%`;
+      if (tourneeBar) tourneeBar.style.width = `${percent}%`;
+
+      const retraitPercent = document.getElementById("retrait-progress-percent");
+      const retraitBar = document.getElementById("retrait-progress-bar");
+      if (retraitPercent) retraitPercent.textContent = `${percent}%`;
+      if (retraitBar) retraitBar.style.width = `${percent}%`;
     }
 
     function addNewProduct() {
