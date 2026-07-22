@@ -1774,8 +1774,8 @@
           <input type="text" id="reg-pharmacy-name" required placeholder="ex: Pharmacie Jean Coutu Vkhoukaz">
         </div>
         <div class="form-group">
-          <label for="reg-initials">Vos Initiales (ex: SB)</label>
-          <input type="text" id="reg-initials" required maxlength="4" placeholder="Ex: SB" style="text-transform: uppercase;">
+          <label for="reg-initials">Vos initiales de technicien(ne)</label>
+          <input type="text" id="reg-initials" required placeholder="ex: SB" maxlength="4" style="text-transform: uppercase;">
         </div>
         <div class="form-group">
           <label for="reg-email">Adresse courriel</label>
@@ -2767,24 +2767,19 @@
     // INITIALISATION DE L'APPLICATION ET CLOUD
     // ----------------------------------------------------
     async function init() {
-      // 1. Toujours attacher les écouteurs d'événements UI et d'authentification EN PREMIER
       try {
-        setupEventHandlers();
-        setupAuthEventHandlers();
-      } catch (e) {
-        console.error("Erreur lors de l'attachement des écouteurs UI:", e);
-      }
-
-      // 2. Initialiser Supabase et la session
-      try {
-        console.log("Initialisation de l'application Cloud...");
+        console.log("Initialisation de l'application...");
         
         if (!window.supabase) {
-          showError("Erreur d'initialisation : La bibliothèque Supabase n'a pas pu être chargée. Vérifiez votre connexion internet.");
-          return;
+          throw new Error("La bibliothèque Supabase n'a pas pu être chargée. Veuillez vérifier votre connexion internet.");
         }
         
+        // 1. Initialiser le client Supabase
         supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        // 2. Configurer les écouteurs d'événements de base et d'auth
+        setupEventHandlers();
+        setupAuthEventHandlers();
         
         // 3. Vérifier s'il y a une session active
         await checkAuthSession();
@@ -2796,45 +2791,22 @@
             .catch(err => console.error('[PWA] Erreur Service Worker', err));
         }
       } catch (err) {
-        console.error("Erreur d'initialisation :", err);
-        showError("Erreur d'initialisation : " + err.message);
+        console.error("Erreur critique d'initialisation :", err);
+        alert("Erreur d'initialisation : " + err.message + "\n\n(Vérifiez que vous êtes connecté à internet)");
       }
     }
 
-    let loadingSafetyTimer = null;
-
     async function checkAuthSession() {
       showLoading("Vérification de la session...");
+      const { data: { session }, error } = await supabaseClient.auth.getSession();
       
-      try {
-        const timeoutPromise = new Promise(resolve => setTimeout(() => resolve({ timeout: true }), 2000));
-        const sessionPromise = supabaseClient.auth.getSession();
-        const res = await Promise.race([sessionPromise, timeoutPromise]);
-        
-        if (res && res.timeout) {
-          console.warn("Session check timed out. Showing login screen.");
-          hideLoading();
-          showAuthScreen();
-          return;
-        }
-        
-        const { data, error } = res;
-        const session = data ? data.session : null;
-        
-        if (error || !session) {
-          hideLoading();
-          showAuthScreen();
-          return;
-        }
-        
-        await handleLoginSuccess(session.user);
-      } catch (err) {
-        console.error("Error in checkAuthSession:", err);
+      if (error || !session) {
         hideLoading();
         showAuthScreen();
-      } finally {
-        hideLoading();
+        return;
       }
+      
+      await handleLoginSuccess(session.user);
     }
 
     function showAuthScreen() {
@@ -2853,8 +2825,7 @@
         // Mode invitation : pré-configurer le formulaire d'inscription
         document.getElementById("login-form").style.display = "none";
         document.getElementById("register-form").style.display = "block";
-        const h2 = document.getElementById("login-header")?.querySelector("h2");
-        if (h2) h2.textContent = "Rejoindre une pharmacie";
+        document.getElementById("login-header").querySelector("h2").textContent = "Rejoindre une pharmacie";
         
         if (inviteAlert) {
           inviteAlert.innerHTML = `👋 Vous êtes invité(e) à rejoindre la pharmacie :<br><strong>${decodeURIComponent(inviteName)}</strong>`;
@@ -2863,18 +2834,15 @@
         if (nameGroup) {
           nameGroup.style.display = "none";
           const nameInput = document.getElementById("reg-pharmacy-name");
-          if (nameInput) {
-            nameInput.value = decodeURIComponent(inviteName);
-            nameInput.required = false;
-          }
+          nameInput.value = decodeURIComponent(inviteName);
+          nameInput.required = false;
         }
       } else {
         // Mode normal
         if (inviteAlert) inviteAlert.style.display = "none";
         if (nameGroup) {
           nameGroup.style.display = "block";
-          const nameInput = document.getElementById("reg-pharmacy-name");
-          if (nameInput) nameInput.required = true;
+          document.getElementById("reg-pharmacy-name").required = true;
         }
       }
     }
@@ -2885,24 +2853,12 @@
     }
 
     function showLoading(text) {
-      const loader = document.getElementById("login-loading");
-      const txt = document.getElementById("login-loading-text");
-      if (loader) loader.style.display = "flex";
-      if (txt) txt.textContent = text;
-
-      if (loadingSafetyTimer) clearTimeout(loadingSafetyTimer);
-      loadingSafetyTimer = setTimeout(() => {
-        hideLoading();
-      }, 7000);
+      document.getElementById("login-loading").style.display = "flex";
+      document.getElementById("login-loading-text").textContent = text;
     }
 
     function hideLoading() {
-      if (loadingSafetyTimer) {
-        clearTimeout(loadingSafetyTimer);
-        loadingSafetyTimer = null;
-      }
-      const loader = document.getElementById("login-loading");
-      if (loader) loader.style.display = "none";
+      document.getElementById("login-loading").style.display = "none";
     }
 
     function showError(message) {
@@ -2956,8 +2912,9 @@
         checkAndShowTutorial();
       } catch (err) {
         console.error("Erreur de profil", err);
-        hideLoading();
-        showError("Erreur d'accès : " + (err.message || "Impossible de charger votre compte."));
+        showError("Erreur d'authentification : " + err.message);
+        await supabaseClient.auth.signOut();
+        showAuthScreen();
       } finally {
         hideLoading();
       }
@@ -3246,45 +3203,21 @@
       
       document.getElementById("login-form").addEventListener("submit", async (e) => {
         e.preventDefault();
-        
-        const email = document.getElementById("login-email").value.trim();
+        const email = document.getElementById("login-email").value;
         const password = document.getElementById("login-password").value;
         
-        if (!email || !password) {
-          showError("Veuillez saisir votre courriel et votre mot de passe.");
-          return;
-        }
-
         showLoading("Connexion en cours...");
         document.getElementById("login-error-msg").style.display = "none";
         
-        try {
-          const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-          
-          if (error) {
-            hideLoading();
-            let msg = error.message;
-            if (msg === "Invalid login credentials") {
-              msg = "Courriel ou mot de passe incorrect.";
-            } else if (msg === "Email not confirmed") {
-              msg = "Adresse courriel non confirmée.";
-            }
-            showError("Erreur de connexion : " + msg);
-            return;
-          }
-          
-          if (!data || !data.user) {
-            hideLoading();
-            showError("Erreur de connexion : Compte introuvable.");
-            return;
-          }
-
-          await handleLoginSuccess(data.user);
-        } catch (err) {
-          console.error("Erreur de soumission login:", err);
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+        
+        if (error) {
           hideLoading();
-          showError("Erreur de connexion : " + (err.message || "Impossible de communiquer avec le serveur."));
+          showError("Erreur de connexion : " + error.message);
+          return;
         }
+        
+        await handleLoginSuccess(data.user);
       });
       
       document.getElementById("register-form").addEventListener("submit", async (e) => {
