@@ -1754,7 +1754,7 @@
       <div id="login-error-msg" class="login-alert danger" style="display: none;"></div>
       <div id="login-info-msg" class="login-alert info" style="display: none;"></div>
 
-      <form id="login-form" onsubmit="event.preventDefault(); return false;">
+      <form id="login-form">
         <div class="form-group">
           <label for="login-email">Adresse courriel</label>
           <input type="email" id="login-email" required placeholder="nom@pharmacie.com">
@@ -1763,11 +1763,11 @@
           <label for="login-password">Mot de passe</label>
           <input type="password" id="login-password" required placeholder="••••••••">
         </div>
-        <button type="button" id="btn-login-submit" class="btn btn-login">Se connecter</button>
+        <button type="submit" class="btn btn-login">Se connecter</button>
         <p class="switch-auth-mode">Nouveau ? <a href="#" id="link-show-register">Créer un compte de pharmacie</a></p>
       </form>
 
-      <form id="register-form" style="display: none;" onsubmit="event.preventDefault(); return false;">
+      <form id="register-form" style="display: none;">
         <div id="reg-invite-alert" class="login-alert info" style="display: none; margin-bottom: 16px; font-size: 0.85rem;"></div>
         <div class="form-group" id="reg-pharmacy-name-group">
           <label for="reg-pharmacy-name">Nom de la Pharmacie</label>
@@ -1785,7 +1785,7 @@
           <label for="reg-password">Mot de passe (Min. 6 car.)</label>
           <input type="password" id="reg-password" required minlength="6" placeholder="••••••••">
         </div>
-        <button type="button" id="btn-register-submit" class="btn btn-login">Créer la pharmacie et le compte</button>
+        <button type="submit" class="btn btn-login">Créer la pharmacie et le compte</button>
         <p class="switch-auth-mode">Déjà inscrit ? <a href="#" id="link-show-login">Se connecter</a></p>
       </form>
       
@@ -3200,11 +3200,11 @@
         document.getElementById("login-error-msg").style.display = "none";
       });
       
-      async function doLogin() {
-        const emailInput = document.getElementById("login-email");
-        const passwordInput = document.getElementById("login-password");
-        const email = emailInput ? emailInput.value.trim() : "";
-        const password = passwordInput ? passwordInput.value : "";
+      document.getElementById("login-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        
+        const email = document.getElementById("login-email").value.trim();
+        const password = document.getElementById("login-password").value;
         
         if (!email || !password) {
           showError("Veuillez saisir votre courriel et votre mot de passe.");
@@ -3212,8 +3212,7 @@
         }
 
         showLoading("Connexion en cours...");
-        const errDiv = document.getElementById("login-error-msg");
-        if (errDiv) errDiv.style.display = "none";
+        document.getElementById("login-error-msg").style.display = "none";
         
         try {
           const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
@@ -3242,22 +3241,7 @@
           hideLoading();
           showError("Erreur de connexion : " + (err.message || "Impossible de communiquer avec le serveur."));
         }
-      }
-
-      const btnLoginSubmit = document.getElementById("btn-login-submit");
-      if (btnLoginSubmit) {
-        btnLoginSubmit.addEventListener("click", doLogin);
-      }
-
-      const loginForm = document.getElementById("login-form");
-      if (loginForm) {
-        loginForm.addEventListener("submit", (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          doLogin();
-          return false;
-        });
-      }
+      });
       
       document.getElementById("register-form").addEventListener("submit", async (e) => {
         e.preventDefault();
