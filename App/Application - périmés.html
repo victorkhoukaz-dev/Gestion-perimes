@@ -4317,20 +4317,36 @@
 
     async function preloadDefaultCatalog(newPharmacyId) {
       try {
-        const { data: refList, error: refError } = await supabaseClient
-          .from("catalog")
-          .select("pharmacy_id")
-          .limit(1);
-          
-        if (refError) throw refError;
+        // 1. Chercher d'abord la pharmacie maîtresse "PJC 28" (ou fallback sur la première créée)
+        let masterPharmId = null;
         
-        if (!refList || refList.length === 0) {
-          console.log("Aucun catalogue de référence existant pour la duplication.");
+        const { data: pjc28Pharm } = await supabaseClient
+          .from("pharmacies")
+          .select("id")
+          .ilike("name", "%PJC 28%")
+          .maybeSingle();
+          
+        if (pjc28Pharm && pjc28Pharm.id) {
+          masterPharmId = pjc28Pharm.id;
+        } else {
+          const { data: firstPharm } = await supabaseClient
+            .from("pharmacies")
+            .select("id")
+            .order("created_at", { ascending: true })
+            .limit(1)
+            .maybeSingle();
+            
+          if (firstPharm) masterPharmId = firstPharm.id;
+        }
+        
+        if (!masterPharmId) {
+          console.log("Aucun catalogue maître existant pour la duplication.");
           return;
         }
         
-        const refId = refList[0].pharmacy_id;
-        console.log(`Duplication du catalogue depuis : ${refId}`);
+        if (masterPharmId === newPharmacyId) return;
+        
+        console.log(`Duplication du catalogue maître (${masterPharmId}) vers la nouvelle pharmacie (${newPharmacyId})...`);
         
         let start = 0;
         const pageSize = 1000;
@@ -4340,7 +4356,7 @@
           const { data, error } = await supabaseClient
             .from("catalog")
             .select("din, product, dosage, format, upc")
-            .eq("pharmacy_id", refId)
+            .eq("pharmacy_id", masterPharmId)
             .range(start, start + pageSize - 1);
             
           if (error) throw error;
@@ -4367,8 +4383,9 @@
             hasMore = false;
           }
         }
+        console.log("Préconfiguration du catalogue maître terminée avec succès !");
       } catch (err) {
-        console.error("Erreur lors de la duplication du catalogue :", err);
+        console.error("Erreur lors de la duplication du catalogue maître :", err);
       }
     }
 
