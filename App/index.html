@@ -3770,19 +3770,38 @@
       return val.trim().replace(/^0+/, "");
     }
 
+    function normalizeDIN(val) {
+      if (!val) return "";
+      const cleaned = val.toString().trim();
+      if (/^\d+$/.test(cleaned)) {
+        return cleaned.replace(/^0+/, "");
+      }
+      return cleaned.toLowerCase();
+    }
+
+    function formatDIN(val) {
+      if (!val || val === "N/A") return "N/A";
+      const cleaned = val.toString().trim();
+      if (/^\d{1,8}$/.test(cleaned)) {
+        return cleaned.padStart(8, '0');
+      }
+      return cleaned;
+    }
+
     function showSuggestions(val, fieldType) {
       closeAllSuggestions();
       const query = val.toLowerCase().trim();
-      const normQuery = normalizeUPC(query);
+      const normUpcQuery = normalizeUPC(query);
+      const normDinQuery = normalizeDIN(query);
       
       // Commencer la recherche à partir de 2 caractères
       if (query.length < 2) return;
 
-      // Filtrer dans localCatalog (inclut la recherche par UPC)
+      // Filtrer dans localCatalog (inclut la recherche par UPC et tolérance aux ceros de DIN)
       const matches = localCatalog.filter(item => {
         if (fieldType === "din") {
-          const matchDin = item.din && item.din.toLowerCase().includes(query);
-          const matchUpc = item.upc && (item.upc.toLowerCase().includes(query) || (normQuery !== "" && normalizeUPC(item.upc).includes(normQuery)));
+          const matchDin = item.din && (item.din.toLowerCase().includes(query) || (normDinQuery !== "" && normalizeDIN(item.din).includes(normDinQuery)));
+          const matchUpc = item.upc && (item.upc.toLowerCase().includes(query) || (normUpcQuery !== "" && normalizeUPC(item.upc).includes(normUpcQuery)));
           return matchDin || matchUpc;
         } else {
           return item.product.toLowerCase().includes(query);
@@ -3822,21 +3841,25 @@
     function checkForExactCodeMatch(val) {
       const query = val.trim();
       if (query.length < 2) return false;
-      const normQuery = normalizeUPC(query);
+      const normUpcQuery = normalizeUPC(query);
+      const normDinQuery = normalizeDIN(query);
 
-      // Chercher une correspondance exacte sur DIN ou UPC (avec tolérance sur les 0 initiaux)
+      // Chercher une correspondance exacte ou normalisée sur DIN ou UPC
       const match = localCatalog.find(item => {
-        if (item.din && item.din.trim() === query) return true;
+        if (item.din && item.din.trim() !== "") {
+          if (item.din.trim() === query) return true;
+          if (normDinQuery !== "" && normalizeDIN(item.din) === normDinQuery) return true;
+        }
         if (item.upc && item.upc.trim() !== "") {
           if (item.upc.trim() === query) return true;
-          if (normQuery !== "" && normalizeUPC(item.upc) === normQuery) return true;
+          if (normUpcQuery !== "" && normalizeUPC(item.upc) === normUpcQuery) return true;
         }
         return false;
       });
 
       if (match) {
         // Ne réinitialiser tempScannedUPC que si le match s'est fait sur le code-barres lui-même
-        if (match.upc && (match.upc === query || (normQuery !== "" && normalizeUPC(match.upc) === normQuery))) {
+        if (match.upc && (match.upc === query || (normUpcQuery !== "" && normalizeUPC(match.upc) === normUpcQuery))) {
           tempScannedUPC = "";
         }
         selectSuggestion(match);
@@ -5030,7 +5053,8 @@
 
     async function addNewProduct() {
       const section = document.getElementById("form-section").value;
-      const din = document.getElementById("form-din").value.trim() || "N/A";
+      const rawDin = document.getElementById("form-din").value.trim();
+      const din = rawDin ? formatDIN(rawDin) : "N/A";
       const name = document.getElementById("form-product").value.trim();
       const dosage = document.getElementById("form-dosage").value.trim() || "N/A";
       const format = document.getElementById("form-format").value.trim() || "N/A";
@@ -5234,10 +5258,13 @@
         if (searchQuery === "") {
           filtered = localCatalog.slice(0, 100);
         } else {
+          const normDinQuery = normalizeDIN(searchQuery);
+          const normUpcQuery = normalizeUPC(searchQuery);
+
           filtered = localCatalog.filter(item => {
             return (item.product && item.product.toLowerCase().includes(searchQuery)) ||
-                   (item.din && item.din.toLowerCase().includes(searchQuery)) ||
-                   (item.upc && item.upc.toLowerCase().includes(searchQuery)) ||
+                   (item.din && (item.din.toLowerCase().includes(searchQuery) || (normDinQuery !== "" && normalizeDIN(item.din).includes(normDinQuery)))) ||
+                   (item.upc && (item.upc.toLowerCase().includes(searchQuery) || (normUpcQuery !== "" && normalizeUPC(item.upc).includes(normUpcQuery)))) ||
                    (item.dosage && item.dosage.toLowerCase().includes(searchQuery)) ||
                    (item.format && item.format.toLowerCase().includes(searchQuery));
           });
