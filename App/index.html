@@ -2833,9 +2833,25 @@
       document.getElementById("login-loading").style.display = "none";
     }
 
+    function formatErrorMessage(err) {
+      if (!err) return "Une erreur inconnue est survenue.";
+      if (typeof err === "string") return err;
+      if (err.message && typeof err.message === "string" && err.message.trim() !== "") return err.message;
+      if (err.error_description && typeof err.error_description === "string") return err.error_description;
+      if (err.details && typeof err.details === "string") return err.details;
+      if (err.hint && typeof err.hint === "string") return err.hint;
+      if (err.msg && typeof err.msg === "string") return err.msg;
+      try {
+        const str = JSON.stringify(err);
+        if (str && str !== "{}" && str !== "[]") return str;
+      } catch (e) {}
+      return String(err);
+    }
+
     function showError(message) {
       const errDiv = document.getElementById("login-error-msg");
-      errDiv.textContent = message;
+      const text = formatErrorMessage(message);
+      errDiv.textContent = text.startsWith("⚠️") ? text : "⚠️ " + text;
       errDiv.style.display = "block";
     }
 
@@ -2884,7 +2900,7 @@
         checkAndShowTutorial();
       } catch (err) {
         console.error("Erreur de profil", err);
-        showError("Erreur d'authentification : " + err.message);
+        showError("Erreur d'authentification : " + formatErrorMessage(err));
         await supabaseClient.auth.signOut();
         showAuthScreen();
       } finally {
@@ -3195,7 +3211,7 @@
       document.getElementById("register-form").addEventListener("submit", async (e) => {
         e.preventDefault();
         const initials = document.getElementById("reg-initials").value.toUpperCase().trim();
-        const email = document.getElementById("reg-email").value;
+        const email = document.getElementById("reg-email").value.trim();
         const password = document.getElementById("reg-password").value;
         
         // Lire le paramètre d'invitation éventuel
@@ -3210,7 +3226,7 @@
           
           if (!targetPharmacyId) {
             // MODE NORMAL : Création d'une nouvelle pharmacie
-            const pharmacyName = document.getElementById("reg-pharmacy-name").value;
+            const pharmacyName = document.getElementById("reg-pharmacy-name").value.trim();
             
             // 1. Créer la pharmacie d'abord
             const { data: pharmData, error: pharmError } = await supabaseClient
@@ -3239,30 +3255,46 @@
             const user = signUpData.user;
             if (!user) throw new Error("Une erreur s'est produite lors de la création de l'utilisateur.");
             
+            // 3. Assurer la présence du profil
+            const { error: profError } = await supabaseClient
+              .from("profiles")
+              .upsert({
+                id: user.id,
+                pharmacy_id: targetPharmacyId,
+                email: email,
+                initials: initials
+              });
+            if (profError) console.warn("Notice profiles upsert:", profError);
+
             if (signUpData.session) {
               await supabaseClient.auth.setSession(signUpData.session);
             }
             
-            // 3. Créer la configuration par défaut (attendre un peu le trigger profile)
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
+            // 4. Créer la configuration par défaut
             const { error: configError } = await supabaseClient
               .from("configurations")
-              .insert({
+              .upsert({
                 pharmacy_id: targetPharmacyId,
                 expiry_window_months: 6,
                 sections: defaultSections,
                 sticker_colors: defaultStickerColors
               });
               
-            if (configError) throw configError;
+            if (configError) console.warn("Notice config upsert:", configError);
             
-            // Précharger le catalogue
+            // 5. Précharger le catalogue
             showLoading("Préconfiguration du catalogue...");
             await preloadDefaultCatalog(targetPharmacyId);
             
             showToast("Compte créé avec succès !", "success");
-            await handleLoginSuccess(user);
+            
+            if (signUpData.session) {
+              await handleLoginSuccess(user);
+            } else {
+              hideLoading();
+              showToast("Compte créé ! Si requis par votre projet Supabase, veuillez valider votre adresse courriel.", "info");
+              showError("Compte créé avec succès ! Si un lien de confirmation vous a été envoyé par courriel, validez-le puis connectez-vous.");
+            }
           } else {
             // MODE INVITATION : Rejoindre une pharmacie existante
             const { data: signUpData, error: signUpError } = await supabaseClient.auth.signUp({
@@ -3281,6 +3313,17 @@
             const user = signUpData.user;
             if (!user) throw new Error("Une erreur s'est produite lors de la création de l'utilisateur.");
             
+            // Assurer la présence du profil
+            const { error: profError } = await supabaseClient
+              .from("profiles")
+              .upsert({
+                id: user.id,
+                pharmacy_id: targetPharmacyId,
+                email: email,
+                initials: initials
+              });
+            if (profError) console.warn("Notice profiles upsert:", profError);
+
             if (signUpData.session) {
               await supabaseClient.auth.setSession(signUpData.session);
             }
@@ -3290,12 +3333,18 @@
             // Nettoyer l'URL de l'invitation pour éviter les réinscriptions par erreur
             window.history.replaceState({}, document.title, window.location.pathname);
             
-            await handleLoginSuccess(user);
+            if (signUpData.session) {
+              await handleLoginSuccess(user);
+            } else {
+              hideLoading();
+              showToast("Compte créé ! Veuillez vérifier vos courriels pour valider votre inscription.", "info");
+              showError("Compte créé avec succès ! Veuillez valider votre courriel avant de vous connecter.");
+            }
           }
           
         } catch (err) {
-          console.error(err);
-          showError("Erreur lors de l'inscription : " + err.message);
+          console.error("Erreur lors de l'inscription:", err);
+          showError("Erreur lors de l'inscription : " + formatErrorMessage(err));
           await supabaseClient.auth.signOut();
           hideLoading();
         }
