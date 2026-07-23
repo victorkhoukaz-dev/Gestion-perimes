@@ -3884,6 +3884,53 @@
       }
     }
 
+    async function deleteUPCAssociation(upcCode, productDin) {
+      if (!sessionPharmacy) return;
+      
+      const cleanUPC = (upcCode || '').trim();
+      const cleanDin = (productDin || '').trim();
+      
+      if (!cleanUPC) {
+        showToast("Aucun code-barres spécifié à dissocier.", "warning");
+        return;
+      }
+      
+      if (!confirm(`Voulez-vous vraiment supprimer l'association du code-barres ${cleanUPC} ?`)) {
+        return;
+      }
+      
+      showLoading("Dissociation du code-barres...");
+      try {
+        // 1. Supprimer l'association de Supabase
+        const { error } = await supabaseClient
+          .from("catalog")
+          .delete()
+          .eq("pharmacy_id", sessionPharmacy.id)
+          .eq("upc", cleanUPC);
+          
+        if (error) throw error;
+        
+        // 2. Supprimer de localCatalog en mémoire
+        const normCleanUPC = normalizeUPC(cleanUPC);
+        localCatalog = localCatalog.filter(item => {
+          if (!item.upc) return true;
+          return item.upc.trim() !== cleanUPC && normalizeUPC(item.upc) !== normCleanUPC;
+        });
+        
+        tempScannedUPC = "";
+        const helperText = document.getElementById("scan-helper-text");
+        if (helperText) helperText.style.display = "none";
+        
+        showToast(`🔗 Association du code-barres ${cleanUPC} supprimée avec succès.`, "success");
+        renderInventoryTable();
+      } catch (err) {
+        console.error("Erreur dissociation UPC:", err);
+        showToast("Erreur lors de la dissociation : " + formatErrorMessage(err), "danger");
+      } finally {
+        hideLoading();
+      }
+    }
+
     function selectSuggestion(item) {
       document.getElementById("form-din").value = (item.din === "N/A" || item.din === "") ? "" : item.din;
       document.getElementById("form-product").value = item.product;
@@ -3892,7 +3939,24 @@
       closeAllSuggestions();
       
       const helperText = document.getElementById("scan-helper-text");
-      if (tempScannedUPC && helperText) {
+      if (item.upc) {
+        const escapedUpc = (item.upc || '').replace(/'/g, "\\'");
+        const escapedDin = (item.din || '').replace(/'/g, "\\'");
+        if (helperText) {
+          helperText.innerHTML = `
+            <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; padding: 10px; border-radius: 6px; margin-top: 8px; line-height: 1.4; display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+              <div>
+                <span style="color: #166534; font-weight: bold; display: block; margin-bottom: 2px;">🔗 Code-barres associé : ${item.upc}</span>
+                <span style="color: var(--text-color); font-size: 0.8rem;">Lié au DIN ${item.din || 'N/A'} (${item.product})</span>
+              </div>
+              <button type="button" class="btn btn-secondary btn-xs danger" onclick="deleteUPCAssociation('${escapedUpc}', '${escapedDin}')" style="padding: 4px 8px; font-size: 0.75rem; color: #ef4444; border: 1px solid #fca5a5; background: white; cursor: pointer; border-radius: 4px; white-space: nowrap;">
+                ❌ Dissocier UPC
+              </button>
+            </div>
+          `;
+          helperText.style.display = "block";
+        }
+      } else if (tempScannedUPC && helperText) {
         helperText.innerHTML = `
           <div style="background-color: #e6fffa; border: 1px solid #b2f5ea; padding: 10px; border-radius: 6px; margin-top: 8px; line-height: 1.4;">
             <span style="color: #319795; font-weight: bold; display: block; margin-bottom: 4px;">🔗 Liaison planifiée</span>
@@ -5206,16 +5270,30 @@
           const escapedProduct = (item.product || 'Inconnu').replace(/'/g, "\\'");
           const escapedDosage = (item.dosage || 'N/A').replace(/'/g, "\\'");
           const escapedFormat = (item.format || 'N/A').replace(/'/g, "\\'");
+          const escapedUpc = (item.upc || '').replace(/'/g, "\\'");
+
+          const upcBadge = item.upc ? `<div style="font-size: 0.75rem; color: var(--primary-color); font-weight: 600; margin-top: 2px;">UPC: ${item.upc}</div>` : '';
+          const dissociateBtn = item.upc ? `
+            <button class="btn btn-secondary btn-xs danger" style="padding: 5px 10px; font-size: 0.75rem; background-color: #fef2f2; color: #ef4444; border: 1px solid #fca5a5; border-radius: 6px; cursor: pointer; margin-left: 6px;" onclick="deleteUPCAssociation('${escapedUpc}', '${escapedDin}')" title="Supprimer l'association de ce code-barres">
+              ❌ Dissocier UPC
+            </button>
+          ` : '';
 
           tr.innerHTML = `
-            <td style="font-family: monospace; font-size: 0.85rem;">${item.din || 'N/A'}</td>
+            <td style="font-family: monospace; font-size: 0.85rem;">
+              <div>${item.din || 'N/A'}</div>
+              ${upcBadge}
+            </td>
             <td><span class="prod-title">${item.product}</span></td>
             <td style="color: var(--text-muted);">${item.dosage || 'N/A'}</td>
             <td style="color: var(--text-muted);">${item.format || 'N/A'}</td>
             <td>
-              <button class="btn" style="padding: 6px 12px; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 4px;" onclick="loadProductToSaisie('${escapedDin}', '${escapedProduct}', '${escapedDosage}', '${escapedFormat}')">
-                ➕ Signaler
-              </button>
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <button class="btn" style="padding: 6px 12px; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 4px;" onclick="loadProductToSaisie('${escapedDin}', '${escapedProduct}', '${escapedDosage}', '${escapedFormat}')">
+                  ➕ Signaler
+                </button>
+                ${dissociateBtn}
+              </div>
             </td>
           `;
           tbody.appendChild(tr);
