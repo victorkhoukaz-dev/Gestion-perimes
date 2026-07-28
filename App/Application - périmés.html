@@ -6384,39 +6384,70 @@
     function parseGS1DataMatrix(text) {
       if (!text) return null;
       
-      // Nettoyer les séparateurs GS (ASCII 29 / \x1D / \x1E)
-      let cleanText = text.replace(/[\x1D\x1E\x04]/g, "|").trim();
-      
+      let raw = text.trim();
       let gtin = null;
       let expiry = null;
       let lot = null;
-      
-      // 1. GTIN (01) - 14 chiffres
-      const gtinMatch = cleanText.match(/(?:^|\||\()01\)?(\d{14})/);
-      if (gtinMatch) {
-        gtin = gtinMatch[1];
-      }
-      
-      // 2. Date Expiration (17) - 6 chiffres AAMMJJ
-      const expMatch = cleanText.match(/(?:^|\||\()17\)?(\d{6})/);
-      if (expMatch) {
-        const rawExp = expMatch[1]; // AAMMJJ
-        const yy = rawExp.substring(0, 2);
-        const mm = rawExp.substring(2, 4);
-        const year = parseInt(yy, 10) > 50 ? `19${yy}` : `20${yy}`;
-        if (parseInt(mm, 10) >= 1 && parseInt(mm, 10) <= 12) {
-          expiry = `${year}-${mm}`;
+
+      // 1. Format à parenthèses ex: (01)00623456789012(17)260831(10)LOT123
+      if (raw.includes("(01)")) {
+        const gMatch = raw.match(/\(01\)(\d{14})/);
+        if (gMatch) gtin = gMatch[1];
+        
+        const eMatch = raw.match(/\(17\)(\d{6})/);
+        if (eMatch) {
+          const yy = eMatch[1].substring(0, 2);
+          const mm = eMatch[1].substring(2, 4);
+          const yyyy = parseInt(yy, 10) > 50 ? `19${yy}` : `20${yy}`;
+          if (parseInt(mm, 10) >= 1 && parseInt(mm, 10) <= 12) {
+            expiry = `${yyyy}-${mm}`;
+          }
+        }
+        
+        const lMatch = raw.match(/\(10\)([a-zA-Z0-9\-\_\.]+)/);
+        if (lMatch) lot = lMatch[1];
+      } 
+      // 2. Format continu GS1 sans parenthèses ex: 010062345678901217260831...
+      else if (raw.startsWith("01") && raw.length >= 24) {
+        gtin = raw.substring(2, 16);
+        if (raw.substring(16, 18) === "17") {
+          const yy = raw.substring(18, 20);
+          const mm = raw.substring(20, 22);
+          const yyyy = parseInt(yy, 10) > 50 ? `19${yy}` : `20${yy}`;
+          if (parseInt(mm, 10) >= 1 && parseInt(mm, 10) <= 12) {
+            expiry = `${yyyy}-${mm}`;
+          }
+        }
+        if (raw.length >= 26 && raw.substring(24, 26) === "10") {
+          lot = raw.substring(26);
         }
       }
-      
-      // 3. Numéro de Lot (10) - jusqu'à 20 caractères alphanumériques
-      const lotMatch = cleanText.match(/(?:^|\||\()10\)?([a-zA-Z0-9\-\_\.]+)(?:\||\(|$)/);
-      if (lotMatch) {
-        lot = lotMatch[1].trim();
+
+      // 3. Fallback Regex général si séparateurs \x1D ou |
+      const cleanText = raw.replace(/[\x1D\x1E\x04]/g, "|");
+
+      if (!gtin) {
+        const gMatch = cleanText.match(/(?:^|\||\()01\)?(\d{14})/);
+        if (gMatch) gtin = gMatch[1];
       }
-      
+      if (!expiry) {
+        const eMatch = cleanText.match(/(?:17|\(17\))(\d{6})/);
+        if (eMatch) {
+          const yy = eMatch[1].substring(0, 2);
+          const mm = eMatch[1].substring(2, 4);
+          const yyyy = parseInt(yy, 10) > 50 ? `19${yy}` : `20${yy}`;
+          if (parseInt(mm, 10) >= 1 && parseInt(mm, 10) <= 12) {
+            expiry = `${yyyy}-${mm}`;
+          }
+        }
+      }
+      if (!lot) {
+        const lMatch = cleanText.match(/(?:^|\||\()10\)?([a-zA-Z0-9\-\_\.]+)(?:\||\(|$)/);
+        if (lMatch) lot = lMatch[1].trim();
+      }
+
       if (gtin || expiry || lot) {
-        return { gtin, expiry, lot, raw: text };
+        return { gtin, expiry, lot, raw };
       }
       return null;
     }
@@ -6439,7 +6470,10 @@
         // Auto-remplir la date d'expiration si extraite du code 2D
         if (gs1Data.expiry) {
           const expInput = document.getElementById("form-expiry");
-          if (expInput) expInput.value = gs1Data.expiry;
+          if (expInput) {
+            expInput.value = gs1Data.expiry;
+            expInput.dispatchEvent(new Event('change', { bubbles: true }));
+          }
         }
 
         // Auto-remplir le numéro de lot dans les notes si extrait
@@ -6450,7 +6484,7 @@
           }
         }
 
-        showToast(`✨ Code 2D GS1 extrait ! ${gs1Data.expiry ? 'Exp: ' + gs1Data.expiry : ''} ${gs1Data.lot ? '| Lot: ' + gs1Data.lot : ''}`, "success");
+        showToast(`✨ Code 2D GS1 extrait ! ${gs1Data.expiry ? 'Expiration: ' + gs1Data.expiry : ''}`, "success");
       }
 
       const dinInput = document.getElementById("form-din");
