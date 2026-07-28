@@ -5,12 +5,7 @@ echo   DEMARRAGE DU SERVEUR LOCAL POUR LES EXPIRES LAB
 echo ====================================================
 echo.
 echo L'application va s'ouvrir dans votre navigateur...
-echo.
 echo Pour fermer le serveur, fermez simplement cette fenetre.
 echo.
 
-:: Ouvre le navigateur sur localhost:8001/App/index.html
-start "" "http://localhost:8001/App/index.html"
-
-:: Lance le serveur web de Python
-python serve.py
+powershell -ExecutionPolicy Bypass -File "%~dp0serve.ps1"

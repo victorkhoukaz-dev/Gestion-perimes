@@ -6279,6 +6279,7 @@
       let formats = [];
       if (window.Html5QrcodeSupportedFormats) {
         formats = [
+          Html5QrcodeSupportedFormats.DATA_MATRIX,
           Html5QrcodeSupportedFormats.QR_CODE,
           Html5QrcodeSupportedFormats.UPC_A,
           Html5QrcodeSupportedFormats.UPC_E,
@@ -6380,6 +6381,46 @@
       }
     }
     
+    function parseGS1DataMatrix(text) {
+      if (!text) return null;
+      
+      // Nettoyer les séparateurs GS (ASCII 29 / \x1D / \x1E)
+      let cleanText = text.replace(/[\x1D\x1E\x04]/g, "|").trim();
+      
+      let gtin = null;
+      let expiry = null;
+      let lot = null;
+      
+      // 1. GTIN (01) - 14 chiffres
+      const gtinMatch = cleanText.match(/(?:^|\||\()01\)?(\d{14})/);
+      if (gtinMatch) {
+        gtin = gtinMatch[1];
+      }
+      
+      // 2. Date Expiration (17) - 6 chiffres AAMMJJ
+      const expMatch = cleanText.match(/(?:^|\||\()17\)?(\d{6})/);
+      if (expMatch) {
+        const rawExp = expMatch[1]; // AAMMJJ
+        const yy = rawExp.substring(0, 2);
+        const mm = rawExp.substring(2, 4);
+        const year = parseInt(yy, 10) > 50 ? `19${yy}` : `20${yy}`;
+        if (parseInt(mm, 10) >= 1 && parseInt(mm, 10) <= 12) {
+          expiry = `${year}-${mm}`;
+        }
+      }
+      
+      // 3. Numéro de Lot (10) - jusqu'à 20 caractères alphanumériques
+      const lotMatch = cleanText.match(/(?:^|\||\()10\)?([a-zA-Z0-9\-\_\.]+)(?:\||\(|$)/);
+      if (lotMatch) {
+        lot = lotMatch[1].trim();
+      }
+      
+      if (gtin || expiry || lot) {
+        return { gtin, expiry, lot, raw: text };
+      }
+      return null;
+    }
+
     function onScanSuccess(decodedText) {
       console.log(`[Scanner] Code détecté : ${decodedText}`);
       
@@ -6387,16 +6428,41 @@
       triggerVisualFlash();
       stopScanner();
       
+      // Vérifier s'il s'agit d'un code 2D GS1 DataMatrix
+      const gs1Data = parseGS1DataMatrix(decodedText);
+      let targetCode = decodedText;
+
+      if (gs1Data) {
+        console.log("[GS1 DataMatrix] En-têtes décodés :", gs1Data);
+        if (gs1Data.gtin) targetCode = gs1Data.gtin;
+
+        // Auto-remplir la date d'expiration si extraite du code 2D
+        if (gs1Data.expiry) {
+          const expInput = document.getElementById("form-expiry");
+          if (expInput) expInput.value = gs1Data.expiry;
+        }
+
+        // Auto-remplir le numéro de lot dans les notes si extrait
+        if (gs1Data.lot) {
+          const notesInput = document.getElementById("form-notes");
+          if (notesInput && !notesInput.value) {
+            notesInput.value = `Lot: ${gs1Data.lot}`;
+          }
+        }
+
+        showToast(`✨ Code 2D GS1 extrait ! ${gs1Data.expiry ? 'Exp: ' + gs1Data.expiry : ''} ${gs1Data.lot ? '| Lot: ' + gs1Data.lot : ''}`, "success");
+      }
+
       const dinInput = document.getElementById("form-din");
-      dinInput.value = decodedText;
+      dinInput.value = targetCode;
       
       const event = new Event('input', { bubbles: true });
       dinInput.dispatchEvent(event);
       
-      const found = checkForExactCodeMatch(decodedText);
+      const found = checkForExactCodeMatch(targetCode);
       if (!found) {
         document.getElementById("form-product").focus();
-        showToast("Code-barres inconnu. Saisissez le DIN associé pour l'enregistrer.", "warning");
+        showToast("Code-barres inconnu. Saisissez le DIN associé ou utilisez la photo IA.", "warning");
       }
     }
     
