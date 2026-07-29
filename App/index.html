@@ -6728,7 +6728,7 @@
 
       showToast("🤖 Analyse de l'étiquette par l'IA Gemini Flash...", "info");
 
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
       const rawBase64 = base64Image.replace(/^data:image\/(png|jpeg|jpg|webp);base64,/, "");
 
       const promptText = "Analyse cette étiquette de médicament canadien. Extrais les informations suivantes et réponds STRICTEMENT sous la forme d'un objet JSON valide sans aucun texte additionnel: {\"din\": \"Numéro DIN à 8 chiffres ou N/A\", \"product\": \"Nom commercial du produit\", \"dosage\": \"Concentration/Dosage ou N/A\", \"format\": \"Format ou N/A\", \"expiry\": \"Date d'expiration AAAA-MM si visible sinon N/A\"}";
@@ -6760,10 +6760,9 @@
           const errText = await res.text();
           console.error("Erreur Gemini API:", res.status, errText);
           
-          // Si la clé est rejetée ou expirée, demander la vraie clé AIzaSy... à l'utilisateur
-          if (res.status === 400 || res.status === 403 || res.status === 401) {
+          if (res.status === 429) {
             localStorage.removeItem("gemini_api_key");
-            const newKey = prompt("⚠️ La clé API Gemini actuelle n'est pas reconnue par Google.\n\nVeuillez saisir votre clé API Google AI Studio (qui commence par 'AIzaSy...'). Vous pouvez en créer une gratuitement en 5 secondes sur https://aistudio.google.com :", "");
+            const newKey = prompt("⚠️ Le quota de cette clé API Google est épuisé (Erreur 429 : Limit 0).\n\nVeuillez créer une nouvelle clé API gratuite sur https://aistudio.google.com/app/apikey en cliquant sur 'Create API key in NEW project' puis collez-la ici :", "");
             if (newKey && newKey.trim() !== "") {
               const cleanKey = newKey.trim();
               localStorage.setItem("gemini_api_key", cleanKey);
@@ -6773,12 +6772,27 @@
                   sessionPharmacy.gemini_api_key = cleanKey;
                 } catch(e) {}
               }
-              showToast("Clé enregistrée. Nouvelle tentative d'analyse...", "info");
+              showToast("Nouvelle clé enregistrée. Tentative...", "info");
+              return analyzeLabelWithGemini(base64Image);
+            }
+          } else if (res.status === 400 || res.status === 403 || res.status === 401) {
+            localStorage.removeItem("gemini_api_key");
+            const newKey = prompt("⚠️ Clé API non valide (Erreur Google API).\n\nSaisissez votre clé API Google AI Studio créée sur https://aistudio.google.com/app/apikey :", "");
+            if (newKey && newKey.trim() !== "") {
+              const cleanKey = newKey.trim();
+              localStorage.setItem("gemini_api_key", cleanKey);
+              if (sessionPharmacy) {
+                try {
+                  await supabaseClient.from("pharmacies").update({ gemini_api_key: cleanKey }).eq("id", sessionPharmacy.id);
+                  sessionPharmacy.gemini_api_key = cleanKey;
+                } catch(e) {}
+              }
+              showToast("Clé enregistrée. Tentative...", "info");
               return analyzeLabelWithGemini(base64Image);
             }
           }
 
-          showToast("Erreur API Gemini : " + res.statusText + " (Vérifiez votre clé)", "danger");
+          showToast("Erreur API Gemini (" + res.status + ") : Vérifiez votre clé sur AI Studio.", "danger");
           return;
         }
 
