@@ -1977,11 +1977,12 @@
                   <!-- Dynamique -->
                 </select>
               </div>
-              <!-- Wrapper Autocomplete DIN -->
-              <div class="form-group autocomplete-wrapper">
-                <label for="form-din">DIN ou code UPC</label>
+            <div class="form-row" style="margin-bottom: 12px;">
+              <!-- Case Code-barres (UPC / 2D) -->
+              <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                <label for="form-upc" style="font-weight: 600; color: var(--primary-color);">📷 Code-barres (UPC / 2D)</label>
                 <div class="barcode-input-wrapper">
-                  <input type="text" id="form-din" class="form-control" placeholder="Saisir DIN ou UPC (Scanner)" autocomplete="off">
+                  <input type="text" id="form-upc" class="form-control" placeholder="Scannez ici..." autocomplete="off">
                   <button type="button" class="btn-scan-trigger" id="btn-scan-trigger" title="Scanner avec la caméra du téléphone">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
@@ -1989,10 +1990,18 @@
                     </svg>
                   </button>
                 </div>
+              </div>
+
+              <!-- Case Code DIN -->
+              <div class="form-group autocomplete-wrapper" style="flex: 1; margin-bottom: 0;">
+                <label for="form-din" style="font-weight: 600; color: var(--primary-color);">💊 Code DIN (8 chiffres)</label>
+                <input type="text" id="form-din" class="form-control" placeholder="Saisir le DIN (ex: 02243859)" autocomplete="off">
                 <div class="autocomplete-suggestions" id="form-din-suggestions" style="display: none;"></div>
-                <div id="scan-helper-text" style="display: none; font-size: 0.75rem; color: var(--warning-color); font-weight: 600; margin-top: 6px;"></div>
               </div>
             </div>
+
+            <!-- Message d'aide et d'alerte sous les deux cases -->
+            <div id="scan-helper-text" style="display: none; font-size: 0.8rem; margin-bottom: 12px;"></div>
 
             <!-- Wrapper Autocomplete Produit -->
             <div class="form-group autocomplete-wrapper">
@@ -3673,113 +3682,104 @@
     // COMPOSANT: AUTO-COMPLÉTION EN TEMPS RÉEL (V2)
     // ----------------------------------------------------
     function setupAutocomplete() {
+      const upcInput = document.getElementById("form-upc");
       const dinInput = document.getElementById("form-din");
       const prodInput = document.getElementById("form-product");
 
-      // Clic en dehors pour fermer les suggestions
+      // Événements sur l'input Code-barres (UPC)
+      if (upcInput) {
+        upcInput.addEventListener("input", (e) => {
+          const val = e.target.value.trim();
+          const helperText = document.getElementById("scan-helper-text");
+          if (!val) {
+            if (!tempScannedUPC && helperText) helperText.style.display = "none";
+            return;
+          }
+
+          const found = checkForExactCodeMatch(val, "upc");
+          if (!found && val.length >= 8) {
+            tempScannedUPC = val;
+            if (helperText) {
+              helperText.innerHTML = `
+                <div style="background-color: #fef2f2; border: 1px solid #fee2e2; padding: 10px; border-radius: 6px; margin-top: 6px; line-height: 1.4;">
+                  <span style="color: var(--danger-color); font-weight: bold; display: block; margin-bottom: 4px;">⚠️ Code-barres (UPC) inconnu : ${val}</span>
+                  <span style="color: var(--text-color); font-size: 0.8rem; display: block; margin-bottom: 8px;">
+                    Saisissez le DIN (ou sélectionnez-le) dans la case à droite pour l'associer.
+                  </span>
+                  <button type="button" class="btn btn-secondary btn-xs" id="btn-cancel-association" style="padding: 4px 8px; font-size: 0.7rem; border-radius: 4px; border: 1px solid var(--border-color); background: white; cursor: pointer; color: var(--text-color);">
+                    Annuler l'association
+                  </button>
+                </div>
+              `;
+              helperText.style.display = "block";
+            }
+            if (dinInput) dinInput.focus();
+          }
+        });
+      }
+
+      // Événements sur l'input DIN (Clavier + Autocomplétion)
+      if (dinInput) {
+        dinInput.addEventListener("input", (e) => {
+          const val = e.target.value.trim();
+          if (!val) {
+            closeAllSuggestions();
+            return;
+          }
+
+          const found = checkForExactCodeMatch(val, "din");
+          if (found) {
+            closeAllSuggestions();
+          } else {
+            showSuggestions(val, "din");
+          }
+        });
+
+        dinInput.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            const val = e.target.value.trim();
+            const found = checkForExactCodeMatch(val, "din");
+            if (found) {
+              e.preventDefault();
+              closeAllSuggestions();
+              return;
+            }
+            const suggestionsBox = document.getElementById("form-din-suggestions");
+            if (suggestionsBox && suggestionsBox.style.display !== "none") {
+              const rows = suggestionsBox.querySelectorAll(".autocomplete-suggestion");
+              if (rows.length > 0) {
+                e.preventDefault();
+                rows[0].click();
+                return;
+              }
+            }
+          }
+          handleAutocompleteKeys(e, "din");
+        });
+      }
+
+      // Événements sur l'input Produit
+      if (prodInput) {
+        prodInput.addEventListener("input", (e) => {
+          showSuggestions(e.target.value, "product");
+        });
+        prodInput.addEventListener("keydown", (e) => {
+          handleAutocompleteKeys(e, "product");
+        });
+      }
+
       document.addEventListener("click", (e) => {
         if (!e.target.closest(".autocomplete-wrapper")) {
           closeAllSuggestions();
         }
       });
-
-      // Événements sur l'input DIN (gestion scan et clavier)
-      dinInput.addEventListener("input", (e) => {
-        const val = e.target.value.trim();
-        const helperText = document.getElementById("scan-helper-text");
-        if (!tempScannedUPC && helperText) helperText.style.display = "none";
-
-        const found = checkForExactCodeMatch(val);
-        if (found) {
-          closeAllSuggestions();
-        } else {
-          // Si le code ressemble à un UPC inconnu (composé uniquement de chiffres, >= 8 et N'EST PAS un début de DIN existant)
-          const normVal = normalizeDIN(val);
-          const isDinPrefix = localCatalog.some(item => item.din && normalizeDIN(item.din).startsWith(normVal));
-
-          if (!tempScannedUPC && /^\d{8,15}$/.test(val) && !isDinPrefix) {
-            tempScannedUPC = val;
-            if (helperText) {
-              helperText.innerHTML = `
-                <div style="background-color: #fef2f2; border: 1px solid #fee2e2; padding: 10px; border-radius: 6px; margin-top: 8px; line-height: 1.4;">
-                  <span style="color: var(--danger-color); font-weight: bold; display: block; margin-bottom: 4px;">⚠️ Code-barres inconnu : ${val}</span>
-                  <span style="color: var(--text-color); font-size: 0.8rem; display: block; margin-bottom: 8px;">
-                    <strong>Attention :</strong> En sélectionnant ou en saisissant un DIN maintenant, ce produit sera <strong>définitivement associé</strong> à ce code-barres.
-                  </span>
-                  <button type="button" class="btn btn-secondary btn-xs" id="btn-cancel-association" style="padding: 4px 8px; font-size: 0.7rem; border-radius: 4px; border: 1px solid var(--border-color); background: white; cursor: pointer; color: var(--text-color);">
-                    Annuler l'association
-                  </button>
-                </div>
-              `;
-              helperText.style.display = "block";
-            }
-          }
-          showSuggestions(val, "din");
-        }
-      });
-
-      dinInput.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
-          const val = e.target.value.trim();
-          
-          // 1. Vérifier match exact
-          const found = checkForExactCodeMatch(val);
-          if (found) {
-            e.preventDefault();
-            closeAllSuggestions();
-            return;
-          }
-          
-          // 2. Vérifier si suggestions ouvertes
-          const suggestionsBox = document.getElementById("form-din-suggestions");
-          if (suggestionsBox.style.display !== "none") {
-            const rows = suggestionsBox.querySelectorAll(".autocomplete-suggestion");
-            if (rows.length > 0) {
-              e.preventDefault();
-              rows[0].click(); // Prendre la première suggestion par défaut
-              return;
-            }
-          }
-          
-          // 3. Si code-barres inconnu
-          if (/^\d{8,15}$/.test(val)) {
-            e.preventDefault();
-            tempScannedUPC = val;
-            e.target.value = ""; // Vider pour qu'ils tapent le DIN
-            const helperText = document.getElementById("scan-helper-text");
-            if (helperText) {
-              helperText.innerHTML = `
-                <div style="background-color: #fef2f2; border: 1px solid #fee2e2; padding: 10px; border-radius: 6px; margin-top: 8px; line-height: 1.4;">
-                  <span style="color: var(--danger-color); font-weight: bold; display: block; margin-bottom: 4px;">⚠️ Code-barres scanné : ${val} (inconnu)</span>
-                  <span style="color: var(--text-color); font-size: 0.8rem; display: block; margin-bottom: 8px;">
-                    <strong>Attention :</strong> Saisissez le DIN correct ci-dessus pour l'associer. Ce code-barres y sera <strong>définitivement lié</strong> lors de l'enregistrement.
-                  </span>
-                  <button type="button" class="btn btn-secondary btn-xs" id="btn-cancel-association" style="padding: 4px 8px; font-size: 0.7rem; border-radius: 4px; border: 1px solid var(--border-color); background: white; cursor: pointer; color: var(--text-color);">
-                    Annuler l'association
-                  </button>
-                </div>
-              `;
-              helperText.style.display = "block";
-            }
-            showToast("Veuillez maintenant saisir le DIN pour l'association.", "info");
-            return;
-          }
-        }
-        handleAutocompleteKeys(e, "din");
-      });
-
-      // Événements sur l'input Produit
-      prodInput.addEventListener("input", (e) => {
-        showSuggestions(e.target.value, "product");
-      });
-      prodInput.addEventListener("keydown", (e) => {
-        handleAutocompleteKeys(e, "product");
-      });
     }
 
     function closeAllSuggestions() {
-      document.getElementById("form-din-suggestions").style.display = "none";
-      document.getElementById("form-product-suggestions").style.display = "none";
+      const dinBox = document.getElementById("form-din-suggestions");
+      const prodBox = document.getElementById("form-product-suggestions");
+      if (dinBox) dinBox.style.display = "none";
+      if (prodBox) prodBox.style.display = "none";
       autocompleteHighlightIndex = -1;
     }
 
@@ -5156,6 +5156,8 @@
       showToast(`"${name}" enregistré.`, "success");
 
       // Réinitialiser les champs (sauf section, tech initials et date d'exp par défaut)
+      const upcField = document.getElementById("form-upc");
+      if (upcField) upcField.value = "";
       document.getElementById("form-product").value = "";
       document.getElementById("form-din").value = "";
       document.getElementById("form-dosage").value = "";
