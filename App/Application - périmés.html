@@ -6662,13 +6662,47 @@
             const p = data1.product;
             const name = p.product_name || p.product_name_fr || p.product_name_en || p.brands || "";
             if (name && name.trim() !== "") {
-              retur    // ====================================================
+              return { product: name.trim(), dosage: p.quantity || "" };
+            }
+          }
+        }
+      } catch (err) {
+        console.log("[GTIN Lookup 1] Erreur OpenFoodFacts :", err);
+      }
+
+      // 2. Tenter via UPC Item DB
+      try {
+        const res2 = await fetch(`https://api.upcitemdb.com/prod/trial/lookup?upc=${cleanUPC}`);
+        if (res2.ok) {
+          const data2 = await res2.json();
+          if (data2.items && data2.items.length > 0) {
+            const item = data2.items[0];
+            const name = item.title || item.brand || "";
+            if (name && name.trim() !== "") {
+              return { product: name.trim(), dosage: "" };
+            }
+          }
+        }
+      } catch (err) {
+        console.log("[GTIN Lookup 2] Erreur UPCItemDB :", err);
+      }
+
+      return null;
+    }
+
+    // ====================================================
     // ANALYSE PHOTO ÉTIQUETTE GEMINI VISION (Étape 2b)
     // ====================================================
     const DEFAULT_GEMINI_API_KEY = atob("QVEuQWI8Uk42TEIyNjRuME02LVh6TUtFcVZaakVXQ0lZUmNBcHBSM1hxbGV2RTBhTTZuMGc=");
 
     async function getEffectiveGeminiKey() {
-      if (sessionPharmacy && sessionPharmacy.gemini_api_key && sessionPharmacy.gemini_api_key.trim() !== "") {
+      // Purger automatiquement les anciennes clés bloquées en cache
+      const cached = localStorage.getItem("gemini_api_key");
+      if (cached && (cached.includes("AQ.Ab8RN6JPI") || cached.length < 20)) {
+        localStorage.removeItem("gemini_api_key");
+      }
+
+      if (sessionPharmacy && sessionPharmacy.gemini_api_key && sessionPharmacy.gemini_api_key.trim() !== "" && !sessionPharmacy.gemini_api_key.includes("AQ.Ab8RN6JPI")) {
         return sessionPharmacy.gemini_api_key.trim();
       }
       const localKey = localStorage.getItem("gemini_api_key");
