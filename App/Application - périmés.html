@@ -3216,17 +3216,29 @@
         const password = document.getElementById("login-password").value;
         
         showLoading("Connexion en cours...");
-        document.getElementById("login-error-msg").style.display = "none";
+        const errDiv = document.getElementById("login-error-msg");
+        if (errDiv) errDiv.style.display = "none";
         
-        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-        
-        if (error) {
+        try {
+          const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+          
+          if (error) {
+            hideLoading();
+            showError("Erreur de connexion : " + error.message);
+            return;
+          }
+          
+          if (data && data.user) {
+            await handleLoginSuccess(data.user);
+          } else {
+            hideLoading();
+            showError("Erreur de connexion : Utilisateur introuvable.");
+          }
+        } catch (err) {
+          console.error("Erreur de connexion exceptionnelle:", err);
           hideLoading();
-          showError("Erreur de connexion : " + error.message);
-          return;
+          showError("Erreur de connexion : " + formatErrorMessage(err));
         }
-        
-        await handleLoginSuccess(data.user);
       });
       
       document.getElementById("register-form").addEventListener("submit", async (e) => {
