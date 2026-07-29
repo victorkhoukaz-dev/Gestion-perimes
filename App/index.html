@@ -3850,6 +3850,28 @@
           }
           handleAutocompleteKeys(e, "din");
         });
+
+        const handleDINComplete = (val) => {
+          const cleanDin = val.trim();
+          if (/^\d{6,8}$/.test(cleanDin)) {
+            const found = checkForExactCodeMatch(cleanDin, "din");
+            if (!found) {
+              lookupHealthCanadaDIN(cleanDin).then(hcMatch => {
+                if (hcMatch && hcMatch.product) {
+                  const prodInput = document.getElementById("form-product");
+                  if (prodInput && !prodInput.value) {
+                    prodInput.value = hcMatch.product;
+                    showToast(`🇨🇦 Produit identifié (${hcMatch.product}) via Santé Canada !`, "success");
+                  }
+                }
+              }).catch(err => console.log("[DPD Lookup] Erreur :", err));
+            }
+          }
+        };
+
+        dinInput.addEventListener("change", (e) => {
+          handleDINComplete(e.target.value.trim());
+        });
       }
 
       // Événements sur l'input Produit
@@ -6643,6 +6665,37 @@
 
         showToast("Code-barres inconnu. Saisissez le DIN associé pour l'enregistrer.", "warning");
       }
+    }
+
+    // ====================================================
+    // RECHERCHE BASE OFFICIELLE SANTÉ CANADA (DPD API)
+    // ====================================================
+    async function lookupHealthCanadaDIN(din) {
+      if (!din || din === "N/A") return null;
+      const cleanDin = din.trim().padStart(8, '0');
+      if (!/^\d{8}$/.test(cleanDin)) return null;
+
+      try {
+        const url = `https://health-products.canada.ca/api/drug/drugproduct/?din=${cleanDin}&lang=fr&type=json`;
+        const res = await fetch(url);
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            const item = data[0];
+            const brand = item.brand_name || "";
+            const company = item.company_name || "";
+            if (brand) {
+              return {
+                product: brand,
+                company: company
+              };
+            }
+          }
+        }
+      } catch (err) {
+        console.log("[Santé Canada DPD] Erreur recherche :", err);
+      }
+      return null;
     }
 
     // ====================================================
