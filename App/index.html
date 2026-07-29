@@ -6728,7 +6728,7 @@
 
       showToast("🤖 Analyse de l'étiquette par l'IA Gemini Flash...", "info");
 
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
       const rawBase64 = base64Image.replace(/^data:image\/(png|jpeg|jpg|webp);base64,/, "");
 
       const promptText = "Analyse cette étiquette de médicament canadien. Extrais les informations suivantes et réponds STRICTEMENT sous la forme d'un objet JSON valide sans aucun texte additionnel: {\"din\": \"Numéro DIN à 8 chiffres ou N/A\", \"product\": \"Nom commercial du produit\", \"dosage\": \"Concentration/Dosage ou N/A\", \"format\": \"Format ou N/A\", \"expiry\": \"Date d'expiration AAAA-MM si visible sinon N/A\"}";
@@ -6758,8 +6758,27 @@
 
         if (!res.ok) {
           const errText = await res.text();
-          console.error("Erreur Gemini API:", errText);
-          showToast("Erreur API Gemini : " + res.statusText, "danger");
+          console.error("Erreur Gemini API:", res.status, errText);
+          
+          // Si la clé est rejetée ou expirée, demander la vraie clé AIzaSy... à l'utilisateur
+          if (res.status === 400 || res.status === 403 || res.status === 401) {
+            localStorage.removeItem("gemini_api_key");
+            const newKey = prompt("⚠️ La clé API Gemini actuelle n'est pas reconnue par Google.\n\nVeuillez saisir votre clé API Google AI Studio (qui commence par 'AIzaSy...'). Vous pouvez en créer une gratuitement en 5 secondes sur https://aistudio.google.com :", "");
+            if (newKey && newKey.trim() !== "") {
+              const cleanKey = newKey.trim();
+              localStorage.setItem("gemini_api_key", cleanKey);
+              if (sessionPharmacy) {
+                try {
+                  await supabaseClient.from("pharmacies").update({ gemini_api_key: cleanKey }).eq("id", sessionPharmacy.id);
+                  sessionPharmacy.gemini_api_key = cleanKey;
+                } catch(e) {}
+              }
+              showToast("Clé enregistrée. Nouvelle tentative d'analyse...", "info");
+              return analyzeLabelWithGemini(base64Image);
+            }
+          }
+
+          showToast("Erreur API Gemini : " + res.statusText + " (Vérifiez votre clé)", "danger");
           return;
         }
 
