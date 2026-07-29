@@ -2025,6 +2025,9 @@
                 🤖 Photo de l'étiquette avec l'IA Gemini (1-Clic)
               </button>
               <input type="file" id="ai-photo-input" accept="image/*" capture="environment" style="display: none;">
+              <p style="font-size: 0.75rem; color: var(--text-muted); text-align: center; margin-top: 6px;">
+                🔒 <strong>Confidentialité garantie :</strong> La photo sert uniquement à l'analyse instantanée de l'étiquette et n'est jamais sauvegardée sur nos serveurs.
+              </p>
             </div>
 
             <!-- Wrapper Autocomplete Produit -->
@@ -3017,6 +3020,10 @@
         populateSectionDropdowns();
         initializeTourneeSelects();
         renderAllViews();
+        
+        // Activer l'onglet "Saisie / Tournée" par défaut dès la connexion (V3.9.7)
+        const tourneeTabBtn = document.querySelector('.tab-btn[data-tab="tab-tournee"]');
+        if (tourneeTabBtn) tourneeTabBtn.click();
         
       } catch (err) {
         console.error("Erreur loadData", err);
