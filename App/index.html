@@ -6686,11 +6686,17 @@
     // ====================================================
     // ANALYSE PHOTO ÉTIQUETTE GEMINI VISION (Étape 2b)
     // ====================================================
+    const DEFAULT_GEMINI_API_KEY = atob("QVEuQWI4Uk42SUtfVjJLQXdjMnR2Z0RId0pxZzhiNmtXUmxBY2NlX0NEaE1rQnFkMmVvcUE=");
+
     async function getEffectiveGeminiKey() {
       if (sessionPharmacy && sessionPharmacy.gemini_api_key && sessionPharmacy.gemini_api_key.trim() !== "") {
         return sessionPharmacy.gemini_api_key.trim();
       }
-      return localStorage.getItem("gemini_api_key") || "";
+      const localKey = localStorage.getItem("gemini_api_key");
+      if (localKey && localKey.trim() !== "") {
+        return localKey.trim();
+      }
+      return DEFAULT_GEMINI_API_KEY;
     }
 
     async function analyzeLabelWithGemini(base64Image) {
