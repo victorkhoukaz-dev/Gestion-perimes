@@ -6496,8 +6496,56 @@
       const found = checkForExactCodeMatch(targetCode);
       if (!found) {
         document.getElementById("form-din").focus();
-        showToast("Code-barres inconnu. Utilisez la photo IA ou saisissez le DIN pour l'associer.", "warning");
+        
+        // Tenter une recherche automatique sur l'API GTIN en ligne (Étape 2a)
+        if (/^\d{8,14}$/.test(targetCode)) {
+          lookupOnlineGTIN(targetCode).then(onlineMatch => {
+            if (onlineMatch && onlineMatch.product) {
+              const prodInput = document.getElementById("form-product");
+              if (prodInput && !prodInput.value) {
+                prodInput.value = onlineMatch.product;
+              }
+              const dosageInput = document.getElementById("form-dosage");
+              if (dosageInput && onlineMatch.dosage && !dosageInput.value) {
+                dosageInput.value = onlineMatch.dosage;
+              }
+              showToast("✨ Produit identifié via le registre GTIN en ligne !", "success");
+            }
+          }).catch(err => console.log("[GTIN Lookup] Erreur :", err));
+        }
+
+        showToast("Code-barres inconnu. Saisissez le DIN associé pour l'enregistrer.", "warning");
       }
+    }
+
+    // ====================================================
+    // RECHERCHE GTIN EN LIGNE (Étape 2a)
+    // ====================================================
+    async function lookupOnlineGTIN(gtin) {
+      if (!gtin) return null;
+      const cleanUPC = gtin.trim().replace(/^0+/, "");
+      if (cleanUPC.length < 8) return null;
+      
+      try {
+        const response = await fetch(`https://world.openproductsfacts.org/api/v0/product/${cleanUPC}.json`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.status === 1 && data.product) {
+            const p = data.product;
+            const name = p.product_name || p.product_name_fr || p.brands || "";
+            if (name && name.trim() !== "") {
+              return {
+                product: name.trim(),
+                dosage: p.quantity || "",
+                source: "OpenProductsFacts"
+              };
+            }
+          }
+        }
+      } catch (err) {
+        console.log("[GTIN Lookup] Erreur de recherche en ligne :", err);
+      }
+      return null;
     }
     
     function onScanFailure() {
