@@ -6614,14 +6614,7 @@
       const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
       const rawBase64 = base64Image.replace(/^data:image\/(png|jpeg|jpg|webp);base64,/, "");
 
-      const promptText = `Analyse cette étiquette de médicament canadien. Extrais les informations suivantes et réponds STRICTEMENT sous la forme d'un objet JSON valide sans aucun texte additionnel ni balises markdown:
-{
-  "din": "Numéro DIN à 8 chiffres (ex: 02243859) ou N/A",
-  "product": "Nom commercial du produit",
-  "dosage": "Concentration/Dosage (ex: 500mg) ou N/A",
-  "format": "Format (ex: 100 co, 500 ml) ou N/A",
-  "expiry": "Date d'expiration au format AAAA-MM si visible, sinon N/A"
-}`;
+      const promptText = "Analyse cette étiquette de médicament canadien. Extrais les informations suivantes et réponds STRICTEMENT sous la forme d'un objet JSON valide sans aucun texte additionnel: {\"din\": \"Numéro DIN à 8 chiffres ou N/A\", \"product\": \"Nom commercial du produit\", \"dosage\": \"Concentration/Dosage ou N/A\", \"format\": \"Format ou N/A\", \"expiry\": \"Date d'expiration AAAA-MM si visible sinon N/A\"}";
 
       const payload = {
         contents: [
