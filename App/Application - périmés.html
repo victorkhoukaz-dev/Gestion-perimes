@@ -3672,27 +3672,27 @@
       // ----------------------------------------------------
       // INTEGRATION LECTURE PHOTO IA GEMINI & RECHERCHE GTIN EN LIGNE (Étape 2)
       // ----------------------------------------------------
-      document.getElementById("btn-ai-photo-trigger").addEventListener("click", () => {
-        document.getElementById("ai-photo-input").click();
-      });
-
       document.addEventListener("click", (e) => {
-        if (e.target && (e.target.id === "btn-trigger-ai-photo-card" || e.target.closest("#btn-trigger-ai-photo-card"))) {
+        if (e.target && (e.target.id === "btn-ai-photo-trigger" || e.target.closest("#btn-ai-photo-trigger") || e.target.id === "btn-trigger-ai-photo-card" || e.target.closest("#btn-trigger-ai-photo-card"))) {
           e.preventDefault();
-          document.getElementById("ai-photo-input").click();
+          const aiInput = document.getElementById("ai-photo-input");
+          if (aiInput) aiInput.click();
         }
       });
 
-      document.getElementById("ai-photo-input").addEventListener("change", (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
+      const aiInput = document.getElementById("ai-photo-input");
+      if (aiInput) {
+        aiInput.addEventListener("change", (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
 
-        const reader = new FileReader();
-        reader.onload = function(evt) {
-          analyzeLabelWithGemini(evt.target.result);
-        };
-        reader.readAsDataURL(file);
-      });
+          const reader = new FileReader();
+          reader.onload = function(evt) {
+            analyzeLabelWithGemini(evt.target.result);
+          };
+          reader.readAsDataURL(file);
+        });
+      }
 
     // ----------------------------------------------------
     // COMPOSANT: AUTO-COMPLÉTION EN TEMPS RÉEL (V2)
