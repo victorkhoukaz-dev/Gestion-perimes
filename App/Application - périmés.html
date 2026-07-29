@@ -542,6 +542,20 @@
       gap: 16px;
     }
 
+    .form-row-dual {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    @media (max-width: 640px) {
+      .form-row-dual {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+    }
+
     .btn {
       background-color: var(--primary-color);
       color: #ffffff;
@@ -1970,19 +1984,21 @@
           <h2 class="card-title">Enregistrement d'un Produit</h2>
           
           <form id="product-form" autocomplete="off">
-            <div class="form-row">
-              <div class="form-group">
-                <label for="form-section">Section du Laboratoire</label>
-                <select id="form-section" class="form-control" required>
-                  <!-- Dynamique -->
-                </select>
-              </div>
-            <div class="form-row" style="margin-bottom: 12px;">
+            <!-- Section de la Pharmacie -->
+            <div class="form-group">
+              <label for="form-section">Section de la Pharmacie</label>
+              <select id="form-section" class="form-control" required>
+                <!-- Dynamique -->
+              </select>
+            </div>
+
+            <!-- Rangée à 2 cases : UPC / 2D (Gauche) et DIN (Droite) -->
+            <div class="form-row-dual">
               <!-- Case Code-barres (UPC / 2D) -->
-              <div class="form-group" style="flex: 1; margin-bottom: 0;">
+              <div class="form-group" style="margin-bottom: 0;">
                 <label for="form-upc" style="font-weight: 600; color: var(--primary-color);">📷 Code-barres (UPC / 2D)</label>
                 <div class="barcode-input-wrapper">
-                  <input type="text" id="form-upc" class="form-control" placeholder="Scannez ici..." autocomplete="off">
+                  <input type="text" id="form-upc" class="form-control" placeholder="Scannez l'UPC..." autocomplete="off">
                   <button type="button" class="btn-scan-trigger" id="btn-scan-trigger" title="Scanner avec la caméra du téléphone">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
@@ -1993,7 +2009,7 @@
               </div>
 
               <!-- Case Code DIN -->
-              <div class="form-group autocomplete-wrapper" style="flex: 1; margin-bottom: 0;">
+              <div class="form-group autocomplete-wrapper" style="margin-bottom: 0;">
                 <label for="form-din" style="font-weight: 600; color: var(--primary-color);">💊 Code DIN (8 chiffres)</label>
                 <input type="text" id="form-din" class="form-control" placeholder="Saisir le DIN (ex: 02243859)" autocomplete="off">
                 <div class="autocomplete-suggestions" id="form-din-suggestions" style="display: none;"></div>
@@ -2001,7 +2017,7 @@
             </div>
 
             <!-- Message d'aide et d'alerte sous les deux cases -->
-            <div id="scan-helper-text" style="display: none; font-size: 0.8rem; margin-bottom: 12px;"></div>
+            <div id="scan-helper-text" style="display: none; font-size: 0.8rem; margin-bottom: 16px;"></div>
 
             <!-- Wrapper Autocomplete Produit -->
             <div class="form-group autocomplete-wrapper">
