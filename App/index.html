@@ -3712,9 +3712,19 @@
             return;
           }
 
+          // Si le code correspond exactement à un produit du catalogue, l'afficher directement
           const found = checkForExactCodeMatch(val, "upc");
-          if (!found && val.length >= 8) {
+          if (found) {
+            closeAllSuggestions();
+          }
+        });
+
+        const handleUPCComplete = (val) => {
+          if (!val || val.length < 5) return;
+          const found = checkForExactCodeMatch(val, "upc");
+          if (!found) {
             tempScannedUPC = val;
+            const helperText = document.getElementById("scan-helper-text");
             if (helperText) {
               helperText.innerHTML = `
                 <div style="background-color: #fef2f2; border: 1px solid #fee2e2; padding: 10px; border-radius: 6px; margin-top: 6px; line-height: 1.4;">
@@ -3730,7 +3740,35 @@
               helperText.style.display = "block";
             }
             if (dinInput) dinInput.focus();
+
+            // Tenter la recherche GTIN en ligne
+            if (/^\d{8,14}$/.test(val)) {
+              lookupOnlineGTIN(val).then(onlineMatch => {
+                if (onlineMatch && onlineMatch.product) {
+                  const prodInput = document.getElementById("form-product");
+                  if (prodInput && !prodInput.value) {
+                    prodInput.value = onlineMatch.product;
+                  }
+                  const dosageInput = document.getElementById("form-dosage");
+                  if (dosageInput && onlineMatch.dosage && !dosageInput.value) {
+                    dosageInput.value = onlineMatch.dosage;
+                  }
+                  showToast(`✨ Produit identifié (${onlineMatch.product}) via le registre GTIN !`, "success");
+                }
+              }).catch(err => console.log("[GTIN Lookup] Erreur :", err));
+            }
           }
+        };
+
+        upcInput.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            handleUPCComplete(e.target.value.trim());
+          }
+        });
+
+        upcInput.addEventListener("change", (e) => {
+          handleUPCComplete(e.target.value.trim());
         });
       }
 
