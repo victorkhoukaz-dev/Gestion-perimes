@@ -3697,7 +3697,7 @@
           const normVal = normalizeDIN(val);
           const isDinPrefix = localCatalog.some(item => item.din && normalizeDIN(item.din).startsWith(normVal));
 
-          if (/^\d{8,15}$/.test(val) && !isDinPrefix) {
+          if (!tempScannedUPC && /^\d{8,15}$/.test(val) && !isDinPrefix) {
             tempScannedUPC = val;
             if (helperText) {
               helperText.innerHTML = `
@@ -3713,8 +3713,6 @@
               `;
               helperText.style.display = "block";
             }
-          } else if (val === "") {
-            tempScannedUPC = "";
           }
           showSuggestions(val, "din");
         }
@@ -5133,7 +5131,11 @@
 
       // Auto-apprentissage : Enregistrer l'association UPC <-> DIN
       if (tempScannedUPC && din !== "N/A" && name) {
-        await saveUPCAssociation(tempScannedUPC, din, name, dosage, format);
+        const normTemp = normalizeDIN(tempScannedUPC);
+        const normDin = normalizeDIN(din);
+        if (normTemp !== normDin) {
+          await saveUPCAssociation(tempScannedUPC, din, name, dosage, format);
+        }
       }
       tempScannedUPC = "";
       const helperText = document.getElementById("scan-helper-text");
