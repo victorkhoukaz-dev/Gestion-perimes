@@ -6546,40 +6546,25 @@
     // ====================================================
     // RECHERCHE GTIN EN LIGNE ET ANALYSE GEMINI VISION (Étape 2)
     // ====================================================
-    let GEMINI_API_KEY = localStorage.getItem("gemini_api_key") || "";
-
-    async function lookupOnlineGTIN(gtin) {
-      if (!gtin) return null;
-      const cleanUPC = gtin.trim().replace(/^0+/, "");
-      
-      try {
-        const response = await fetch(`https://world.openproductsfacts.org/api/v0/product/${cleanUPC}.json`);
-        if (response.ok) {
-          const data = await response.json();
-          if (data.status === 1 && data.product) {
-            const p = data.product;
-            const name = p.product_name || p.product_name_fr || p.brands || "";
-            if (name) {
-              return {
-                product: name,
-                dosage: p.quantity || "",
-                source: "OpenProductsFacts"
-              };
-            }
-          }
-        }
-      } catch (err) {
-        console.log("[GTIN Lookup] Erreur de recherche en ligne :", err);
+    async function getEffectiveGeminiKey() {
+      if (sessionPharmacy && sessionPharmacy.gemini_api_key && sessionPharmacy.gemini_api_key.trim() !== "") {
+        return sessionPharmacy.gemini_api_key.trim();
       }
-      return null;
+      return localStorage.getItem("gemini_api_key") || "";
     }
 
     async function analyzeLabelWithGemini(base64Image) {
-      if (!GEMINI_API_KEY) {
+      let apiKey = await getEffectiveGeminiKey();
+
+      if (!apiKey) {
         const key = prompt("Veuillez saisir votre clé API Google Gemini AI Studio (obtention gratuite sur aistudio.google.com) :", "");
         if (key && key.trim() !== "") {
-          GEMINI_API_KEY = key.trim();
-          localStorage.setItem("gemini_api_key", GEMINI_API_KEY);
+          apiKey = key.trim();
+          localStorage.setItem("gemini_api_key", apiKey);
+          if (sessionPharmacy) {
+            await supabaseClient.from("pharmacies").update({ gemini_api_key: apiKey }).eq("id", sessionPharmacy.id);
+            sessionPharmacy.gemini_api_key = apiKey;
+          }
         } else {
           showToast("Clé API Gemini requise pour l'analyse IA d'étiquette.", "warning");
           return;
@@ -6588,7 +6573,7 @@
 
       showToast("🤖 Analyse de l'étiquette par l'IA Gemini Flash...", "info");
 
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
       const rawBase64 = base64Image.replace(/^data:image\/(png|jpeg|jpg|webp);base64,/, "");
 
       const promptText = `Analyse cette étiquette de médicament canadien. Extrais les informations suivantes et réponds STRICTEMENT sous la forme d'un objet JSON valide sans aucun texte additionnel ni balises markdown:
