@@ -3901,7 +3901,7 @@
         product: cleanName,
         dosage: cleanDosage,
         format: cleanFormat,
-        upc: cleanUPC
+        upc: cleanUPC || null
       };
 
       try {
@@ -5129,12 +5129,19 @@
       state.products.push(newProd);
       saveProducts();
 
-      // Auto-apprentissage : Enregistrer l'association UPC <-> DIN
+      // Auto-apprentissage : Enregistrer l'association UPC <-> DIN (ou nouveau DIN manuel)
       if (tempScannedUPC && din !== "N/A" && name) {
         const normTemp = normalizeDIN(tempScannedUPC);
         const normDin = normalizeDIN(din);
         if (normTemp !== normDin) {
           await saveUPCAssociation(tempScannedUPC, din, name, dosage, format);
+        }
+      } else if (!tempScannedUPC && din !== "N/A" && name) {
+        // Sauvegarder automatiquement les nouveaux DINs créés manuellement pour le futur
+        const normDin = normalizeDIN(din);
+        const exists = localCatalog.some(item => item.din && normalizeDIN(item.din) === normDin);
+        if (!exists) {
+          await saveUPCAssociation("", din, name, dosage, format);
         }
       }
       tempScannedUPC = "";
