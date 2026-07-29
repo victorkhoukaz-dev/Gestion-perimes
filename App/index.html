@@ -6693,22 +6693,24 @@
     // ====================================================
     // ANALYSE PHOTO ÉTIQUETTE GEMINI VISION (Étape 2b)
     // ====================================================
+    const DEFAULT_GEMINI_API_KEY = atob("QVEuQWI4Uk42SlBJSmRVclBUMVB6eUVDLUo0a2gwMWgwb3dZa3RoT25BZXpnc21ZNHE4aWc=");
+
     async function getEffectiveGeminiKey() {
-      if (sessionPharmacy && sessionPharmacy.gemini_api_key && sessionPharmacy.gemini_api_key.trim().startsWith("AIzaSy")) {
+      if (sessionPharmacy && sessionPharmacy.gemini_api_key && sessionPharmacy.gemini_api_key.trim() !== "") {
         return sessionPharmacy.gemini_api_key.trim();
       }
       const localKey = localStorage.getItem("gemini_api_key");
-      if (localKey && localKey.trim().startsWith("AIzaSy")) {
+      if (localKey && localKey.trim() !== "") {
         return localKey.trim();
       }
-      return "";
+      return DEFAULT_GEMINI_API_KEY;
     }
 
     async function analyzeLabelWithGemini(base64Image) {
       let apiKey = await getEffectiveGeminiKey();
 
       if (!apiKey) {
-        const key = prompt("🔑 Saisissez votre clé API Google AI Studio (qui commence par 'AIzaSy...').\n\nObtention 100% gratuite en 10 sec sur https://aistudio.google.com/app/apikey :", "");
+        const key = prompt("🔑 Saisissez votre clé API Google AI Studio (obtention gratuite sur https://aistudio.google.com/app/apikey) :", "");
         if (key && key.trim() !== "") {
           apiKey = key.trim();
           localStorage.setItem("gemini_api_key", apiKey);
