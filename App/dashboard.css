@@ -1,0 +1,493 @@
+/*
+ * Dashboard layout. All color / shape / type comes from M3 tokens.
+ * Breakpoints follow M3 window classes: compact <600, medium 600-839,
+ * expanded >=840.
+ */
+
+.app {
+  min-height: 100dvh;
+  background: var(--md-sys-color-background);
+}
+
+/* ---------- App bar ---------- */
+.appbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--md-sys-color-surface-container);
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.appbar-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.brand-logo {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+  flex-shrink: 0;
+}
+
+.brand-logo md-icon {
+  font-size: 26px;
+  width: 26px;
+  height: 26px;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.brand-title {
+  margin: 0;
+  color: var(--md-sys-color-on-surface);
+  line-height: 1.15;
+}
+
+.brand-sub {
+  color: var(--md-sys-color-on-surface-variant);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.appbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.pharma-id {
+  display: none;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-right: 4px;
+}
+
+.pharma-id .name {
+  color: var(--md-sys-color-on-surface);
+}
+
+.pharma-id .mail {
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.month-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 9999px;
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  white-space: nowrap;
+}
+
+.logout-btn {
+  display: none;
+}
+
+/* ---------- Tabs ---------- */
+.tabs-wrap {
+  position: sticky;
+  top: 65px;
+  z-index: 15;
+  background: var(--md-sys-color-surface-container);
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.tabs-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.tabs-inner md-tabs {
+  --md-primary-tab-container-color: transparent;
+}
+
+/* ---------- Page ---------- */
+.dash {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px 16px 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.panel-title {
+  margin: 4px 0 0;
+  color: var(--md-sys-color-on-surface);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.panel-sub {
+  margin: 2px 0 0;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* ---------- KPI row ---------- */
+.kpi-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.kpi {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 20px;
+  border-radius: 20px;
+}
+
+.kpi-icon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  flex-shrink: 0;
+}
+
+.kpi-icon md-icon {
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+}
+
+.kpi-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+
+.kpi-value {
+  color: var(--md-sys-color-on-surface);
+  line-height: 1.05;
+}
+
+.kpi-label {
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* ---------- Cards ---------- */
+.card {
+  border-radius: 24px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.card-head-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Quick entry — the star of the fast-entry workflow */
+.entry-card {
+  background: var(--md-sys-color-surface-container-low);
+  border: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.entry-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.entry-grid md-outlined-text-field,
+.entry-grid md-outlined-select {
+  width: 100%;
+}
+
+.entry-field-cip {
+  grid-column: 1 / -1;
+}
+
+.entry-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.entry-hint {
+  color: var(--md-sys-color-on-surface-variant);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.entry-hint md-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+.kbd {
+  display: inline-grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 6px;
+  background: var(--md-sys-color-surface-container-highest);
+  color: var(--md-sys-color-on-surface-variant);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  font-size: 12px;
+}
+
+/* Session initials mini card */
+.session-card {
+  background: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+  border-radius: 20px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.session-avatar {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 9999px;
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+  flex-shrink: 0;
+}
+
+.session-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* Recently added list */
+.entry-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.entry-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  border-radius: 16px;
+  background: var(--md-sys-color-surface-container);
+}
+
+.entry-item .meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.entry-item .name {
+  color: var(--md-sys-color-on-surface);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.entry-item .cip {
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* Status badge */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 9999px;
+  white-space: nowrap;
+}
+
+.badge md-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+/* ---------- Progress ---------- */
+.progress-card {
+  background: var(--md-sys-color-surface-container-low);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 20px;
+  padding: 18px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.progress-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--md-sys-color-on-surface);
+}
+
+.progress-card md-linear-progress {
+  --md-linear-progress-track-height: 10px;
+  --md-linear-progress-active-indicator-height: 10px;
+  border-radius: 9999px;
+  width: 100%;
+}
+
+/* ---------- Table ---------- */
+.table-card {
+  background: var(--md-sys-color-surface-container-low);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 24px;
+  padding: 8px;
+  overflow: hidden;
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 640px;
+}
+
+.data-table th {
+  text-align: left;
+  color: var(--md-sys-color-on-surface-variant);
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  white-space: nowrap;
+}
+
+.data-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  color: var(--md-sys-color-on-surface);
+  vertical-align: middle;
+}
+
+.data-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.data-table tbody tr:hover td {
+  background: var(--md-sys-color-surface-container);
+}
+
+.cell-name {
+  display: flex;
+  flex-direction: column;
+}
+
+.cell-name .cip {
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Empty / placeholder panel */
+.placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+  padding: 56px 24px;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.placeholder .pico {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 9999px;
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+}
+
+.placeholder .pico md-icon {
+  font-size: 36px;
+  width: 36px;
+  height: 36px;
+}
+
+/* ---------- Responsive ---------- */
+@media (min-width: 600px) {
+  .pharma-id {
+    display: flex;
+  }
+  .logout-btn {
+    display: inline-flex;
+  }
+  .kpi-row {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .entry-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 840px) {
+  .entry-grid {
+    grid-template-columns: 2fr 2fr 1fr 1.4fr;
+  }
+  .entry-field-cip {
+    grid-column: auto;
+  }
+  .split {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+}

@@ -11,23 +11,60 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <style>
-    /* VARIABLES DE CONCEPTION - PALETTE TEAL FRAIS & LUMINEUX */
+    /* VARIABLES DE CONCEPTION - v0.dev MATERIAL DESIGN 3 (M3 PHARMACY SAGE) */
     :root {
-      --primary-color: #0f766e; /* Teal vivant & dynamique */
-      --primary-hover: #0d635d;
-      --primary-light: #ddf2ee;
-      --bg-color: #eaf4f2; /* Fond Teal marin très doux, frais et lumineux */
+      color-scheme: light;
+
+      /* M3 Scheme seeded with Option 1: Ice Slate Cyan */
+      --primary-color: #0f766e;
+      --primary-hover: #0d524c;
+      --primary-light: #e0f2fe;   /* Option 1: Ice Slate Cyan - Crisp Cool Tint */
+      --bg-color: #f8fafc;        /* Slate 50 - Crisp Canvas */
       --card-bg: #ffffff;
-      --text-color: #122b28; /* Ardoise sombre pour un contraste parfait */
-      --text-muted: #4e6e69;
-      --border-color: #d1e5e1;
-      --success-color: #10b981;
-      --danger-color: #ef4444;
-      --warning-color: #d97706; /* Ambre ocre pour les notifications */
-      --info-color: #0284c7;
-      --shadow-sm: 0 2px 10px rgba(15, 118, 110, 0.05);
-      --shadow-md: 0 8px 24px rgba(15, 118, 110, 0.08);
-      
+      --surface-muted: #f1f5f9;   /* Slate 100 - Neutral Surface */
+      --text-color: #0f172a;     /* Slate 900 */
+      --text-muted: #475569;     /* Slate 600 */
+      --border-color: #cbd5e1;    /* Slate 300 Border */
+      --border-strong: #94a3b8;   /* Slate 400 */
+
+      /* M3 Container Tokens (Option 1 Ice Slate Cyan) */
+      --md-sys-color-primary-container: #e0f2fe;
+      --md-sys-color-on-primary-container: #0369a1;
+      --md-sys-color-secondary-container: #e2e8f0;
+      --md-sys-color-on-secondary-container: #334155;
+      --md-sys-color-tertiary-container: #e0f2fe;
+      --md-sys-color-on-tertiary-container: #0369a1;
+      --md-sys-color-surface-container: #f1f5f9;
+      --md-sys-color-surface-container-low: #f8fafc;
+      --md-sys-color-surface-container-highest: #e2e8f0;
+
+      /* Status Colors */
+      --success-color: #386a20;
+      --success-bg: #b7f397;
+      --success-text: #052100;
+
+      --warning-color: #815600;
+      --warning-bg: #ffddaf;
+      --warning-text: #291800;
+
+      --danger-color: #ba1a1a;
+      --danger-bg: #ffdad6;
+      --danger-text: #410002;
+
+      --info-color: #386663;
+      --info-bg: #bcece7;
+      --info-text: #1f4e4b;
+
+      /* Radii */
+      --radius-sm: 8px;
+      --radius-md: 16px;
+      --radius-lg: 24px;
+      --radius-full: 9999px;
+
+      /* Elevation */
+      --shadow-sm: 0 1px 3px rgba(26, 28, 22, 0.06);
+      --shadow-md: 0 4px 12px rgba(26, 28, 22, 0.08);
+
       /* Couleurs de stickers par défaut (Pastels) */
       --color-jan: #ef5350;
       --color-feb: #ec407a;
@@ -44,12 +81,19 @@
     }
 
     [data-theme="dark"] {
-      --bg-color: #1a221e;
-      --card-bg: #232d28;
-      --text-color: #f1f5f3;
-      --text-muted: #95a39b;
-      --border-color: #323e37;
-      --primary-light: #2b3b33;
+      color-scheme: dark;
+      --bg-color: #12140e;
+      --card-bg: #1e201a;
+      --surface-muted: #1a1c16;
+      --text-color: #e2e3d8;
+      --text-muted: #c5c8ba;
+      --border-color: #44483d;
+      --border-strong: #8e9285;
+      --primary-color: #b1d18a;
+      --primary-hover: #cdeda3;
+      --primary-light: #354e16;
+      --md-sys-color-primary-container: #354e16;
+      --md-sys-color-on-primary-container: #cdeda3;
     }
 
     * {
@@ -64,27 +108,31 @@
       color: var(--text-color);
       line-height: 1.5;
       padding-bottom: 40px;
-      transition: background-color 0.3s, color 0.3s;
+      transition: background-color 0.2s, color 0.2s;
+      -webkit-font-smoothing: antialiased;
     }
 
     .container {
-      max-width: 1280px;
+      max-width: 1200px;
       margin: 0 auto;
-      padding: 20px;
+      padding: 16px 16px 64px;
     }
 
-    /* HEADER */
+    /* HEADER & APP BAR v0.dev */
     header {
-      background-color: transparent;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background-color: var(--surface-muted);
       border-radius: 0;
-      padding: 12px 4px 16px 4px;
-      margin-bottom: 16px;
+      padding: 10px 16px;
+      margin-bottom: 0;
       box-shadow: none;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border: none;
-      transition: background-color 0.3s, border-color 0.3s;
+      border-bottom: 1px solid var(--border-color);
+      transition: background-color 0.2s, border-color 0.2s;
     }
 
     .header-logo {
@@ -94,40 +142,55 @@
     }
 
     .header-logo svg {
-      width: 40px;
-      height: 40px;
-      color: var(--primary-color);
+      width: 26px;
+      height: 26px;
+      color: var(--md-sys-color-on-primary-container);
+    }
+
+    .header-logo-box {
+      display: grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: var(--primary-light);
+      color: var(--md-sys-color-on-primary-container);
+      flex-shrink: 0;
     }
 
     .header-title h1 {
-      font-size: 1.5rem;
+      font-size: 1.25rem;
       font-weight: 700;
       color: var(--text-color);
+      line-height: 1.15;
     }
 
     .header-title p {
-      font-size: 0.875rem;
+      font-size: 0.85rem;
       color: var(--text-muted);
     }
 
     .header-right {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 12px;
     }
 
     .month-badge {
-      background-color: var(--primary-light);
-      color: var(--primary-color);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
       padding: 8px 16px;
-      border-radius: 9999px;
+      border-radius: var(--radius-full);
+      background-color: var(--md-sys-color-secondary-container);
+      color: var(--md-sys-color-on-secondary-container);
       font-weight: 600;
-      font-size: 0.95rem;
-      border: 1px solid rgba(15, 118, 110, 0.2);
+      font-size: 0.875rem;
+      border: none;
     }
 
     .theme-toggle {
-      background: none;
+      background: transparent;
       border: 1px solid var(--border-color);
       border-radius: 50%;
       width: 40px;
@@ -141,18 +204,20 @@
     }
 
     .theme-toggle:hover {
-      background-color: var(--primary-light);
+      background-color: var(--surface-muted);
     }
 
-    /* NAVIGATION - Onglets soulignés (Style Template 1 / Image 0) */
+    /* NAVIGATION TABS v0.dev (Sticky Tabs) */
     .nav-tabs {
+      position: sticky;
+      top: 65px;
+      z-index: 15;
+      background-color: var(--surface-muted);
       display: flex;
-      gap: 8px;
+      gap: 4px;
       margin-bottom: 24px;
-      border-bottom: 2px solid var(--border-color);
-      padding: 0 0 2px 0;
-      background-color: transparent;
-      border-radius: 0;
+      border-bottom: 1px solid var(--border-color);
+      padding: 4px 16px 0;
       overflow-x: auto;
     }
 
@@ -160,7 +225,7 @@
       background: transparent;
       border: none;
       padding: 12px 18px;
-      font-size: 1rem;
+      font-size: 0.95rem;
       font-weight: 600;
       color: var(--text-muted);
       cursor: pointer;
@@ -168,14 +233,14 @@
       align-items: center;
       gap: 8px;
       border-bottom: 3px solid transparent;
-      border-radius: 6px 6px 0 0;
-      transition: all 0.2s ease;
+      border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+      transition: all 0.15s ease;
       white-space: nowrap;
     }
 
     .tab-btn:hover {
       color: var(--primary-color);
-      background-color: rgba(15, 118, 110, 0.08);
+      background-color: var(--primary-light);
     }
 
     .tab-btn.active {
@@ -198,7 +263,7 @@
 
     .tab-content.active {
       display: block;
-      animation: fadeIn 0.3s ease;
+      animation: fadeIn 0.25s ease;
     }
 
     @keyframes fadeIn {
@@ -206,60 +271,238 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* CARDS */
+    /* CARDS v0.dev Style (24px Rounded Corners) */
     .grid-dashboard {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 24px;
+      gap: 20px;
     }
 
-    @media (min-width: 1024px) {
+    @media (min-width: 840px) {
       .grid-dashboard {
-        grid-template-columns: 3fr 1fr;
+        grid-template-columns: 1.6fr 1fr;
       }
     }
 
     .card {
       background-color: var(--card-bg);
-      border-radius: 20px;
+      border-radius: var(--radius-lg);
       border: 1px solid var(--border-color);
       padding: 24px;
-      box-shadow: var(--shadow-md);
+      box-shadow: var(--shadow-sm);
       margin-bottom: 24px;
     }
 
     .card-title {
-      font-size: 1.2rem;
-      font-weight: 600;
-      margin-bottom: 16px;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-color);
+      margin-bottom: 18px;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
-    /* STATS PANEL */
+    /* STATS PANEL KPI v0.dev (.kpi, .kpi-icon) */
     .stats-container {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px;
-      margin-bottom: 24px;
+      gap: 12px;
+      margin-bottom: 20px;
     }
 
     .stat-card {
       background-color: var(--card-bg);
       border: 1px solid var(--border-color);
-      border-radius: 16px;
+      border-radius: 20px;
       padding: 18px 20px;
       display: flex;
       align-items: center;
       gap: 16px;
       box-shadow: var(--shadow-sm);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
 
     .stat-card:hover {
       transform: translateY(-2px);
       box-shadow: var(--shadow-md);
+    }
+
+    .stat-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+
+    .stat-icon.primary { background-color: var(--danger-bg); color: var(--danger-text); }
+    .stat-icon.success { background-color: var(--success-bg); color: var(--success-text); }
+    .stat-icon.warning { background-color: var(--warning-bg); color: var(--warning-text); }
+
+    .stat-info h3 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      line-height: 1.05;
+      color: var(--text-color);
+    }
+
+    .stat-info p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-top: 2px;
+    }
+
+    /* RETRAIT MENSUEL (CHECKLIST) v0.dev */
+    .month-selector-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: var(--surface-muted);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 12px 18px;
+      margin-bottom: 20px;
+    }
+
+    .month-navigation {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-circle {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-color);
+      transition: background-color 0.2s;
+    }
+
+    .btn-circle:hover {
+      background-color: var(--primary-light);
+      color: var(--primary-color);
+    }
+
+    .section-group {
+      margin-bottom: 20px;
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      overflow: hidden;
+      background-color: var(--card-bg);
+    }
+
+    .section-header {
+      background-color: var(--surface-muted);
+      padding: 14px 18px;
+      font-weight: 700;
+      color: var(--primary-color);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .section-badge {
+      background-color: var(--primary-light);
+      color: var(--md-sys-color-on-primary-container);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: var(--radius-full);
+    }
+
+    .product-row {
+      display: flex;
+      align-items: center;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border-color);
+      background-color: var(--card-bg);
+      transition: background-color 0.15s ease;
+    }
+
+    .product-row:last-child {
+      border-bottom: none;
+    }
+
+    .product-row:hover {
+      background-color: var(--surface-muted);
+    }
+
+    /* ACTION BUTTONS v0.dev */
+    .checklist-actions {
+      display: flex;
+      gap: 8px;
+      margin-left: 16px;
+    }
+
+    .btn-action {
+      border: none;
+      padding: 6px 14px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: opacity 0.2s;
+    }
+
+    .btn-action:hover {
+      opacity: 0.9;
+    }
+
+    .btn-action.retirer {
+      background-color: var(--success-bg);
+      color: var(--success-text);
+    }
+
+    .btn-action.vendu {
+      background-color: var(--warning-bg);
+      color: var(--warning-text);
+    }
+
+    .btn {
+      background-color: var(--primary-color);
+      color: #ffffff;
+      border: none;
+      padding: 10px 20px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.15s ease;
+    }
+
+    .btn:hover {
+      background-color: var(--primary-hover);
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn.btn-secondary {
+      background-color: var(--surface-muted);
+      color: var(--text-color);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-full);
+    }
+
+    .btn.btn-secondary:hover {
+      background-color: var(--primary-light);
+      color: var(--primary-color);
     }
 
     .stat-icon {
@@ -521,19 +764,26 @@
 
     .form-control {
       width: 100%;
-      padding: 10px 12px;
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
+      padding: 10px 14px;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
       background-color: var(--card-bg);
       color: var(--text-color);
       font-size: 0.95rem;
       outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
     }
 
     .form-control:focus {
       border-color: var(--primary-color);
-      box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.15);
+      box-shadow: var(--shadow-scanner);
+    }
+
+    /* Active scanner focus state for UPC & DIN inputs (Glow visible from distance) */
+    #form-upc:focus, #form-din:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.3);
+      background-color: #fafdfd;
     }
 
     .form-row {
@@ -560,31 +810,36 @@
       background-color: var(--primary-color);
       color: #ffffff;
       border: none;
-      padding: 12px 24px;
-      font-size: 1rem;
+      padding: 10px 20px;
+      font-size: 0.95rem;
       font-weight: 600;
-      border-radius: 8px;
+      border-radius: var(--radius-md);
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      transition: background-color 0.2s;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.15s ease;
     }
 
     .btn:hover {
       background-color: var(--primary-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 3px 8px rgba(13, 148, 136, 0.2);
     }
 
     .btn.btn-secondary {
-      background-color: var(--bg-color);
+      background-color: transparent;
       color: var(--text-color);
-      border: 1px solid var(--border-color);
+      border: 1px solid var(--border-strong);
+      box-shadow: none;
     }
 
     .btn.btn-secondary:hover {
-      background-color: var(--primary-light);
+      background-color: var(--surface-muted);
       color: var(--primary-color);
+      border-color: var(--primary-color);
     }
 
     .btn.btn-danger {
