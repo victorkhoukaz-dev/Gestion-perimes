@@ -1,0 +1,136 @@
+/* Material Web typescale utility classes (.md-typescale-*) */
+@import '@material/web/typography/md-typescale-styles.css';
+
+/*
+ * Material 3 baseline color schemes.
+ * Token values are the M3 baseline scheme (source color #6750A4) from
+ * Material Theme Builder / m3.material.io. Light scheme on :root,
+ * dark scheme on .dark.
+ */
+:root {
+  color-scheme: light;
+
+  /* M3 scheme seeded from a pharmacy green (source ~#4C662B) */
+  --md-sys-color-primary: #4c662b;
+  --md-sys-color-on-primary: #ffffff;
+  --md-sys-color-primary-container: #cdeda3;
+  --md-sys-color-on-primary-container: #354e16;
+  --md-sys-color-secondary: #586249;
+  --md-sys-color-on-secondary: #ffffff;
+  --md-sys-color-secondary-container: #dce7c8;
+  --md-sys-color-on-secondary-container: #404a33;
+  --md-sys-color-tertiary: #386663;
+  --md-sys-color-on-tertiary: #ffffff;
+  --md-sys-color-tertiary-container: #bcece7;
+  --md-sys-color-on-tertiary-container: #1f4e4b;
+  --md-sys-color-error: #ba1a1a;
+  --md-sys-color-on-error: #ffffff;
+  --md-sys-color-error-container: #ffdad6;
+  --md-sys-color-on-error-container: #410002;
+  --md-sys-color-background: #f9faef;
+  --md-sys-color-on-background: #1a1c16;
+  --md-sys-color-surface: #f9faef;
+  --md-sys-color-on-surface: #1a1c16;
+  --md-sys-color-surface-variant: #e1e4d5;
+  --md-sys-color-on-surface-variant: #44483d;
+  --md-sys-color-outline: #75796c;
+  --md-sys-color-outline-variant: #c5c8ba;
+  --md-sys-color-shadow: #000000;
+  --md-sys-color-scrim: #000000;
+  --md-sys-color-inverse-surface: #2f312a;
+  --md-sys-color-inverse-on-surface: #f0f2e5;
+  --md-sys-color-inverse-primary: #b1d18a;
+  --md-sys-color-surface-dim: #d9dbcd;
+  --md-sys-color-surface-bright: #f9faef;
+  --md-sys-color-surface-container-lowest: #ffffff;
+  --md-sys-color-surface-container-low: #f3f4e9;
+  --md-sys-color-surface-container: #edeee3;
+  --md-sys-color-surface-container-high: #e7e9de;
+  --md-sys-color-surface-container-highest: #e2e3d8;
+
+  /* Custom status tokens for expiry urgency (M3 does not ship a warning role) */
+  --md-sys-color-warning: #815600;
+  --md-sys-color-on-warning: #ffffff;
+  --md-sys-color-warning-container: #ffddaf;
+  --md-sys-color-on-warning-container: #291800;
+  --md-sys-color-success: #386a20;
+  --md-sys-color-on-success: #ffffff;
+  --md-sys-color-success-container: #b7f397;
+  --md-sys-color-on-success-container: #052100;
+
+  /* Typefaces: applied to every system and component token */
+  --md-ref-typeface-brand: var(--font-roboto), Roboto, system-ui, sans-serif;
+  --md-ref-typeface-plain: var(--font-roboto), Roboto, system-ui, sans-serif;
+}
+
+.dark {
+  color-scheme: dark;
+
+  --md-sys-color-primary: #b1d18a;
+  --md-sys-color-on-primary: #1f3701;
+  --md-sys-color-primary-container: #354e16;
+  --md-sys-color-on-primary-container: #cdeda3;
+  --md-sys-color-secondary: #bfcbad;
+  --md-sys-color-on-secondary: #2a331e;
+  --md-sys-color-secondary-container: #404a33;
+  --md-sys-color-on-secondary-container: #dce7c8;
+  --md-sys-color-tertiary: #a0d0cb;
+  --md-sys-color-on-tertiary: #003734;
+  --md-sys-color-tertiary-container: #1f4e4b;
+  --md-sys-color-on-tertiary-container: #bcece7;
+  --md-sys-color-error: #ffb4ab;
+  --md-sys-color-on-error: #690005;
+  --md-sys-color-error-container: #93000a;
+  --md-sys-color-on-error-container: #ffdad6;
+  --md-sys-color-background: #12140e;
+  --md-sys-color-on-background: #e2e3d8;
+  --md-sys-color-surface: #12140e;
+  --md-sys-color-on-surface: #e2e3d8;
+  --md-sys-color-surface-variant: #44483d;
+  --md-sys-color-on-surface-variant: #c5c8ba;
+  --md-sys-color-outline: #8e9285;
+  --md-sys-color-outline-variant: #44483d;
+  --md-sys-color-shadow: #000000;
+  --md-sys-color-scrim: #000000;
+  --md-sys-color-inverse-surface: #e2e3d8;
+  --md-sys-color-inverse-on-surface: #2f312a;
+  --md-sys-color-inverse-primary: #4c662b;
+  --md-sys-color-surface-dim: #12140e;
+  --md-sys-color-surface-bright: #383b32;
+  --md-sys-color-surface-container-lowest: #0c0f09;
+  --md-sys-color-surface-container-low: #1a1c16;
+  --md-sys-color-surface-container: #1e201a;
+  --md-sys-color-surface-container-high: #282b24;
+  --md-sys-color-surface-container-highest: #33362e;
+
+  --md-sys-color-warning: #f5bd48;
+  --md-sys-color-on-warning: #442b00;
+  --md-sys-color-warning-container: #614000;
+  --md-sys-color-on-warning-container: #ffddaf;
+  --md-sys-color-success: #9cd67f;
+  --md-sys-color-on-success: #0a3900;
+  --md-sys-color-success-container: #205107;
+  --md-sys-color-on-success-container: #b7f397;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--md-sys-color-background);
+  color: var(--md-sys-color-on-background);
+  font-family: var(--md-ref-typeface-plain);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Material Symbols icon font for <md-icon> */
+md-icon {
+  font-family: 'Material Symbols Outlined';
+}

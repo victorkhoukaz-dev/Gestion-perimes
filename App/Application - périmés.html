@@ -11,47 +11,59 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <style>
-    /* VARIABLES DE CONCEPTION - CRISP CLINICAL & DEFINED BORDERS */
+    /* VARIABLES DE CONCEPTION - v0.dev MATERIAL DESIGN 3 (M3 PHARMACY SAGE) */
     :root {
-      /* Surface & Backgrounds */
-      --bg-color: #f4f6f8;        /* Slate Neutral Crisp Off-White */
-      --card-bg: #ffffff;        /* Pure White */
-      --surface-muted: #eef2f6;   /* Slate 100 - Surface contrastée */
-      
-      /* Primary Action (Deep Teal Original & Autoritaire) */
-      --primary-color: #0f766e;    /* Teal Profond d'origine */
-      --primary-hover: #0d524c;    /* Teal Foncé */
-      --primary-light: #e6f4f1;    /* Slate Teal pastel très propre */
-      --primary-glow: rgba(15, 118, 110, 0.28);
-      
-      /* Typography & Colors */
-      --text-color: #0f172a;     /* Slate 900 - Haut contraste */
-      --text-muted: #475569;     /* Slate 600 - Texte très lisible */
-      --text-subdued: #94a3b8;   /* Slate 400 */
-      
-      /* Borders & Dividers (Bien définies & Nettes) */
-      --border-color: #cbd5e1;    /* Slate 300 - Bordure nette et définie */
-      --border-strong: #94a3b8;   /* Slate 400 - Input border marquée */
-      
-      /* Status Feedback */
-      --success-color: #059669;   /* Emerald 600 */
-      --success-bg: #ecfdf5;
-      --danger-color: #dc2626;    /* Rose 600 */
-      --danger-bg: #fef2f2;
-      --warning-color: #d97706;   /* Amber 600 */
-      --warning-bg: #fffbeb;
-      --info-color: #0284c7;      /* Sky 600 */
-      --info-bg: #f0f9ff;
+      color-scheme: light;
 
-      /* Elevation & Radii */
-      --shadow-sm: 0 1px 3px 0 rgba(15, 23, 42, 0.08);
-      --shadow-md: 0 4px 12px -2px rgba(15, 23, 42, 0.08), 0 2px 4px -1px rgba(15, 23, 42, 0.04);
-      --shadow-scanner: 0 0 0 4px rgba(15, 118, 110, 0.25);
+      /* M3 Scheme seeded from Pharmacy Green (~#4C662B) */
+      --primary-color: #4c662b;
+      --primary-hover: #3b5220;
+      --primary-light: #cdeda3;   /* M3 Primary Container - Soft Pistachio */
+      --bg-color: #f9faef;        /* M3 Background - Warm Pale Olive / Off-White */
+      --card-bg: #ffffff;
+      --surface-muted: #f3f4e9;   /* M3 Surface Container Low */
+      --text-color: #1a1c16;     /* M3 On Background - Dark Olive Slate */
+      --text-muted: #44483d;     /* M3 On Surface Variant */
+      --border-color: #c5c8ba;    /* M3 Outline Variant - Soft Sage Border */
+      --border-strong: #75796c;   /* M3 Outline */
 
-      --radius-sm: 6px;
-      --radius-md: 8px;
-      --radius-lg: 12px;
+      /* M3 Container Tokens */
+      --md-sys-color-primary-container: #cdeda3;
+      --md-sys-color-on-primary-container: #354e16;
+      --md-sys-color-secondary-container: #dce7c8;
+      --md-sys-color-on-secondary-container: #404a33;
+      --md-sys-color-tertiary-container: #bcece7;
+      --md-sys-color-on-tertiary-container: #1f4e4b;
+      --md-sys-color-surface-container: #edeee3;
+      --md-sys-color-surface-container-low: #f3f4e9;
+      --md-sys-color-surface-container-highest: #e2e3d8;
+
+      /* Status Colors */
+      --success-color: #386a20;
+      --success-bg: #b7f397;
+      --success-text: #052100;
+
+      --warning-color: #815600;
+      --warning-bg: #ffddaf;
+      --warning-text: #291800;
+
+      --danger-color: #ba1a1a;
+      --danger-bg: #ffdad6;
+      --danger-text: #410002;
+
+      --info-color: #386663;
+      --info-bg: #bcece7;
+      --info-text: #1f4e4b;
+
+      /* Radii */
+      --radius-sm: 8px;
+      --radius-md: 16px;
+      --radius-lg: 24px;
       --radius-full: 9999px;
+
+      /* Elevation */
+      --shadow-sm: 0 1px 3px rgba(26, 28, 22, 0.06);
+      --shadow-md: 0 4px 12px rgba(26, 28, 22, 0.08);
 
       /* Couleurs de stickers par défaut (Pastels) */
       --color-jan: #ef5350;
@@ -69,21 +81,26 @@
     }
 
     [data-theme="dark"] {
-      --bg-color: #0f172a;
-      --card-bg: #1e293b;
-      --surface-muted: #334155;
-      --text-color: #f8fafc;
-      --text-muted: #94a3b8;
-      --border-color: #334155;
-      --border-strong: #475569;
-      --primary-light: #134e4a;
+      color-scheme: dark;
+      --bg-color: #12140e;
+      --card-bg: #1e201a;
+      --surface-muted: #1a1c16;
+      --text-color: #e2e3d8;
+      --text-muted: #c5c8ba;
+      --border-color: #44483d;
+      --border-strong: #8e9285;
+      --primary-color: #b1d18a;
+      --primary-hover: #cdeda3;
+      --primary-light: #354e16;
+      --md-sys-color-primary-container: #354e16;
+      --md-sys-color-on-primary-container: #cdeda3;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
     body {
@@ -92,25 +109,29 @@
       line-height: 1.5;
       padding-bottom: 40px;
       transition: background-color 0.2s, color 0.2s;
+      -webkit-font-smoothing: antialiased;
     }
 
     .container {
-      max-width: 1280px;
+      max-width: 1200px;
       margin: 0 auto;
-      padding: 20px;
+      padding: 16px 16px 64px;
     }
 
-    /* HEADER */
+    /* HEADER & APP BAR v0.dev */
     header {
-      background-color: transparent;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background-color: var(--surface-muted);
       border-radius: 0;
-      padding: 12px 4px 16px 4px;
-      margin-bottom: 16px;
+      padding: 10px 16px;
+      margin-bottom: 0;
       box-shadow: none;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border: none;
+      border-bottom: 1px solid var(--border-color);
       transition: background-color 0.2s, border-color 0.2s;
     }
 
@@ -121,41 +142,55 @@
     }
 
     .header-logo svg {
-      width: 40px;
-      height: 40px;
-      color: var(--primary-color);
+      width: 26px;
+      height: 26px;
+      color: var(--md-sys-color-on-primary-container);
+    }
+
+    .header-logo-box {
+      display: grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: var(--primary-light);
+      color: var(--md-sys-color-on-primary-container);
+      flex-shrink: 0;
     }
 
     .header-title h1 {
-      font-size: 1.5rem;
+      font-size: 1.25rem;
       font-weight: 700;
       color: var(--text-color);
-      letter-spacing: -0.01em;
+      line-height: 1.15;
     }
 
     .header-title p {
-      font-size: 0.875rem;
+      font-size: 0.85rem;
       color: var(--text-muted);
     }
 
     .header-right {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 12px;
     }
 
     .month-badge {
-      background-color: var(--primary-light);
-      color: var(--primary-color);
-      padding: 6px 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
       border-radius: var(--radius-full);
+      background-color: var(--md-sys-color-secondary-container);
+      color: var(--md-sys-color-on-secondary-container);
       font-weight: 600;
       font-size: 0.875rem;
-      border: 1px solid rgba(15, 118, 110, 0.25);
+      border: none;
     }
 
     .theme-toggle {
-      background: var(--card-bg);
+      background: transparent;
       border: 1px solid var(--border-color);
       border-radius: 50%;
       width: 40px;
@@ -165,24 +200,24 @@
       justify-content: center;
       cursor: pointer;
       color: var(--text-color);
-      box-shadow: var(--shadow-sm);
-      transition: background-color 0.2s, border-color 0.2s;
+      transition: background-color 0.2s;
     }
 
     .theme-toggle:hover {
       background-color: var(--surface-muted);
-      border-color: var(--border-strong);
     }
 
-    /* NAVIGATION - Onglets Nette & Définie */
+    /* NAVIGATION TABS v0.dev (Sticky Tabs) */
     .nav-tabs {
+      position: sticky;
+      top: 65px;
+      z-index: 15;
+      background-color: var(--surface-muted);
       display: flex;
-      gap: 8px;
+      gap: 4px;
       margin-bottom: 24px;
-      border-bottom: 2px solid var(--border-color);
-      padding: 0 0 2px 0;
-      background-color: transparent;
-      border-radius: 0;
+      border-bottom: 1px solid var(--border-color);
+      padding: 4px 16px 0;
       overflow-x: auto;
     }
 
@@ -236,16 +271,16 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* CARDS BIEN DÉFINIES */
+    /* CARDS v0.dev Style (24px Rounded Corners) */
     .grid-dashboard {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 24px;
+      gap: 20px;
     }
 
-    @media (min-width: 1024px) {
+    @media (min-width: 840px) {
       .grid-dashboard {
-        grid-template-columns: 3fr 1fr;
+        grid-template-columns: 1.6fr 1fr;
       }
     }
 
@@ -254,7 +289,7 @@
       border-radius: var(--radius-lg);
       border: 1px solid var(--border-color);
       padding: 24px;
-      box-shadow: var(--shadow-md);
+      box-shadow: var(--shadow-sm);
       margin-bottom: 24px;
     }
 
@@ -263,38 +298,211 @@
       font-weight: 700;
       color: var(--text-color);
       margin-bottom: 18px;
-      padding-bottom: 10px;
-      border-bottom: 2px solid var(--surface-muted);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      letter-spacing: -0.01em;
     }
 
-    /* STATS PANEL AVEC BORDURES NETTES */
+    /* STATS PANEL KPI v0.dev (.kpi, .kpi-icon) */
     .stats-container {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px;
-      margin-bottom: 24px;
+      gap: 12px;
+      margin-bottom: 20px;
     }
 
     .stat-card {
       background-color: var(--card-bg);
-      border: 1.5px solid var(--border-color);
-      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
       padding: 18px 20px;
       display: flex;
       align-items: center;
       gap: 16px;
       box-shadow: var(--shadow-sm);
-      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
 
     .stat-card:hover {
-      transform: translateY(-1px);
+      transform: translateY(-2px);
       box-shadow: var(--shadow-md);
-      border-color: var(--primary-color);
+    }
+
+    .stat-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+
+    .stat-icon.primary { background-color: var(--danger-bg); color: var(--danger-text); }
+    .stat-icon.success { background-color: var(--success-bg); color: var(--success-text); }
+    .stat-icon.warning { background-color: var(--warning-bg); color: var(--warning-text); }
+
+    .stat-info h3 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      line-height: 1.05;
+      color: var(--text-color);
+    }
+
+    .stat-info p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-top: 2px;
+    }
+
+    /* RETRAIT MENSUEL (CHECKLIST) v0.dev */
+    .month-selector-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: var(--surface-muted);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 12px 18px;
+      margin-bottom: 20px;
+    }
+
+    .month-navigation {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-circle {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-color);
+      transition: background-color 0.2s;
+    }
+
+    .btn-circle:hover {
+      background-color: var(--primary-light);
+      color: var(--primary-color);
+    }
+
+    .section-group {
+      margin-bottom: 20px;
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      overflow: hidden;
+      background-color: var(--card-bg);
+    }
+
+    .section-header {
+      background-color: var(--surface-muted);
+      padding: 14px 18px;
+      font-weight: 700;
+      color: var(--primary-color);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .section-badge {
+      background-color: var(--primary-light);
+      color: var(--md-sys-color-on-primary-container);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: var(--radius-full);
+    }
+
+    .product-row {
+      display: flex;
+      align-items: center;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border-color);
+      background-color: var(--card-bg);
+      transition: background-color 0.15s ease;
+    }
+
+    .product-row:last-child {
+      border-bottom: none;
+    }
+
+    .product-row:hover {
+      background-color: var(--surface-muted);
+    }
+
+    /* ACTION BUTTONS v0.dev */
+    .checklist-actions {
+      display: flex;
+      gap: 8px;
+      margin-left: 16px;
+    }
+
+    .btn-action {
+      border: none;
+      padding: 6px 14px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: opacity 0.2s;
+    }
+
+    .btn-action:hover {
+      opacity: 0.9;
+    }
+
+    .btn-action.retirer {
+      background-color: var(--success-bg);
+      color: var(--success-text);
+    }
+
+    .btn-action.vendu {
+      background-color: var(--warning-bg);
+      color: var(--warning-text);
+    }
+
+    .btn {
+      background-color: var(--primary-color);
+      color: #ffffff;
+      border: none;
+      padding: 10px 20px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.15s ease;
+    }
+
+    .btn:hover {
+      background-color: var(--primary-hover);
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn.btn-secondary {
+      background-color: var(--surface-muted);
+      color: var(--text-color);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-full);
+    }
+
+    .btn.btn-secondary:hover {
+      background-color: var(--primary-light);
+      color: var(--primary-color);
     }
 
     .stat-icon {
