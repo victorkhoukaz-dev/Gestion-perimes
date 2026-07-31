@@ -647,38 +647,56 @@
       background-color: var(--surface-muted);
     }
 
-    /* ACTION BUTTONS v0.dev */
+    /* ACTION BUTTONS (ELEGANT ALIGNED SOFT TINTS) */
     .checklist-actions {
       display: flex;
       gap: 8px;
-      margin-left: 16px;
+      margin-left: auto;
+      flex-shrink: 0;
+      min-width: 200px;
+      justify-content: flex-end;
     }
 
     .btn-action {
-      border: none;
-      padding: 6px 14px;
-      font-size: 0.85rem;
+      border: 1px solid transparent;
+      padding: 5px 12px;
+      font-size: 0.8rem;
       font-weight: 600;
-      border-radius: var(--radius-full);
+      border-radius: 8px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
-      transition: opacity 0.2s;
-    }
-
-    .btn-action:hover {
-      opacity: 0.9;
+      justify-content: center;
+      gap: 5px;
+      min-width: 95px;
+      height: 32px;
+      flex-shrink: 0;
+      white-space: nowrap;
+      transition: all 0.15s ease;
     }
 
     .btn-action.retirer {
-      background-color: var(--success-bg);
-      color: var(--success-text);
+      background-color: #ecfdf5;
+      color: #047857;
+      border-color: #a7f3d0;
+    }
+    .btn-action.retirer:hover {
+      background-color: #10b981;
+      color: #ffffff;
+      border-color: #10b981;
+      box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25);
     }
 
     .btn-action.vendu {
-      background-color: var(--warning-bg);
-      color: var(--warning-text);
+      background-color: #fffbe6;
+      color: #b45309;
+      border-color: #fde68a;
+    }
+    .btn-action.vendu:hover {
+      background-color: #f59e0b;
+      color: #ffffff;
+      border-color: #f59e0b;
+      box-shadow: 0 2px 6px rgba(245, 158, 11, 0.25);
     }
 
     .btn {
@@ -886,38 +904,7 @@
       font-weight: 600;
     }
 
-    /* ACTION BUTTONS (V2) */
-    .checklist-actions {
-      display: flex;
-      gap: 8px;
-      margin-left: 16px;
-    }
 
-    .btn-action {
-      border: none;
-      padding: 6px 12px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      border-radius: 6px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      color: white;
-      transition: opacity 0.2s;
-    }
-
-    .btn-action:hover {
-      opacity: 0.9;
-    }
-
-    .btn-action.retirer {
-      background-color: var(--success-color);
-    }
-
-    .btn-action.vendu {
-      background-color: var(--warning-color);
-    }
 
     .resolution-badge {
       display: flex;
@@ -5489,10 +5476,10 @@
             ${!isResolved ? `
               <div class="checklist-actions">
                 <button class="btn-action retirer" data-id="${prod.id}" title="Marquer comme Retiré des tablettes">
-                  ✅ Retirer
+                  📥 Retirer
                 </button>
                 <button class="btn-action vendu" data-id="${prod.id}" title="Marquer comme Vendu / Épuisé">
-                  📦 Vendu
+                  🏷️ Vendu
                 </button>
               </div>
             ` : `
