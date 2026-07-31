@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PharmaExpire - One Pager Marketing</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+    /* VARIABLES & THEME */
+    :root {
+      --primary: #0f766e; /* Deep Teal */
+      --primary-light: #f0fdfa;
+      --primary-hover: #0d9488;
+      --secondary: #0369a1; /* Ocean Blue */
+      --text-dark: #0f172a; /* Slate 900 */
+      --text-muted: #475569; /* Slate 600 */
+      --bg-page: #f8fafc; /* Slate 50 */
+      --card-bg: #ffffff;
+      --border: #e2e8f0;
+      --success: #10b981; /* Emerald 500 */
+      --success-light: #ecfdf5;
+      --accent: #f59e0b; /* Amber 500 */
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      
+      /* Colors matching standard sticker configuration */
+      --sticker-jan: #ef5350;
+      --sticker-feb: #ec407a;
+      --sticker-mar: #ab47bc;
+      --sticker-apr: #5c6bc0;
+      --sticker-may: #29b6f6;
+      --sticker-jun: #66bb6a;
+      --sticker-jul: #ffca28;
+      --sticker-aug: #ffa726;
+      --sticker-sep: #8d6e63;
+      --sticker-oct: #d4e157;
+      --sticker-nov: #26c6da;
+      --sticker-dec: #bdc3c7;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-page);
+      color: var(--text-dark);
+      line-height: 1.4;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* PREVIEW CONTROLS (SCREEN ONLY) */
+    .preview-header {
+      width: 210mm;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 8px;
+    }
+
+    .preview-title {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .preview-title svg {
+      width: 16px;
+      height: 16px;
+      color: var(--primary);
+    }
+
+    .print-btn {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: var(--shadow-sm);
+      transition: background-color 0.2s, transform 0.1s;
+    }
+
+    .print-btn:hover {
+      background-color: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    .print-btn:active {
+      transform: translateY(0);
+    }
+
+    /* A4 PAGE CONTAINER */
+    .a4-page {
+      width: 210mm;
+      height: 297mm;
+      background: var(--card-bg);
+      box-shadow: var(--shadow-lg);
+      padding: 18mm 16mm 14mm 16mm;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+      border-radius: 4px;
+    }
+
+    /* HEADER SECTION */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid var(--primary-light);
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-icon {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(15, 118, 110, 0.2);
+    }
+
+    .logo-icon svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .brand-name {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--primary);
+      letter-spacing: -0.5px;
+      line-height: 1;
+    }
+
+    .brand-subtitle {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .tagline-badge {
+      background-color: var(--primary-light);
+      color: var(--primary);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      border: 1px solid rgba(15, 118, 110, 0.1);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* KEY STATS ROW */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .stat-card {
+      background: linear-gradient(to bottom right, var(--primary-light), #ffffff);
+      border: 1px solid rgba(15, 118, 110, 0.08);
+      border-radius: 12px;
+      padding: 12px 14px;
+      text-align: center;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .stat-number {
+      font-size: 1.7rem;
+      font-weight: 800;
+      color: var(--primary);
+      line-height: 1.1;
+      margin-bottom: 2px;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 2px;
+    }
+
+    .stat-desc {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+    }
+
+    /* MAIN CONTENT SPLIT */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 20px;
+      flex-grow: 1;
+      margin-bottom: 16px;
+    }
+
+    /* LEFT COLUMN: FEATURES */
+    .features-col {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .section-title {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      font-weight: 700;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .section-title::after {
+      content: '';
+      flex-grow: 1;
+      height: 1px;
+      background-color: var(--border);
+    }
+
+    .feature-item {
+      display: flex;
+      gap: 12px;
+    }
+
+    .feature-icon-wrapper {
+      background-color: var(--primary-light);
+      color: var(--primary);
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      border: 1px solid rgba(15, 118, 110, 0.05);
+    }
+
+    .feature-icon-wrapper svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .feature-content h3 {
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 2px;
+    }
+
+    .feature-content p {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      line-height: 1.35;
+    }
+
+    /* RIGHT COLUMN: APP MOCKUP */
+    .mockup-col {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background-color: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+    }
+
+    .mockup-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+    }
+
+    .mockup-window-controls {
+      display: flex;
+      gap: 4px;
+    }
+
+    .mockup-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: #cbd5e1;
+    }
+    .mockup-dot.red { background-color: #ef4444; }
+    .mockup-dot.yellow { background-color: #f59e0b; }
+    .mockup-dot.green { background-color: #10b981; }
+
+    .mockup-title {
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background-color: #e2e8f0;
+      padding: 2px 10px;
+      border-radius: 4px;
+    }
+
+    .mockup-body {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* Mini Autocomplete Form */
+    .mock-card {
+      background-color: white;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .mock-card-title {
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .mock-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .mock-label {
+      font-size: 0.55rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .mock-input {
+      border: 1px solid var(--primary);
+      border-radius: 4px;
+      padding: 4px 6px;
+      font-size: 0.65rem;
+      background-color: var(--primary-light);
+      color: var(--text-dark);
+      font-weight: 500;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .mock-autocomplete-dropdown {
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background-color: white;
+      box-shadow: var(--shadow-md);
+      margin-top: 2px;
+      overflow: hidden;
+    }
+
+    .mock-dropdown-item {
+      padding: 4px 6px;
+      font-size: 0.6rem;
+      border-bottom: 1px solid #f1f5f9;
+      display: flex;
+      justify-content: space-between;
+    }
+    .mock-dropdown-item.active {
+      background-color: var(--primary-light);
+      font-weight: 600;
+    }
+
+    .mock-dropdown-din {
+      color: var(--text-muted);
+      font-family: monospace;
+    }
+
+    /* Sticker display */
+    .mock-sticker-preview {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 6px;
+      background: #faf5ff;
+      border: 1px dashed #d8b4fe;
+      padding: 4px 6px;
+      border-radius: 6px;
+    }
+
+    .mock-sticker {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background-color: var(--sticker-oct);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+      border: 1px solid rgba(255,255,255,0.4);
+    }
+
+    .mock-sticker-text {
+      font-size: 0.6rem;
+      font-weight: 600;
+      color: #6b21a8;
+    }
+
+    /* Mini Dashboard Table */
+    .mock-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.6rem;
+      margin-top: 4px;
+    }
+
+    .mock-table th {
+      text-align: left;
+      padding: 4px;
+      background-color: #f1f5f9;
+      color: var(--text-muted);
+      font-weight: 600;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .mock-table td {
+      padding: 4px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .badge {
+      padding: 1px 4px;
+      border-radius: 3px;
+      font-size: 0.55rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      display: inline-block;
+    }
+    
+    .badge.success {
+      background-color: var(--success-light);
+      color: var(--success);
+    }
+
+    .badge.warning {
+      background-color: #fffbeb;
+      color: #d97706;
+    }
+
+    .sticker-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      vertical-align: middle;
+      margin-right: 4px;
+    }
+
+    /* Sticker Palette Visualizer */
+    .stickers-showcase {
+      margin-top: 8px;
+    }
+    
+    .stickers-title {
+      font-size: 0.6rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+    }
+
+    .stickers-grid {
+      display: flex;
+      justify-content: space-between;
+      gap: 3px;
+    }
+
+    .sticker-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      flex: 1;
+    }
+
+    .circle {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+
+    .sticker-month {
+      font-size: 0.5rem;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    /* PROPRIÉTAIRE SPECIFIC VALUE */
+    .owner-section {
+      background-color: #f0fdfa;
+      border: 1px solid rgba(15, 118, 110, 0.15);
+      border-radius: 12px;
+      padding: 10px 14px;
+      margin-bottom: 16px;
+    }
+
+    .owner-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .owner-text {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* CALL TO ACTION FOOTER */
+    .cta-footer {
+      border-top: 2px solid var(--primary-light);
+      padding-top: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .cta-instructions h4 {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 2px;
+    }
+
+    .cta-step {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .step-badge {
+      background-color: #e2e8f0;
+      color: var(--text-dark);
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-weight: 600;
+      font-size: 0.7rem;
+    }
+
+    .cta-badge-button {
+      background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+      color: white;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      box-shadow: 0 4px 8px rgba(15, 118, 110, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* WATERMARK / LOCAL APP REMINDER */
+    .watermark {
+      text-align: center;
+      font-size: 0.6rem;
+      color: #94a3b8;
+      margin-top: 8px;
+    }
+
+    /* PRINT LAYOUT ADJUSTMENTS */
+    @media print {
+      body {
+        background-color: white;
+        padding: 0;
+        margin: 0;
+      }
+
+      .preview-header {
+        display: none !important;
+      }
+
+      .a4-page {
+        box-shadow: none;
+        padding: 0;
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 0;
+      }
+
+      /* Force background colors to print */
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Screen Only: Print Button & Guide -->
+  <div class="preview-header no-print">
+    <div class="preview-title">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+      Aperçu A4 — PharmaExpire One-Pager
+    </div>
+    <button class="print-btn" onclick="window.print()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+        <path d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4zm1 5a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm.5 8a.5.5 0 0 1-.5-.5V12h6v3.5a.5.5 0 0 1-.5.5z"/>
+      </svg>
+      Imprimer / Sauvegarder en PDF
+    </button>
+  </div>
+
+  <!-- A4 PAGE CONTENT -->
+  <div class="a4-page">
+    
+    <!-- HEADER -->
+    <div class="header">
+      <div class="logo-container">
+        <div class="logo-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+          </svg>
+        </div>
+        <div>
+          <div class="brand-name">PharmaExpire</div>
+          <div class="brand-subtitle">Gestion Centralisée des Expirés de Laboratoire</div>
+        </div>
+      </div>
+      <div class="tagline-badge">Technologie Cloud</div>
+    </div>
+
+    <!-- STATS ROW (ROI) -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-number">Gain de Temps</div>
+        <div class="stat-label">Productivité Accrue</div>
+        <div class="stat-desc">Des heures de saisie libérées chaque mois pour votre équipe.</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">Accès Sécurisé</div>
+        <div class="stat-label">Multi-Utilisateurs</div>
+        <div class="stat-desc">Connexion individuelle par mot de passe avec synchro Cloud.</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">Traçabilité</div>
+        <div class="stat-label">Suivi des Retraits</div>
+        <div class="stat-desc">Historique complet des produits pour un suivi de qualité rigoureux.</div>
+      </div>
+    </div>
+
+    <!-- MAIN BODY SECTION -->
+    <div class="main-grid">
+      
+      <!-- LEFT: FEATURES & DESCRIPTION -->
+      <div class="features-col">
+        <div class="section-title">Le workflow PharmaExpire en 2 étapes</div>
+        
+        <!-- Feature 1 -->
+        <div class="feature-item">
+          <div class="feature-icon-wrapper">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+          </div>
+          <div class="feature-content">
+            <h3>1. Tournée Générale (Tous les 6 mois)</h3>
+            <p>Une tournée complète du laboratoire pour identifier et documenter tous les produits qui expirent dans les 6 prochains mois. La saisie intelligente (auto-complétion DIN, nom, dosage et format) permet d'informatiser l'inventaire des expirés rapidement et sans erreur.</p>
+          </div>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="feature-item">
+          <div class="feature-icon-wrapper">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div class="feature-content">
+            <h3>2. Retrait Mensuel Express (En 5 minutes)</h3>
+            <p>Chaque début de mois, plus besoin de chercher partout : le tableau de bord cible uniquement les produits qui expirent ce mois-ci. Classés par section physique (Frigo, Tablettes, Magistral...), ils sont retirés des rayons en 5 minutes chrono.</p>
+          </div>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="feature-item">
+          <div class="feature-icon-wrapper">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+            </svg>
+          </div>
+          <div class="feature-content">
+            <h3>Guidage Visuel par Pastilles</h3>
+            <p>L'application détermine automatiquement la couleur de sticker (pastille mensuelle) à apposer sur chaque produit lors de la tournée semestrielle, éliminant les erreurs humaines d'étiquetage.</p>
+          </div>
+        </div>
+
+        <!-- Feature 4 -->
+        <div class="feature-item">
+          <div class="feature-icon-wrapper">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <div class="feature-content">
+            <h3>Suivi & Signature Quality Assurance</h3>
+            <p>Générez instantanément des rapports de retraits clairs avec lignes de validation (Technicien + Pharmacien) pour consigner de manière rigoureuse le suivi de qualité de votre pharmacie.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: APP MOCKUP VISUALS -->
+      <div class="mockup-col">
+        <div>
+          <div class="mockup-header">
+            <div class="mockup-window-controls">
+              <div class="mockup-dot red"></div>
+              <div class="mockup-dot yellow"></div>
+              <div class="mockup-dot green"></div>
+            </div>
+            <div class="mockup-title">app.pharma-expire.com</div>
+            <div style="width: 24px;"></div>
+          </div>
+
+          <div class="mockup-body">
+            <!-- Autocomplete Mock -->
+            <div class="mock-card">
+              <div class="mock-card-title">
+                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.03l-.179.178c-.087.086-.154.19-.196.306l-1 2.892a.5.5 0 0 0 .62.62l2.892-1a.5.5 0 0 0 .306-.197l.178-.179z"/>
+                </svg>
+                Tournée de Saisie (6 mois)
+              </div>
+              <div class="mock-input-group">
+                <div class="mock-label">Recherche de produit</div>
+                <div class="mock-input">
+                  <span>Atorvas...</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                  </svg>
+                </div>
+                <div class="mock-autocomplete-dropdown">
+                  <div class="mock-dropdown-item active">
+                    <span><b>Atorvastatine</b> 20mg (90 co.)</span>
+                    <span class="mock-dropdown-din">02243586</span>
+                  </div>
+                  <div class="mock-dropdown-item">
+                    <span><b>Atorvastatine</b> 10mg (90 co.)</span>
+                    <span class="mock-dropdown-din">02243585</span>
+                  </div>
+                </div>
+                <div class="mock-sticker-preview">
+                  <div class="mock-sticker"></div>
+                  <span class="mock-sticker-text">Sticker à poser : <b>OCTOBRE (Vert)</b></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- List Mock -->
+            <div class="mock-card">
+              <div class="mock-card-title">
+                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M14.5 3a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h13zm-13-1A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-13z"/>
+                  <path d="M7 5.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm-2 0a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0zm2 3a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm-2 0a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0zm2 3a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm-2 0a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0z"/>
+                </svg>
+                Retrait Mensuel Express (5 min)
+              </div>
+              <table class="mock-table">
+                <thead>
+                  <tr>
+                    <th>Produit</th>
+                    <th>Empl.</th>
+                    <th>État</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Atorvastatine 20mg</td>
+                    <td>Frigo</td>
+                    <td><span class="badge success">Retiré</span></td>
+                  </tr>
+                  <tr>
+                    <td>Pantoprazole 40mg</td>
+                    <td>Mag.</td>
+                    <td><span class="badge warning">En cours</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Colors Legend Mock -->
+        <div class="stickers-showcase">
+          <div class="stickers-title">Système de pastilles mensuelles</div>
+          <div class="stickers-grid">
+            <div class="sticker-item"><div class="circle" style="background-color: var(--sticker-jan);"></div><span class="sticker-month">JAN</span></div>
+            <div class="sticker-item"><div class="circle" style="background-color: var(--sticker-feb);"></div><span class="sticker-month">FÉV</span></div>
+            <div class="sticker-item"><div class="circle" style="background-color: var(--sticker-mar);"></div><span class="sticker-month">MAR</span></div>
+            <div class="sticker-item"><div class="circle" style="background-color: var(--sticker-apr);"></div><span class="sticker-month">AVR</span></div>
+            <div class="sticker-item"><div class="circle" style="background-color: var(--sticker-may);"></div><span class="sticker-month">MAI</span></div>
+            <div class="sticker-item"><div class="circle" style="background-color: var(--sticker-jun);"></div><span class="sticker-month">JUI</span></div>
+            <div class="sticker-item"><div class="circle" style="background-color: var(--sticker-jul);"></div><span class="sticker-month">JUL</span></div>
+            <div class="sticker-item"><div class="circle" style="background-color: var(--sticker-aug);"></div><span class="sticker-month">AOÛ</span></div>
+            <div class="sticker-item"><div class="circle" style="background-color: var(--sticker-sep);"></div><span class="sticker-month">SEP</span></div>
+            <div class="sticker-item"><div class="circle" style="background-color: var(--sticker-oct);"></div><span class="sticker-month">OCT</span></div>
+            <div class="sticker-item"><div class="circle" style="background-color: var(--sticker-nov);"></div><span class="sticker-month">NOV</span></div>
+            <div class="sticker-item"><div class="circle" style="background-color: var(--sticker-dec);"></div><span class="sticker-month">DÉC</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OWNER VALUE PROPOSITION -->
+    <div class="owner-section">
+      <div class="owner-title">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M1 4h14v10a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V4zm2-1a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1H3V3z"/>
+        </svg>
+        Le Choix des Pharmaciens pour l'Assurance Qualité
+      </div>
+      <div class="owner-text">
+        PharmaExpire modernise la gestion de vos expirés grâce à sa base de données Cloud sécurisée. Vos données d'inventaire sont synchronisées en temps réel entre tous les postes de la pharmacie. En systématisant la tournée semestrielle d'informatisation et en réduisant la tournée mensuelle de retrait à seulement 5 minutes par section, vous libérez du temps précieux pour votre équipe tout en maintenant un suivi qualité irréprochable.
+      </div>
+    </div>
+
+    <!-- FOOTER CALL TO ACTION -->
+    <div class="cta-footer">
+      <div class="cta-instructions">
+        <h4>Prêt à optimiser vos tournées ?</h4>
+        <div class="cta-step">
+          Connectez-vous sur votre espace Cloud sécurisé avec vos identifiants.
+        </div>
+      </div>
+      <button class="cta-badge-button">Se Connecter à PharmaExpire</button>
+    </div>
+
+    <!-- WATERMARK / INFO -->
+    <div class="watermark">
+      Solution Cloud sécurisée pour maximiser l'assurance qualité en pharmacie.
+    </div>
+
+  </div>
+
+</body>
+</html>

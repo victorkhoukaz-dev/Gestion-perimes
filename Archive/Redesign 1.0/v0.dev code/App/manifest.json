@@ -1,0 +1,22 @@
+{
+  "name": "Gestion des Expirés de Laboratoire",
+  "short_name": "Expirés Lab",
+  "description": "Application de gestion et repérage des produits arrivant à expiration.",
+  "start_url": "./Application%20-%20p%C3%A9rim%C3%A9s.html",
+  "display": "standalone",
+  "background_color": "#0f766e",
+  "theme_color": "#0f766e",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ]
+}
