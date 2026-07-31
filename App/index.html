@@ -118,11 +118,27 @@
       padding: 16px 16px 64px;
     }
 
-    /* HEADER & NAVIGATION (2-LINE LAYOUT v2) */
+    /* CONCEPT B — PREMIUM ENTERPRISE SAAS DESIGN TOKENS */
+    :root {
+      --primary-color: #10b981;    /* Emerald Green Enterprise Accent */
+      --primary-hover: #059669;
+      --primary-light: #ecfdf5;
+      --bg-color: #f8fafc;        /* Slate 50 Canvas */
+      --card-bg: #ffffff;
+      --navy-header-bg: #0f172a;  /* Rich Navy Header */
+      --navy-header-text: #ffffff;
+      --surface-muted: #f1f5f9;
+      --text-color: #0f172a;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      --border-strong: #cbd5e1;
+    }
+
+    /* HEADER & NAVIGATION (CONCEPT B ENTERPRISE NAVY) */
     .app-header-container {
       position: sticky;
       top: 0;
-      z-index: 20;
+      z-index: 25;
       background-color: var(--bg-color);
       padding-top: 8px;
       padding-bottom: 8px;
@@ -130,17 +146,18 @@
     }
 
     header {
-      background: transparent;
-      border: none;
-      border-radius: 0;
-      padding: 10px 4px;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 12px 20px;
       margin-bottom: 12px;
-      box-shadow: none;
+      box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.25);
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 16px;
-      transition: background-color 0.2s, border-color 0.2s;
+      color: #ffffff;
+      transition: all 0.2s ease;
     }
 
     .header-logo {
@@ -153,19 +170,19 @@
     .header-logo svg {
       width: 26px;
       height: 26px;
-      color: var(--primary-color);
+      color: #34d399; /* Emerald 400 */
     }
 
     .header-title h1 {
       font-size: 1.2rem;
       font-weight: 700;
-      color: var(--text-color);
+      color: #ffffff;
       line-height: 1.2;
     }
 
     .header-title p {
       font-size: 0.82rem;
-      color: var(--text-muted);
+      color: #94a3b8; /* Slate 400 */
       margin-top: 2px;
       display: block;
     }
@@ -175,6 +192,111 @@
       align-items: center;
       gap: 14px;
       flex-shrink: 0;
+    }
+
+    /* OMNIBOX COMMAND PALETTE (CTRL+K) STYLES */
+    .btn-cmd-k-trigger {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #e2e8f0;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn-cmd-k-trigger:hover {
+      background: rgba(255, 255, 255, 0.18);
+      border-color: rgba(255, 255, 255, 0.35);
+      color: #ffffff;
+    }
+
+    .cmd-k-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(4px);
+      z-index: 9999;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding-top: 12vh;
+      animation: fadeIn 0.15s ease;
+    }
+
+    .cmd-k-modal {
+      background: #ffffff;
+      width: 100%;
+      max-width: 620px;
+      border-radius: 16px;
+      box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.3);
+      overflow: hidden;
+      border: 1px solid #cbd5e1;
+    }
+
+    .cmd-k-search-box {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 20px;
+      border-bottom: 1px solid #e2e8f0;
+      background: #f8fafc;
+    }
+
+    .cmd-k-search-box input {
+      border: none;
+      background: transparent;
+      outline: none;
+      font-size: 1.05rem;
+      width: 100%;
+      color: #0f172a;
+      font-weight: 500;
+    }
+
+    .cmd-k-results {
+      max-height: 380px;
+      overflow-y: auto;
+      padding: 12px;
+    }
+
+    .cmd-k-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .cmd-k-item:hover, .cmd-k-item.selected {
+      background: #ecfdf5;
+      color: #047857;
+    }
+
+    /* FLOATING BATCH ACTION BAR */
+    .batch-action-bar {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #0f172a;
+      color: #ffffff;
+      padding: 12px 24px;
+      border-radius: 9999px;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      z-index: 1000;
+      animation: slideUp 0.2s ease;
+    }
+    @keyframes slideUp {
+      from { transform: translate(-50%, 20px); opacity: 0; }
+      to { transform: translate(-50%, 0); opacity: 1; }
     }
 
     .month-badge {
@@ -2254,12 +2376,20 @@
           </div>
         </div>
         <div class="header-right" style="gap: 12px;">
+          <button id="btn-open-cmd-k" type="button" class="btn-cmd-k-trigger" title="Recherche globale rapide (Ctrl+K)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <span>Recherche</span>
+            <kbd style="background: rgba(255,255,255,0.2); padding: 1px 5px; border-radius: 4px; font-size: 0.72rem; font-family: inherit;">Ctrl+K</kbd>
+          </button>
+
           <div class="header-user-info" style="text-align: right; font-size: 0.8rem; display: flex; flex-direction: column; justify-content: center; line-height: 1.2;">
-            <span style="font-weight: 700; color: var(--text-color);" id="header-pharmacy-name">Pharmacie...</span>
-            <span style="color: var(--text-muted);" id="header-user-email">email@test.com</span>
+            <span style="font-weight: 700; color: #ffffff;" id="header-pharmacy-name">Pharmacie...</span>
+            <span style="color: #94a3b8;" id="header-user-email">email@test.com</span>
           </div>
-          <div class="month-badge" id="current-month-badge">Juin 2026</div>
-          <button class="btn btn-secondary" id="btn-logout" title="Se déconnecter" style="padding: 6px 12px; font-size: 0.85rem; border-color: var(--border-color); background-color: var(--card-bg); color: var(--text-color);">
+          <div class="month-badge" id="current-month-badge" style="background: rgba(255,255,255,0.12); color: #ffffff; border: 1px solid rgba(255,255,255,0.2);">Juin 2026</div>
+          <button class="btn btn-secondary" id="btn-logout" title="Se déconnecter" style="padding: 6px 12px; font-size: 0.85rem; border-color: rgba(255,255,255,0.2); background-color: rgba(255,255,255,0.1); color: #ffffff;">
             Déconnexion
           </button>
         </div>
@@ -3155,6 +3285,36 @@
   </div>
 
   </div> <!-- FIN DU main-app-wrapper -->
+
+  <!-- OMNIBOX COMMAND PALETTE (CTRL+K) MODAL OVERLAY -->
+  <div id="cmd-k-overlay" class="cmd-k-overlay" style="display: none;">
+    <div class="cmd-k-modal">
+      <div class="cmd-k-search-box">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="color: #64748b;">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <input type="text" id="cmd-k-input" placeholder="Rechercher par Produit, DIN, UPC ou taper 'Retrait', 'Saisie', 'Inventaire'..." autocomplete="off">
+        <span style="font-size: 0.75rem; color: #94a3b8; background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-weight: 600;">ESC</span>
+      </div>
+      <div class="cmd-k-results" id="cmd-k-results">
+        <!-- Dynamique JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- FLOATING BATCH ACTION BAR FOR RETRAIT MENSUEL -->
+  <div id="batch-action-bar" class="batch-action-bar" style="display: none;">
+    <span id="batch-count-text" style="font-weight: 700;">0 produit(s) sélectionné(s)</span>
+    <button type="button" class="btn" id="btn-batch-remove" style="background: #10b981; color: white; border: none; padding: 6px 14px; border-radius: 8px; font-size: 0.85rem; font-weight: 700; cursor: pointer;">
+      📦 Retirer de l'inventaire
+    </button>
+    <button type="button" class="btn" id="btn-batch-sold" style="background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.25); padding: 6px 14px; border-radius: 8px; font-size: 0.85rem; font-weight: 700; cursor: pointer;">
+      💰 Marquer comme Vendu
+    </button>
+    <button type="button" class="btn" id="btn-batch-cancel" style="background: transparent; color: #94a3b8; border: none; font-size: 0.8rem; cursor: pointer; text-decoration: underline;">
+      Annuler
+    </button>
+  </div>
 
   <!-- TOAST NOTIFICATION CONTAINER -->
   <div class="toast-container" id="toast-container"></div>
@@ -4135,6 +4295,55 @@
       document.getElementById("btn-toggle-recent-entries").addEventListener("click", () => {
         showAllRecent = !showAllRecent;
         renderRecentEntries();
+      });
+
+      // CONCEPT B : COMMANDE PALETTE (CTRL+K) ET BATCH ACTIONS
+      const btnOpenCmdK = document.getElementById("btn-open-cmd-k");
+      if (btnOpenCmdK) {
+        btnOpenCmdK.addEventListener("click", openCommandPalette);
+      }
+
+      const cmdKInput = document.getElementById("cmd-k-input");
+      if (cmdKInput) {
+        cmdKInput.addEventListener("input", (e) => {
+          renderCmdKResults(e.target.value);
+        });
+      }
+
+      const cmdKOverlay = document.getElementById("cmd-k-overlay");
+      if (cmdKOverlay) {
+        cmdKOverlay.addEventListener("click", (e) => {
+          if (e.target === cmdKOverlay) closeCommandPalette();
+        });
+      }
+
+      // Événements Batch Action Bar
+      document.getElementById("btn-batch-cancel").addEventListener("click", () => {
+        selectedBatchIds.clear();
+        updateBatchActionBar();
+        renderChecklist();
+      });
+
+      document.getElementById("btn-batch-remove").addEventListener("click", () => {
+        if (selectedBatchIds.size === 0) return;
+        const ids = Array.from(selectedBatchIds);
+        const initials = state.sessionInitials.trim() || "TECH";
+        ids.forEach(id => performCheckout(id, 'removed', initials));
+        selectedBatchIds.clear();
+        updateBatchActionBar();
+        renderAllViews();
+        showToast(`${ids.length} produit(s) retiré(s) des tablettes par ${initials}.`, "success");
+      });
+
+      document.getElementById("btn-batch-sold").addEventListener("click", () => {
+        if (selectedBatchIds.size === 0) return;
+        const ids = Array.from(selectedBatchIds);
+        const initials = state.sessionInitials.trim() || "TECH";
+        ids.forEach(id => performCheckout(id, 'sold', initials));
+        selectedBatchIds.clear();
+        updateBatchActionBar();
+        renderAllViews();
+        showToast(`${ids.length} produit(s) marqué(s) comme vendu(s) par ${initials}.`, "success");
       });
 
       // Filtres & tris d'inventaire
@@ -5363,6 +5572,12 @@
           const stickerInfo = getStickerInfo(prod.expiryDate);
 
           row.innerHTML = `
+            ${!isResolved ? `
+              <label style="display: flex; align-items: center; cursor: pointer; margin-right: 12px;" title="Cocher pour action groupée">
+                <input type="checkbox" class="batch-select-cb" data-id="${prod.id}" ${selectedBatchIds.has(prod.id) ? 'checked' : ''} style="width: 18px; height: 18px; accent-color: #10b981; cursor: pointer;">
+              </label>
+            ` : ''}
+
             <div class="product-details">
               <div>
                 <span class="prod-title">${prod.product}</span>
@@ -5414,7 +5629,19 @@
             `}
           `;
 
-          // Événements boutons checklist
+          // Événements boutons checklist & batch select
+          const batchCb = row.querySelector(".batch-select-cb");
+          if (batchCb) {
+            batchCb.addEventListener("change", (e) => {
+              if (e.target.checked) {
+                selectedBatchIds.add(prod.id);
+              } else {
+                selectedBatchIds.delete(prod.id);
+              }
+              updateBatchActionBar();
+            });
+          }
+
           if (!isResolved) {
             row.querySelector(".btn-action.retirer").addEventListener("click", () => {
               handleChecklistAction(prod.id, 'removed');
@@ -6242,6 +6469,110 @@
         renderAllViews();
       }
     }
+
+    // ----------------------------------------------------
+    // CONCEPT B : HELPER FUNCTIONS FOR COMMAND PALETTE & BATCH ACTIONS
+    // ----------------------------------------------------
+    let selectedBatchIds = new Set();
+
+    function updateBatchActionBar() {
+      const bar = document.getElementById("batch-action-bar");
+      const text = document.getElementById("batch-count-text");
+      if (!bar || !text) return;
+      if (selectedBatchIds.size > 0) {
+        text.textContent = `${selectedBatchIds.size} produit(s) sélectionné(s)`;
+        bar.style.display = "flex";
+      } else {
+        bar.style.display = "none";
+      }
+    }
+
+    function openCommandPalette() {
+      const overlay = document.getElementById("cmd-k-overlay");
+      const input = document.getElementById("cmd-k-input");
+      if (!overlay || !input) return;
+      overlay.style.display = "flex";
+      input.value = "";
+      input.focus();
+      renderCmdKResults("");
+    }
+
+    function closeCommandPalette() {
+      const overlay = document.getElementById("cmd-k-overlay");
+      if (overlay) overlay.style.display = "none";
+    }
+
+    function renderCmdKResults(query) {
+      const container = document.getElementById("cmd-k-results");
+      if (!container) return;
+      container.innerHTML = "";
+
+      const q = query.toLowerCase().trim();
+      const results = [];
+
+      const tabs = [
+        { name: "📋 Retrait Mensuel", target: "tab-retrait" },
+        { name: "📝 Saisie / Tournée", target: "tab-tournee" },
+        { name: "🔍 Inventaire & Recherche", target: "tab-inventaire" },
+        { name: "⚙️ Configuration", target: "tab-config" },
+        { name: "📖 Guide & Tutoriel", target: "tab-guide" }
+      ];
+
+      tabs.forEach(t => {
+        if (!q || t.name.toLowerCase().includes(q)) {
+          results.push({ type: "navigation", label: t.name, target: t.target });
+        }
+      });
+
+      if (q.length >= 1) {
+        state.products.forEach(p => {
+          if ((p.product && p.product.toLowerCase().includes(q)) ||
+              (p.din && p.din.includes(q)) ||
+              (p.upc && p.upc.includes(q))) {
+            results.push({ type: "product", label: `${p.product} (DIN: ${p.din || 'N/A'})`, product: p });
+          }
+        });
+      }
+
+      if (results.length === 0) {
+        container.innerHTML = `<div style="padding: 20px; text-align: center; color: #64748b;">Aucun résultat pour "${query}"</div>`;
+        return;
+      }
+
+      results.slice(0, 10).forEach((res, idx) => {
+        const div = document.createElement("div");
+        div.className = `cmd-k-item ${idx === 0 ? 'selected' : ''}`;
+        div.innerHTML = `
+          <span style="font-weight: 600; color: #0f172a;">${res.label}</span>
+          <span style="font-size: 0.75rem; color: #64748b; background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-weight: 600;">
+            ${res.type === 'navigation' ? 'Onglet' : 'Produit'}
+          </span>
+        `;
+        div.addEventListener("click", () => {
+          if (res.type === 'navigation') {
+            document.querySelector(`[data-tab='${res.target}']`).click();
+          } else if (res.type === 'product') {
+            loadProductToSaisie(res.product.din, res.product.product, res.product.dosage, res.product.format);
+          }
+          closeCommandPalette();
+        });
+        container.appendChild(div);
+      });
+    }
+
+    document.addEventListener("keydown", (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        const overlay = document.getElementById("cmd-k-overlay");
+        if (overlay && overlay.style.display === "flex") {
+          closeCommandPalette();
+        } else {
+          openCommandPalette();
+        }
+      } else if (e.key === "Escape") {
+        closeCommandPalette();
+      }
+    });
 
     // ----------------------------------------------------
     // INTERFACE DE CONFIGURATION (PARAMÈTRES)
