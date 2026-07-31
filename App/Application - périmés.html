@@ -212,6 +212,27 @@
       gap: 16px;
       z-index: 1000;
       animation: slideUp 0.2s ease;
+      white-space: nowrap;
+    }
+
+    /* Sur mobile : remonter la barre au-dessus de la bottom nav (60px) */
+    @media (max-width: 768px) {
+      .batch-action-bar {
+        bottom: 72px !important;
+        left: 8px !important;
+        right: 8px !important;
+        width: auto !important;
+        transform: none !important;
+        border-radius: 14px !important;
+        padding: 10px 14px !important;
+        flex-wrap: wrap;
+        gap: 8px;
+        animation: slideUpMobile 0.2s ease;
+      }
+    }
+    @keyframes slideUpMobile {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
     }
     @keyframes slideUp {
       from { transform: translate(-50%, 20px); opacity: 0; }
@@ -673,6 +694,33 @@
       flex-shrink: 0;
       white-space: nowrap;
       transition: all 0.15s ease;
+    }
+
+    /* Sur mobile : empiler les boutons Retirer/Vendu sous les infos produit */
+    @media (max-width: 768px) {
+      .product-row {
+        flex-wrap: wrap !important;
+        align-items: flex-start !important;
+        gap: 8px !important;
+        padding: 12px 12px !important;
+      }
+
+      .checklist-actions {
+        width: 100% !important;
+        min-width: unset !important;
+        margin-left: 0 !important;
+        justify-content: flex-start !important;
+        gap: 6px !important;
+      }
+
+      .btn-action {
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        height: 36px !important;
+        font-size: 0.82rem !important;
+        padding: 6px 8px !important;
+        justify-content: center !important;
+      }
     }
 
     .btn-action.retirer {

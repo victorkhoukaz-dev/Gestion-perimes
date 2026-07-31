@@ -1,4 +1,4 @@
-const CACHE_NAME = 'expires-lab-v9';
+const CACHE_NAME = 'expires-lab-v10';
 const ASSETS = [
   './Application - périmés.html',
   './supabase.js',
