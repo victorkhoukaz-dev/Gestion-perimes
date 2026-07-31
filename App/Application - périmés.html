@@ -269,12 +269,34 @@
       flex-shrink: 0;
     }
 
+    /* Badge de section active dynamique sur mobile */
+    .mobile-section-badge {
+      display: none;
+    }
+
     /* BARRE DE NAVIGATION EN BAS D'ÉCRAN (STYLE APP NATIVE MOBILE) */
     .mobile-bottom-nav {
       display: none;
     }
 
     @media (max-width: 768px) {
+      .month-badge {
+        display: none !important;
+      }
+
+      .mobile-section-badge {
+        display: inline-flex !important;
+        align-items: center;
+        gap: 4px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        background-color: var(--md-sys-color-secondary-container);
+        padding: 2px 8px;
+        border-radius: 6px;
+        margin-top: 2px;
+      }
+
       .nav-tabs {
         display: none !important;
       }
@@ -2228,6 +2250,7 @@
           <div class="header-title">
             <h1>Gestion des Expirés</h1>
             <p>Plateforme de contrôle interne du laboratoire</p>
+            <div id="mobile-section-badge" class="mobile-section-badge">📝 Saisie / Tournée</div>
           </div>
         </div>
         <div class="header-right" style="gap: 12px;">
@@ -3945,6 +3968,19 @@
           document.querySelectorAll(`[data-tab="${tabId}"]`).forEach(b => b.classList.add("active"));
           const targetContent = document.getElementById(tabId);
           if (targetContent) targetContent.classList.add("active");
+
+          // Mettre à jour le badge de titre de section sur mobile (V4.0)
+          const tabTitles = {
+            "tab-tournee": "📝 Saisie / Tournée",
+            "tab-retrait": "📋 Retrait Mensuel",
+            "tab-inventaire": "📦 Inventaire & Recherche",
+            "tab-config": "⚙️ Configuration",
+            "tab-guide": "📖 Guide & Tutoriel"
+          };
+          const badge = document.getElementById("mobile-section-badge");
+          if (badge && tabTitles[tabId]) {
+            badge.textContent = tabTitles[tabId];
+          }
 
           // Forcer la synchronisation des sections à chaque changement d'onglet
           populateSectionDropdowns();
