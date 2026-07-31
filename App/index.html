@@ -118,11 +118,27 @@
       padding: 16px 16px 64px;
     }
 
-    /* HEADER & NAVIGATION (2-LINE LAYOUT v2) */
+    /* CONCEPT B — PREMIUM ENTERPRISE SAAS DESIGN TOKENS */
+    :root {
+      --primary-color: #10b981;    /* Emerald Green Enterprise Accent */
+      --primary-hover: #059669;
+      --primary-light: #ecfdf5;
+      --bg-color: #f8fafc;        /* Slate 50 Canvas */
+      --card-bg: #ffffff;
+      --navy-header-bg: #0f172a;  /* Rich Navy Header */
+      --navy-header-text: #ffffff;
+      --surface-muted: #f1f5f9;
+      --text-color: #0f172a;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      --border-strong: #cbd5e1;
+    }
+
+    /* HEADER & NAVIGATION (CONCEPT B ENTERPRISE NAVY) */
     .app-header-container {
       position: sticky;
       top: 0;
-      z-index: 20;
+      z-index: 25;
       background-color: var(--bg-color);
       padding-top: 8px;
       padding-bottom: 8px;
@@ -130,17 +146,18 @@
     }
 
     header {
-      background: transparent;
-      border: none;
-      border-radius: 0;
-      padding: 10px 4px;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 12px 20px;
       margin-bottom: 12px;
-      box-shadow: none;
+      box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.25);
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 16px;
-      transition: background-color 0.2s, border-color 0.2s;
+      color: #ffffff;
+      transition: all 0.2s ease;
     }
 
     .header-logo {
@@ -153,19 +170,19 @@
     .header-logo svg {
       width: 26px;
       height: 26px;
-      color: var(--primary-color);
+      color: #34d399; /* Emerald 400 */
     }
 
     .header-title h1 {
       font-size: 1.2rem;
       font-weight: 700;
-      color: var(--text-color);
+      color: #ffffff;
       line-height: 1.2;
     }
 
     .header-title p {
       font-size: 0.82rem;
-      color: var(--text-muted);
+      color: #94a3b8; /* Slate 400 */
       margin-top: 2px;
       display: block;
     }
@@ -175,6 +192,30 @@
       align-items: center;
       gap: 14px;
       flex-shrink: 0;
+    }
+
+
+
+    /* FLOATING BATCH ACTION BAR */
+    .batch-action-bar {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #0f172a;
+      color: #ffffff;
+      padding: 12px 24px;
+      border-radius: 9999px;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      z-index: 1000;
+      animation: slideUp 0.2s ease;
+    }
+    @keyframes slideUp {
+      from { transform: translate(-50%, 20px); opacity: 0; }
+      to { transform: translate(-50%, 0); opacity: 1; }
     }
 
     .month-badge {
@@ -606,38 +647,56 @@
       background-color: var(--surface-muted);
     }
 
-    /* ACTION BUTTONS v0.dev */
+    /* ACTION BUTTONS (ELEGANT ALIGNED SOFT TINTS) */
     .checklist-actions {
       display: flex;
       gap: 8px;
-      margin-left: 16px;
+      margin-left: auto;
+      flex-shrink: 0;
+      min-width: 200px;
+      justify-content: flex-end;
     }
 
     .btn-action {
-      border: none;
-      padding: 6px 14px;
-      font-size: 0.85rem;
+      border: 1px solid transparent;
+      padding: 5px 12px;
+      font-size: 0.8rem;
       font-weight: 600;
-      border-radius: var(--radius-full);
+      border-radius: 8px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
-      transition: opacity 0.2s;
-    }
-
-    .btn-action:hover {
-      opacity: 0.9;
+      justify-content: center;
+      gap: 5px;
+      min-width: 95px;
+      height: 32px;
+      flex-shrink: 0;
+      white-space: nowrap;
+      transition: all 0.15s ease;
     }
 
     .btn-action.retirer {
-      background-color: var(--success-bg);
-      color: var(--success-text);
+      background-color: #ecfdf5;
+      color: #047857;
+      border-color: #a7f3d0;
+    }
+    .btn-action.retirer:hover {
+      background-color: #10b981;
+      color: #ffffff;
+      border-color: #10b981;
+      box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25);
     }
 
     .btn-action.vendu {
-      background-color: var(--warning-bg);
-      color: var(--warning-text);
+      background-color: #fffbe6;
+      color: #b45309;
+      border-color: #fde68a;
+    }
+    .btn-action.vendu:hover {
+      background-color: #f59e0b;
+      color: #ffffff;
+      border-color: #f59e0b;
+      box-shadow: 0 2px 6px rgba(245, 158, 11, 0.25);
     }
 
     .btn {
@@ -845,38 +904,7 @@
       font-weight: 600;
     }
 
-    /* ACTION BUTTONS (V2) */
-    .checklist-actions {
-      display: flex;
-      gap: 8px;
-      margin-left: 16px;
-    }
 
-    .btn-action {
-      border: none;
-      padding: 6px 12px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      border-radius: 6px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      color: white;
-      transition: opacity 0.2s;
-    }
-
-    .btn-action:hover {
-      opacity: 0.9;
-    }
-
-    .btn-action.retirer {
-      background-color: var(--success-color);
-    }
-
-    .btn-action.vendu {
-      background-color: var(--warning-color);
-    }
 
     .resolution-badge {
       display: flex;
@@ -1765,12 +1793,14 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 8px 12px;
+      padding: 8px 10px;
       border-radius: 8px;
       background-color: var(--primary-light);
       border: 1px solid rgba(15, 118, 110, 0.08);
       font-size: 0.85rem;
       transition: all 0.2s ease;
+      min-width: 0;
+      overflow: hidden;
     }
     .section-progress-item:hover {
       transform: translateY(-1px);
@@ -2254,12 +2284,13 @@
           </div>
         </div>
         <div class="header-right" style="gap: 12px;">
+
           <div class="header-user-info" style="text-align: right; font-size: 0.8rem; display: flex; flex-direction: column; justify-content: center; line-height: 1.2;">
-            <span style="font-weight: 700; color: var(--text-color);" id="header-pharmacy-name">Pharmacie...</span>
-            <span style="color: var(--text-muted);" id="header-user-email">email@test.com</span>
+            <span style="font-weight: 700; color: #ffffff;" id="header-pharmacy-name">Pharmacie...</span>
+            <span style="color: #94a3b8;" id="header-user-email">email@test.com</span>
           </div>
-          <div class="month-badge" id="current-month-badge">Juin 2026</div>
-          <button class="btn btn-secondary" id="btn-logout" title="Se déconnecter" style="padding: 6px 12px; font-size: 0.85rem; border-color: var(--border-color); background-color: var(--card-bg); color: var(--text-color);">
+          <div class="month-badge" id="current-month-badge" style="background: rgba(255,255,255,0.12); color: #ffffff; border: 1px solid rgba(255,255,255,0.2);">Juin 2026</div>
+          <button class="btn btn-secondary" id="btn-logout" title="Se déconnecter" style="padding: 6px 12px; font-size: 0.85rem; border-color: rgba(255,255,255,0.2); background-color: rgba(255,255,255,0.1); color: #ffffff;">
             Déconnexion
           </button>
         </div>
@@ -2383,7 +2414,7 @@
           <div class="progress-bar-bg" style="margin-bottom: 16px;">
             <div id="retrait-progress-bar" class="progress-bar-fill" style="width: 0%;"></div>
           </div>
-          <div id="retrait-sections-progress-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px;">
+          <div id="retrait-sections-progress-list" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; overflow: hidden;">
             <!-- Dynamique -->
           </div>
         </div>
@@ -3155,6 +3186,21 @@
   </div>
 
   </div> <!-- FIN DU main-app-wrapper -->
+
+
+  <!-- FLOATING BATCH ACTION BAR FOR RETRAIT MENSUEL -->
+  <div id="batch-action-bar" class="batch-action-bar" style="display: none;">
+    <span id="batch-count-text" style="font-weight: 700;">0 produit(s) sélectionné(s)</span>
+    <button type="button" class="btn" id="btn-batch-remove" style="background: #10b981; color: white; border: none; padding: 6px 14px; border-radius: 8px; font-size: 0.85rem; font-weight: 700; cursor: pointer;">
+      📦 Retirer de l'inventaire
+    </button>
+    <button type="button" class="btn" id="btn-batch-sold" style="background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.25); padding: 6px 14px; border-radius: 8px; font-size: 0.85rem; font-weight: 700; cursor: pointer;">
+      💰 Marquer comme Vendu
+    </button>
+    <button type="button" class="btn" id="btn-batch-cancel" style="background: transparent; color: #94a3b8; border: none; font-size: 0.8rem; cursor: pointer; text-decoration: underline;">
+      Annuler
+    </button>
+  </div>
 
   <!-- TOAST NOTIFICATION CONTAINER -->
   <div class="toast-container" id="toast-container"></div>
@@ -4135,6 +4181,37 @@
       document.getElementById("btn-toggle-recent-entries").addEventListener("click", () => {
         showAllRecent = !showAllRecent;
         renderRecentEntries();
+      });
+
+
+
+      // Événements Batch Action Bar
+      document.getElementById("btn-batch-cancel").addEventListener("click", () => {
+        selectedBatchIds.clear();
+        updateBatchActionBar();
+        renderChecklist();
+      });
+
+      document.getElementById("btn-batch-remove").addEventListener("click", () => {
+        if (selectedBatchIds.size === 0) return;
+        const ids = Array.from(selectedBatchIds);
+        const initials = state.sessionInitials.trim() || "TECH";
+        ids.forEach(id => performCheckout(id, 'removed', initials));
+        selectedBatchIds.clear();
+        updateBatchActionBar();
+        renderAllViews();
+        showToast(`${ids.length} produit(s) retiré(s) des tablettes par ${initials}.`, "success");
+      });
+
+      document.getElementById("btn-batch-sold").addEventListener("click", () => {
+        if (selectedBatchIds.size === 0) return;
+        const ids = Array.from(selectedBatchIds);
+        const initials = state.sessionInitials.trim() || "TECH";
+        ids.forEach(id => performCheckout(id, 'sold', initials));
+        selectedBatchIds.clear();
+        updateBatchActionBar();
+        renderAllViews();
+        showToast(`${ids.length} produit(s) marqué(s) comme vendu(s) par ${initials}.`, "success");
       });
 
       // Filtres & tris d'inventaire
@@ -5363,6 +5440,12 @@
           const stickerInfo = getStickerInfo(prod.expiryDate);
 
           row.innerHTML = `
+            ${!isResolved ? `
+              <label style="display: flex; align-items: center; cursor: pointer; margin-right: 12px;" title="Cocher pour action groupée">
+                <input type="checkbox" class="batch-select-cb" data-id="${prod.id}" ${selectedBatchIds.has(prod.id) ? 'checked' : ''} style="width: 18px; height: 18px; accent-color: #10b981; cursor: pointer;">
+              </label>
+            ` : ''}
+
             <div class="product-details">
               <div>
                 <span class="prod-title">${prod.product}</span>
@@ -5395,10 +5478,10 @@
             ${!isResolved ? `
               <div class="checklist-actions">
                 <button class="btn-action retirer" data-id="${prod.id}" title="Marquer comme Retiré des tablettes">
-                  ✅ Retirer
+                  📥 Retirer
                 </button>
                 <button class="btn-action vendu" data-id="${prod.id}" title="Marquer comme Vendu / Épuisé">
-                  📦 Vendu
+                  🏷️ Vendu
                 </button>
               </div>
             ` : `
@@ -5414,7 +5497,19 @@
             `}
           `;
 
-          // Événements boutons checklist
+          // Événements boutons checklist & batch select
+          const batchCb = row.querySelector(".batch-select-cb");
+          if (batchCb) {
+            batchCb.addEventListener("change", (e) => {
+              if (e.target.checked) {
+                selectedBatchIds.add(prod.id);
+              } else {
+                selectedBatchIds.delete(prod.id);
+              }
+              updateBatchActionBar();
+            });
+          }
+
           if (!isResolved) {
             row.querySelector(".btn-action.retirer").addEventListener("click", () => {
               handleChecklistAction(prod.id, 'removed');
@@ -5631,6 +5726,10 @@
         sectionCountsRetrait[s] = 0;
       });
       
+      // Compteurs produits pour le % de progression Retrait Mensuel
+      let totalRetraitProducts = 0;
+      let resolvedRetraitProducts = 0;
+
       (state.products || []).forEach(p => {
         if (p.status === 'active') {
           if (p.expiryDate >= startKey && p.expiryDate <= endKey) {
@@ -5642,6 +5741,13 @@
             if (sectionCountsRetrait[p.section] !== undefined) {
               sectionCountsRetrait[p.section]++;
             }
+            totalRetraitProducts++;
+          }
+        } else {
+          // Produit résolu (retiré ou vendu) expirant le mois ciblé
+          if (p.expiryDate === targetMonthKey) {
+            totalRetraitProducts++;
+            resolvedRetraitProducts++;
           }
         }
       });
@@ -5654,75 +5760,114 @@
         const counts = isRetrait ? sectionCountsRetrait : sectionCountsTournee;
         
         sections.forEach(secName => {
-          let userStatus = state.sectionsProgress[tourKey] ? state.sectionsProgress[tourKey][secName] : undefined;
           const count = counts[secName] || 0;
-          
-          let isCompleted = (userStatus === 'completed');
-          
-          let dotColor = "#ef4444"; // Rouge si non entamé
-          if (isCompleted) {
-            dotColor = "#10b981"; // Vert si complété (coché)
-          } else if (count > 0) {
-            dotColor = "#f59e0b"; // Jaune/Orange si produits saisis
-          }
-          
-          const isChecked = isCompleted ? 'checked' : '';
+          let isCompleted = false;
+          let dotColor = "#ef4444";
 
-          const item = document.createElement("div");
-          item.className = "section-progress-item";
-          item.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0;">
-              <span class="status-dot-glow" style="color: ${dotColor}; background-color: ${dotColor};"></span>
-              <span style="font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-color);" title="${secName}">${secName}</span>
-              <span style="font-size: 0.75rem; color: var(--text-muted); margin-left: 2px;">(${count})</span>
-            </div>
-            <label style="display: flex; align-items: center; cursor: pointer; margin-bottom: 0;">
-              <input type="checkbox" ${isChecked} style="width: 16px; height: 16px; accent-color: var(--primary-color);" class="sec-progress-cb">
-            </label>
-          `;
-          
-          const cb = item.querySelector(".sec-progress-cb");
-          if (cb) {
-            cb.addEventListener("change", async (e) => {
-              try {
-                if (e.target.checked) {
-                  state.sectionsProgress[tourKey][secName] = 'completed';
-                } else {
-                  state.sectionsProgress[tourKey][secName] = 'in_progress';
+          if (isRetrait) {
+            // RETRAIT MENSUEL : Progression 100% AUTOMATIQUE pour le mois sélectionné
+            // count === 0 => Tous les produits du mois sont retirés/vendus ou aucun produit ciblé => ÉPURÉE 🟢
+            // count > 0  => Il reste des produits actifs à retirer => À ÉPURER 🟡
+            if (count === 0) {
+              isCompleted = true;
+              dotColor = "#10b981"; // Vert Épurée
+            } else {
+              isCompleted = false;
+              dotColor = "#f59e0b"; // Ambre En cours
+            }
+
+            const item = document.createElement("div");
+            item.className = "section-progress-item";
+            item.innerHTML = `
+              <div style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0;">
+                <span class="status-dot-glow" style="color: ${dotColor}; background-color: ${dotColor};"></span>
+                <span style="font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-color);" title="${secName}">${secName}</span>
+                <span style="font-size: 0.75rem; color: var(--text-muted); margin-left: 2px;">
+                  ${count > 0 ? `(${count})` : ''}
+                </span>
+              </div>
+              <span style="font-size: 1rem; color: ${dotColor};" title="${isCompleted ? 'Épurée' : 'En cours'}">
+                ${isCompleted ? '✓' : '⏳'}
+              </span>
+            `;
+            container.appendChild(item);
+
+          } else {
+            // SAISIE / TOURNÉE : Progression MANUELLE par le technicien
+            let userStatus = state.sectionsProgress[tourKey] ? state.sectionsProgress[tourKey][secName] : undefined;
+            isCompleted = (userStatus === 'completed');
+            
+            if (isCompleted) {
+              dotColor = "#10b981"; // Vert si complété
+            } else if (count > 0) {
+              dotColor = "#f59e0b"; // Jaune/Orange si des produits sont saisis
+            } else {
+              dotColor = "#ef4444"; // Rouge si non entamé
+            }
+            
+            const isChecked = isCompleted ? 'checked' : '';
+
+            const item = document.createElement("div");
+            item.className = "section-progress-item";
+            item.innerHTML = `
+              <div style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0;">
+                <span class="status-dot-glow" style="color: ${dotColor}; background-color: ${dotColor};"></span>
+                <span style="font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-color);" title="${secName}">${secName}</span>
+                <span style="font-size: 0.75rem; color: var(--text-muted); margin-left: 2px;">(${count})</span>
+              </div>
+              <label style="display: flex; align-items: center; cursor: pointer; margin-bottom: 0;">
+                <input type="checkbox" ${isChecked} style="width: 16px; height: 16px; accent-color: var(--primary-color);" class="sec-progress-cb">
+              </label>
+            `;
+            
+            const cb = item.querySelector(".sec-progress-cb");
+            if (cb) {
+              cb.addEventListener("change", async (e) => {
+                try {
+                  if (e.target.checked) {
+                    state.sectionsProgress[tourKey][secName] = 'completed';
+                  } else {
+                    state.sectionsProgress[tourKey][secName] = 'in_progress';
+                  }
+                  updateSectionsProgressUI();
+                  await saveConfig();
+                } catch (err) {
+                  console.error("Erreur enregistrement progression section:", err);
                 }
-                updateSectionsProgressUI();
-                await saveConfig();
-              } catch (err) {
-                console.error("Erreur enregistrement progression section:", err);
-              }
-            });
+              });
+            }
+            container.appendChild(item);
           }
-          container.appendChild(item);
         });
       };
-
-      sections.forEach(secName => {
-        const userStatus = state.sectionsProgress[tourKey] ? state.sectionsProgress[tourKey][secName] : undefined;
-        if (userStatus === 'completed') {
-          completedCount++;
-        }
-      });
 
       populateContainer(progressListTournee, false);
       populateContainer(progressListRetrait, true);
 
+      // Calcul des pourcentages de progression séparés
       const totalSections = sections.length || 1;
-      const percent = Math.round((completedCount / totalSections) * 100);
-      
+
+      let completedCountTournee = 0;
+      sections.forEach(secName => {
+        const userStatus = state.sectionsProgress[tourKey] ? state.sectionsProgress[tourKey][secName] : undefined;
+        if (userStatus === 'completed') completedCountTournee++;
+      });
+      const percentTournee = Math.round((completedCountTournee / totalSections) * 100);
+
+      // % Retrait = produits retirés/vendus sur total produits expirant le mois sélectionné
+      const percentRetrait = totalRetraitProducts === 0
+        ? 100
+        : Math.round((resolvedRetraitProducts / totalRetraitProducts) * 100);
+
       const tourneePercent = document.getElementById("tournee-progress-percent");
       const tourneeBar = document.getElementById("tournee-progress-bar");
-      if (tourneePercent) tourneePercent.textContent = `${percent}%`;
-      if (tourneeBar) tourneeBar.style.width = `${percent}%`;
+      if (tourneePercent) tourneePercent.textContent = `${percentTournee}%`;
+      if (tourneeBar) tourneeBar.style.width = `${percentTournee}%`;
 
       const retraitPercent = document.getElementById("retrait-progress-percent");
       const retraitBar = document.getElementById("retrait-progress-bar");
-      if (retraitPercent) retraitPercent.textContent = `${percent}%`;
-      if (retraitBar) retraitBar.style.width = `${percent}%`;
+      if (retraitPercent) retraitPercent.textContent = `${percentRetrait}%`;
+      if (retraitBar) retraitBar.style.width = `${percentRetrait}%`;
     }
 
     async function addNewProduct() {
@@ -6242,6 +6387,25 @@
         renderAllViews();
       }
     }
+
+    // ----------------------------------------------------
+    // CONCEPT B : HELPER FUNCTIONS FOR COMMAND PALETTE & BATCH ACTIONS
+    // ----------------------------------------------------
+    let selectedBatchIds = new Set();
+
+    function updateBatchActionBar() {
+      const bar = document.getElementById("batch-action-bar");
+      const text = document.getElementById("batch-count-text");
+      if (!bar || !text) return;
+      if (selectedBatchIds.size > 0) {
+        text.textContent = `${selectedBatchIds.size} produit(s) sélectionné(s)`;
+        bar.style.display = "flex";
+      } else {
+        bar.style.display = "none";
+      }
+    }
+
+
 
     // ----------------------------------------------------
     // INTERFACE DE CONFIGURATION (PARAMÈTRES)
