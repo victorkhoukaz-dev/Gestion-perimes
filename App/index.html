@@ -2412,7 +2412,7 @@
           <div class="progress-bar-bg" style="margin-bottom: 16px;">
             <div id="retrait-progress-bar" class="progress-bar-fill" style="width: 0%;"></div>
           </div>
-          <div id="retrait-sections-progress-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px;">
+          <div id="retrait-sections-progress-list" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;">
             <!-- Dynamique -->
           </div>
         </div>
@@ -5781,11 +5781,11 @@
                 <span class="status-dot-glow" style="color: ${dotColor}; background-color: ${dotColor};"></span>
                 <span style="font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-color);" title="${secName}">${secName}</span>
                 <span style="font-size: 0.75rem; color: var(--text-muted); margin-left: 2px;">
-                  ${count > 0 ? `(${count} à retirer)` : ''}
+                  ${count > 0 ? `(${count})` : ''}
                 </span>
               </div>
-              <span style="font-size: 0.78rem; font-weight: 700; color: ${dotColor};">
-                ${isCompleted ? '✓ Épurée' : '⏳ En cours'}
+              <span style="font-size: 1rem; color: ${dotColor};" title="${isCompleted ? 'Épurée' : 'En cours'}">
+                ${isCompleted ? '✓' : '⏳'}
               </span>
             `;
             container.appendChild(item);
