@@ -5501,16 +5501,15 @@
           let userStatus = state.sectionsProgress[tourKey] ? state.sectionsProgress[tourKey][secName] : undefined;
           const count = counts[secName] || 0;
           
-          let isCompleted = false;
-          if (count === 0) {
-            isCompleted = true; // Auto-terminé si 0 produit restant
-          } else if (userStatus === 'completed') {
-            isCompleted = true; // Coché manuellement par l'utilisateur
-          } else if (userStatus === 'in_progress') {
-            isCompleted = false;
+          let isCompleted = (userStatus === 'completed');
+          
+          let dotColor = "#ef4444"; // Rouge si non entamé
+          if (isCompleted) {
+            dotColor = "#10b981"; // Vert si complété (coché)
+          } else if (count > 0) {
+            dotColor = "#f59e0b"; // Jaune/Orange si produits saisis
           }
           
-          let dotColor = isCompleted ? "#10b981" : "#f59e0b";
           const isChecked = isCompleted ? 'checked' : '';
 
           const item = document.createElement("div");
@@ -5547,9 +5546,8 @@
       };
 
       sections.forEach(secName => {
-        const count = sectionCountsRetrait[secName] || 0;
         const userStatus = state.sectionsProgress[tourKey] ? state.sectionsProgress[tourKey][secName] : undefined;
-        if (count === 0 || userStatus === 'completed') {
+        if (userStatus === 'completed') {
           completedCount++;
         }
       });
