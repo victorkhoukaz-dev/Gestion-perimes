@@ -1793,12 +1793,14 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 8px 12px;
+      padding: 8px 10px;
       border-radius: 8px;
       background-color: var(--primary-light);
       border: 1px solid rgba(15, 118, 110, 0.08);
       font-size: 0.85rem;
       transition: all 0.2s ease;
+      min-width: 0;
+      overflow: hidden;
     }
     .section-progress-item:hover {
       transform: translateY(-1px);
@@ -2412,7 +2414,7 @@
           <div class="progress-bar-bg" style="margin-bottom: 16px;">
             <div id="retrait-progress-bar" class="progress-bar-fill" style="width: 0%;"></div>
           </div>
-          <div id="retrait-sections-progress-list" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;">
+          <div id="retrait-sections-progress-list" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; overflow: hidden;">
             <!-- Dynamique -->
           </div>
         </div>
