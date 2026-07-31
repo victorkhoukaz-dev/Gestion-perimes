@@ -5724,6 +5724,10 @@
         sectionCountsRetrait[s] = 0;
       });
       
+      // Compteurs produits pour le % de progression Retrait Mensuel
+      let totalRetraitProducts = 0;
+      let resolvedRetraitProducts = 0;
+
       (state.products || []).forEach(p => {
         if (p.status === 'active') {
           if (p.expiryDate >= startKey && p.expiryDate <= endKey) {
@@ -5735,6 +5739,13 @@
             if (sectionCountsRetrait[p.section] !== undefined) {
               sectionCountsRetrait[p.section]++;
             }
+            totalRetraitProducts++;
+          }
+        } else {
+          // Produit résolu (retiré ou vendu) expirant le mois ciblé
+          if (p.expiryDate === targetMonthKey) {
+            totalRetraitProducts++;
+            resolvedRetraitProducts++;
           }
         }
       });
@@ -5841,11 +5852,10 @@
       });
       const percentTournee = Math.round((completedCountTournee / totalSections) * 100);
 
-      let completedCountRetrait = 0;
-      sections.forEach(secName => {
-        if ((sectionCountsRetrait[secName] || 0) === 0) completedCountRetrait++;
-      });
-      const percentRetrait = Math.round((completedCountRetrait / totalSections) * 100);
+      // % Retrait = produits retirés/vendus sur total produits expirant le mois sélectionné
+      const percentRetrait = totalRetraitProducts === 0
+        ? 100
+        : Math.round((resolvedRetraitProducts / totalRetraitProducts) * 100);
 
       const tourneePercent = document.getElementById("tournee-progress-percent");
       const tourneeBar = document.getElementById("tournee-progress-bar");
