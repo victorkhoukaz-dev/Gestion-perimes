@@ -5242,7 +5242,9 @@
         saveProducts();
         
         const actionName = actionType === 'removed' ? 'retiré des tablettes' : 'marqué comme vendu';
-        showToast(`"${prod.product}" ${actionName} par ${initials}.`, "success");
+        showToast(`"${prod.product}" ${actionName} par ${initials}.`, "success", () => {
+          undoChecklistAction(id);
+        });
         renderAllViews();
       }
     }
@@ -5524,7 +5526,13 @@
       localStorage.setItem("exp_tech_initials", tech);
       document.getElementById("session-initials").value = tech;
 
-      showToast(`"${name}" enregistré.`, "success");
+      const addedProductId = newProd.id;
+      showToast(`"${name}" (x${qty}) enregistré.`, "success", () => {
+        state.products = state.products.filter(p => p.id !== addedProductId);
+        saveProducts();
+        renderAllViews();
+        showToast(`Saisie de "${name}" annulée.`, "info");
+      });
 
       // Réinitialiser les champs (sauf section, tech initials et date d'exp par défaut)
       const upcField = document.getElementById("form-upc");
@@ -6422,20 +6430,65 @@
     // ----------------------------------------------------
     // FONCTIONS UTILITAIRES DE DATE ET TEXTE
     // ----------------------------------------------------
-    function showToast(message, type = "info") {
+    let lastUndoAction = null;
+
+    function showToast(message, type = "info", undoAction = null) {
       const container = document.getElementById("toast-container");
       if (!container) return;
       
       const toast = document.createElement("div");
       toast.className = `toast ${type}`;
-      toast.innerHTML = `<span>${message}</span>`;
-      container.appendChild(toast);
       
-      // Auto-suppression après 3 secondes
+      if (undoAction && typeof undoAction === "function") {
+        lastUndoAction = undoAction;
+        const undoId = "undo-" + Date.now() + "-" + Math.random().toString(36).substr(2, 4);
+        toast.innerHTML = `
+          <span>${message}</span>
+          <button id="${undoId}" type="button" class="btn-toast-undo" style="margin-left: 10px; background: rgba(255,255,255,0.22); border: 1px solid rgba(255,255,255,0.4); color: inherit; padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 0.78rem; cursor: pointer;">
+            Annuler (Ctrl+Z)
+          </button>
+        `;
+        container.appendChild(toast);
+        
+        setTimeout(() => {
+          const btn = document.getElementById(undoId);
+          if (btn) {
+            btn.addEventListener("click", () => {
+              if (lastUndoAction) {
+                const act = lastUndoAction;
+                lastUndoAction = null;
+                act();
+              }
+              toast.remove();
+            });
+          }
+        }, 10);
+      } else {
+        toast.innerHTML = `<span>${message}</span>`;
+        container.appendChild(toast);
+      }
+      
+      // Auto-suppression après 4 secondes
       setTimeout(() => {
-        toast.remove();
-      }, 3000);
+        if (toast.parentNode) toast.remove();
+      }, 4000);
     }
+
+    // ÉCOUTEUR CLAVIER GLOBAL (CTRL+Z / CMD+Z) POUR ANNULATION INSTANTANÉE
+    document.addEventListener("keydown", (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") {
+        const activeElem = document.activeElement;
+        const tag = activeElem ? activeElem.tagName.toLowerCase() : "";
+        const isEditingText = (tag === "input" && activeElem.type === "text" && activeElem.value.length > 0) || tag === "textarea";
+        
+        if (!isEditingText && lastUndoAction && typeof lastUndoAction === "function") {
+          e.preventDefault();
+          const act = lastUndoAction;
+          lastUndoAction = null;
+          act();
+        }
+      }
+    });
 
     function getSortIcon(key) {
       if (state.sorting.key === key) {
