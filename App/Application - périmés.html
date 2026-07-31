@@ -3849,18 +3849,20 @@
         });
       });
 
-      // Basculement de thème
+      // Basculement de thème (Sécurisé)
       const themeBtn = document.getElementById("theme-toggle-btn");
-      themeBtn.addEventListener("click", () => {
-        const doc = document.documentElement;
-        if (doc.getAttribute("data-theme") === "dark") {
-          doc.removeAttribute("data-theme");
-          localStorage.setItem("theme", "light");
-        } else {
-          doc.setAttribute("data-theme", "dark");
-          localStorage.setItem("theme", "dark");
-        }
-      });
+      if (themeBtn) {
+        themeBtn.addEventListener("click", () => {
+          const doc = document.documentElement;
+          if (doc.getAttribute("data-theme") === "dark") {
+            doc.removeAttribute("data-theme");
+            localStorage.setItem("theme", "light");
+          } else {
+            doc.setAttribute("data-theme", "dark");
+            localStorage.setItem("theme", "dark");
+          }
+        });
+      }
       if (localStorage.getItem("theme") === "dark") {
         document.documentElement.setAttribute("data-theme", "dark");
       }
