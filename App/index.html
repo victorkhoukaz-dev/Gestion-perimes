@@ -257,6 +257,74 @@
       flex-shrink: 0;
     }
 
+    /* PHASE 4 ERGONOMIC UX IMPROVEMENTS FOR SAISIE / TOURNÉE */
+    .accordion-header-btn {
+      cursor: pointer;
+      user-select: none;
+      padding: 8px 12px;
+      margin: -8px -12px;
+      border-radius: 8px;
+      transition: background-color 0.2s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: calc(100% + 24px);
+    }
+
+    .accordion-header-btn:hover {
+      background-color: var(--surface-muted);
+    }
+
+    .accordion-action-badge {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 9999px;
+      background: var(--surface-muted);
+      border: 1px solid var(--border-color);
+      color: var(--text-color);
+      transition: all 0.2s ease;
+    }
+
+    .accordion-header-btn:hover .accordion-action-badge {
+      background: var(--primary-light);
+      color: var(--primary-color);
+      border-color: rgba(15, 118, 110, 0.3);
+    }
+
+    .btn-qty-step {
+      width: 22px;
+      height: 22px;
+      border-radius: 4px;
+      border: 1px solid var(--border-color);
+      background: var(--card-bg);
+      color: var(--text-color);
+      font-weight: bold;
+      font-size: 0.82rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+      line-height: 1;
+    }
+
+    .btn-qty-step:hover {
+      background: var(--primary-light);
+      color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+
+    .accordion-header {
+      cursor: pointer;
+      user-select: none;
+      transition: color 0.15s ease;
+    }
+
+    .accordion-header:hover {
+      color: var(--primary-color);
+    }
+
     /* CONTENU DES ONGLETS */
     .tab-content {
       display: none;
@@ -743,7 +811,7 @@
 
     @media (min-width: 768px) {
       .tournee-wizard {
-        grid-template-columns: 2fr 1fr;
+        grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr);
       }
     }
 
@@ -2354,61 +2422,85 @@
           </div>
         </div>
 
-        <div style="display: flex; flex-direction: column; gap: 24px;">
-          <!-- MODE TOURNEE ASSISTANT FLEXIBLE (V3) -->
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+          <!-- MODE TOURNEE ASSISTANT FLEXIBLE (V3 - ACCORDION REPLIABLE) -->
           <div class="card" style="margin-bottom: 0;">
-            <h3 class="card-title" style="font-size: 1.1rem; margin-bottom: 10px;">Assistant Tournée</h3>
-            
-            <div class="form-group">
-              <label for="assistant-start-month">Mois de début d'étiquetage :</label>
-              <select id="assistant-start-month" class="form-control">
-                <!-- Rempli en JS avec les prochains mois -->
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label for="assistant-duration">Durée de la tournée :</label>
-              <select id="assistant-duration" class="form-control">
-                <option value="3">3 Mois</option>
-                <option value="6" selected>6 Mois (Recommandé)</option>
-                <option value="12">12 Mois</option>
-              </select>
-            </div>
-
-            <div style="background-color: var(--primary-light); padding: 12px; border-radius: 8px; border: 1px solid rgba(15, 118, 110, 0.15); margin-bottom: 16px;">
-              <p style="font-size: 0.85rem; font-weight: 700; color: var(--primary-color); margin-bottom: 4px;">Période ciblée pour la tournée :</p>
-              <p style="font-size: 0.9rem; font-weight: 600;" id="tournee-target-period">-</p>
-            </div>
-            
-            <h4 style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 8px;">Préparez vos pastilles :</h4>
-            <div id="tournee-stickers-list" style="display: flex; flex-direction: column; gap: 8px;">
-              <!-- Rempli en JS -->
-            </div>
-          </div>
-
-          <!-- SUIVI DES SECTIONS (V3.6) -->
-          <div class="card" style="margin-bottom: 0;">
-            <h3 class="card-title" style="font-size: 1.1rem; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
-              <span>Suivi des Sections</span>
-              <span id="tournee-progress-percent" style="font-size: 0.85rem; font-weight: bold; color: var(--primary-color);">0%</span>
+            <h3 class="card-title accordion-header-btn" data-target="card-body-assistant" style="font-size: 1.05rem; margin-bottom: 0;" title="Cliquer pour afficher/masquer l'assistant">
+              <span style="font-weight: 700;">⚙️ Assistant Tournée</span>
+              <span style="display: flex; align-items: center; gap: 8px;">
+                <span class="accordion-action-badge">➕ Configurer</span>
+                <span class="accordion-arrow" style="font-size: 0.8rem; color: var(--text-muted);">▶</span>
+              </span>
             </h3>
             
-            <!-- Progress Bar -->
-            <div style="background-color: var(--border-color); height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: 12px;">
-              <div id="tournee-progress-bar" style="background-color: var(--primary-color); width: 0%; height: 100%; transition: width 0.3s ease;"></div>
-            </div>
+            <div id="card-body-assistant" style="display: none; margin-top: 14px;">
+              <div class="form-group">
+                <label for="assistant-start-month">Mois de début d'étiquetage :</label>
+                <select id="assistant-start-month" class="form-control">
+                  <!-- Rempli en JS avec les prochains mois -->
+                </select>
+              </div>
 
-            <!-- List of Sections -->
-            <div id="tournee-sections-progress-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto; padding-right: 4px;">
-              <!-- Rempli en JS -->
+              <div class="form-group">
+                <label for="assistant-duration">Durée de la tournée :</label>
+                <select id="assistant-duration" class="form-control">
+                  <option value="3">3 Mois</option>
+                  <option value="6" selected>6 Mois (Recommandé)</option>
+                  <option value="12">12 Mois</option>
+                </select>
+              </div>
+
+              <div style="background-color: var(--primary-light); padding: 12px; border-radius: 8px; border: 1px solid rgba(15, 118, 110, 0.15); margin-bottom: 16px;">
+                <p style="font-size: 0.85rem; font-weight: 700; color: var(--primary-color); margin-bottom: 4px;">Période ciblée pour la tournée :</p>
+                <p style="font-size: 0.9rem; font-weight: 600;" id="tournee-target-period">-</p>
+              </div>
+              
+              <h4 style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 8px;">Préparez vos pastilles :</h4>
+              <div id="tournee-stickers-list" style="display: flex; flex-direction: column; gap: 8px;">
+                <!-- Rempli en JS -->
+              </div>
             </div>
           </div>
 
-          <!-- PASTILLE DU PRODUIT EN COURS -->
+          <!-- SUIVI DES SECTIONS (V3.6 - ACCORDION OUVERT) -->
           <div class="card" style="margin-bottom: 0;">
-            <h3 class="card-title" style="font-size: 1.1rem; margin-bottom: 12px;">Visualisation Pastille</h3>
-            <div class="sticker-preview-box" id="form-sticker-preview">
-              <p style="color: var(--text-muted); font-size: 0.9rem;">Saisissez une date d'expiration pour voir la pastille correspondante.</p>
+            <h3 class="card-title accordion-header-btn" data-target="card-body-sections" style="font-size: 1.05rem; margin-bottom: 0;" title="Cliquer pour afficher/masquer la liste des sections">
+              <span style="display: flex; align-items: center; gap: 8px; font-weight: 700;">
+                <span>📋 Suivi des Sections</span>
+                <span id="tournee-progress-percent" style="font-size: 0.85rem; font-weight: bold; color: var(--primary-color);">0%</span>
+              </span>
+              <span style="display: flex; align-items: center; gap: 8px;">
+                <span class="accordion-action-badge">➖ Masquer</span>
+                <span class="accordion-arrow" style="font-size: 0.8rem; color: var(--text-muted);">▼</span>
+              </span>
+            </h3>
+            
+            <div id="card-body-sections" style="display: block; margin-top: 14px;">
+              <!-- Progress Bar -->
+              <div style="background-color: var(--border-color); height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: 12px;">
+                <div id="tournee-progress-bar" style="background-color: var(--primary-color); width: 0%; height: 100%; transition: width 0.3s ease;"></div>
+              </div>
+
+              <!-- List of Sections -->
+              <div id="tournee-sections-progress-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto; padding-right: 4px;">
+                <!-- Rempli en JS -->
+              </div>
+            </div>
+          </div>
+
+          <!-- PASTILLE DU PRODUIT EN COURS (ACCORDION OUVERT) -->
+          <div class="card" style="margin-bottom: 0;">
+            <h3 class="card-title accordion-header-btn" data-target="card-body-sticker" style="font-size: 1.05rem; margin-bottom: 0;" title="Cliquer pour afficher/masquer la pastille">
+              <span style="font-weight: 700;">🏷️ Visualisation Pastille</span>
+              <span style="display: flex; align-items: center; gap: 8px;">
+                <span class="accordion-action-badge">➖ Masquer</span>
+                <span class="accordion-arrow" style="font-size: 0.8rem; color: var(--text-muted);">▼</span>
+              </span>
+            </h3>
+            <div id="card-body-sticker" style="display: block; margin-top: 14px;">
+              <div class="sticker-preview-box" id="form-sticker-preview">
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Saisissez une date d'expiration pour voir la pastille correspondante.</p>
+              </div>
             </div>
           </div>
         </div>
@@ -3829,6 +3921,29 @@
           }
         });
       }
+
+      // Écouteur générique pour les accordéons repliables (Assistant Tournée, Suivi des Sections, Visualisation Pastille)
+      document.addEventListener("click", (e) => {
+        const header = e.target.closest(".accordion-header-btn");
+        if (header) {
+          const targetId = header.getAttribute("data-target");
+          const body = document.getElementById(targetId);
+          const arrow = header.querySelector(".accordion-arrow");
+          const badge = header.querySelector(".accordion-action-badge");
+          if (body) {
+            const isHidden = body.style.display === "none";
+            body.style.display = isHidden ? "block" : "none";
+            if (arrow) arrow.textContent = isHidden ? "▼" : "▶";
+            if (badge) {
+              if (targetId === "card-body-assistant") {
+                badge.textContent = isHidden ? "➖ Masquer" : "➕ Configurer";
+              } else {
+                badge.textContent = isHidden ? "➖ Masquer" : "➕ Afficher";
+              }
+            }
+          }
+        }
+      });
 
       // Soumission d'enregistrement produit
       document.getElementById("product-form").addEventListener("submit", (e) => {
@@ -5598,7 +5713,13 @@
               <span>${stickerInfo.name}</span>
             </div>
           </td>
-          <td style="font-weight: 700;">${prod.quantity}</td>
+          <td style="font-weight: 700; white-space: nowrap;">
+            <div style="display: inline-flex; align-items: center; gap: 4px;">
+              <button type="button" class="btn-qty-step" onclick="stepEntryQuantity('${prod.id}', -1)" title="Diminuer la quantité">-</button>
+              <span style="padding: 0 4px;" class="num">${prod.quantity}</span>
+              <button type="button" class="btn-qty-step" onclick="stepEntryQuantity('${prod.id}', 1)" title="Augmenter la quantité">+</button>
+            </div>
+          </td>
           <td>
             <div class="action-btn-group">
               <button class="btn-icon" title="Modifier" onclick="openEditModal('${prod.id}')">
@@ -6211,6 +6332,19 @@
         }
         filterMonth.appendChild(opt);
       });
+    }
+
+    function stepEntryQuantity(id, delta) {
+      const prod = state.products.find(p => p.id === id);
+      if (prod) {
+        const newQty = Math.max(1, parseInt(prod.quantity || 1) + delta);
+        if (newQty !== prod.quantity) {
+          prod.quantity = newQty;
+          saveProducts();
+          renderAllViews();
+          showToast(`Quantité de "${prod.product}" ajustée à ${newQty}.`, "success");
+        }
+      }
     }
 
     // ----------------------------------------------------
