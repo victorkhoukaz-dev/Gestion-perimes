@@ -5747,75 +5747,115 @@
         const counts = isRetrait ? sectionCountsRetrait : sectionCountsTournee;
         
         sections.forEach(secName => {
-          let userStatus = state.sectionsProgress[tourKey] ? state.sectionsProgress[tourKey][secName] : undefined;
           const count = counts[secName] || 0;
-          
-          let isCompleted = (userStatus === 'completed');
-          
-          let dotColor = "#ef4444"; // Rouge si non entamé
-          if (isCompleted) {
-            dotColor = "#10b981"; // Vert si complété (coché)
-          } else if (count > 0) {
-            dotColor = "#f59e0b"; // Jaune/Orange si produits saisis
-          }
-          
-          const isChecked = isCompleted ? 'checked' : '';
+          let isCompleted = false;
+          let dotColor = "#ef4444";
 
-          const item = document.createElement("div");
-          item.className = "section-progress-item";
-          item.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0;">
-              <span class="status-dot-glow" style="color: ${dotColor}; background-color: ${dotColor};"></span>
-              <span style="font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-color);" title="${secName}">${secName}</span>
-              <span style="font-size: 0.75rem; color: var(--text-muted); margin-left: 2px;">(${count})</span>
-            </div>
-            <label style="display: flex; align-items: center; cursor: pointer; margin-bottom: 0;">
-              <input type="checkbox" ${isChecked} style="width: 16px; height: 16px; accent-color: var(--primary-color);" class="sec-progress-cb">
-            </label>
-          `;
-          
-          const cb = item.querySelector(".sec-progress-cb");
-          if (cb) {
-            cb.addEventListener("change", async (e) => {
-              try {
-                if (e.target.checked) {
-                  state.sectionsProgress[tourKey][secName] = 'completed';
-                } else {
-                  state.sectionsProgress[tourKey][secName] = 'in_progress';
+          if (isRetrait) {
+            // RETRAIT MENSUEL : Progression 100% AUTOMATIQUE pour le mois sélectionné
+            // count === 0 => Tous les produits du mois sont retirés/vendus ou aucun produit ciblé => ÉPURÉE 🟢
+            // count > 0  => Il reste des produits actifs à retirer => À ÉPURER 🟡
+            if (count === 0) {
+              isCompleted = true;
+              dotColor = "#10b981"; // Vert Épurée
+            } else {
+              isCompleted = false;
+              dotColor = "#f59e0b"; // Ambre En cours
+            }
+
+            const item = document.createElement("div");
+            item.className = "section-progress-item";
+            item.innerHTML = `
+              <div style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0;">
+                <span class="status-dot-glow" style="color: ${dotColor}; background-color: ${dotColor};"></span>
+                <span style="font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-color);" title="${secName}">${secName}</span>
+                <span style="font-size: 0.75rem; color: var(--text-muted); margin-left: 2px;">
+                  ${count > 0 ? `(${count} à retirer)` : ''}
+                </span>
+              </div>
+              <span style="font-size: 0.78rem; font-weight: 700; color: ${dotColor};">
+                ${isCompleted ? '✓ Épurée' : '⏳ En cours'}
+              </span>
+            `;
+            container.appendChild(item);
+
+          } else {
+            // SAISIE / TOURNÉE : Progression MANUELLE par le technicien
+            let userStatus = state.sectionsProgress[tourKey] ? state.sectionsProgress[tourKey][secName] : undefined;
+            isCompleted = (userStatus === 'completed');
+            
+            if (isCompleted) {
+              dotColor = "#10b981"; // Vert si complété
+            } else if (count > 0) {
+              dotColor = "#f59e0b"; // Jaune/Orange si des produits sont saisis
+            } else {
+              dotColor = "#ef4444"; // Rouge si non entamé
+            }
+            
+            const isChecked = isCompleted ? 'checked' : '';
+
+            const item = document.createElement("div");
+            item.className = "section-progress-item";
+            item.innerHTML = `
+              <div style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0;">
+                <span class="status-dot-glow" style="color: ${dotColor}; background-color: ${dotColor};"></span>
+                <span style="font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-color);" title="${secName}">${secName}</span>
+                <span style="font-size: 0.75rem; color: var(--text-muted); margin-left: 2px;">(${count})</span>
+              </div>
+              <label style="display: flex; align-items: center; cursor: pointer; margin-bottom: 0;">
+                <input type="checkbox" ${isChecked} style="width: 16px; height: 16px; accent-color: var(--primary-color);" class="sec-progress-cb">
+              </label>
+            `;
+            
+            const cb = item.querySelector(".sec-progress-cb");
+            if (cb) {
+              cb.addEventListener("change", async (e) => {
+                try {
+                  if (e.target.checked) {
+                    state.sectionsProgress[tourKey][secName] = 'completed';
+                  } else {
+                    state.sectionsProgress[tourKey][secName] = 'in_progress';
+                  }
+                  updateSectionsProgressUI();
+                  await saveConfig();
+                } catch (err) {
+                  console.error("Erreur enregistrement progression section:", err);
                 }
-                updateSectionsProgressUI();
-                await saveConfig();
-              } catch (err) {
-                console.error("Erreur enregistrement progression section:", err);
-              }
-            });
+              });
+            }
+            container.appendChild(item);
           }
-          container.appendChild(item);
         });
       };
-
-      sections.forEach(secName => {
-        const userStatus = state.sectionsProgress[tourKey] ? state.sectionsProgress[tourKey][secName] : undefined;
-        if (userStatus === 'completed') {
-          completedCount++;
-        }
-      });
 
       populateContainer(progressListTournee, false);
       populateContainer(progressListRetrait, true);
 
+      // Calcul des pourcentages de progression séparés
       const totalSections = sections.length || 1;
-      const percent = Math.round((completedCount / totalSections) * 100);
-      
+
+      let completedCountTournee = 0;
+      sections.forEach(secName => {
+        const userStatus = state.sectionsProgress[tourKey] ? state.sectionsProgress[tourKey][secName] : undefined;
+        if (userStatus === 'completed') completedCountTournee++;
+      });
+      const percentTournee = Math.round((completedCountTournee / totalSections) * 100);
+
+      let completedCountRetrait = 0;
+      sections.forEach(secName => {
+        if ((sectionCountsRetrait[secName] || 0) === 0) completedCountRetrait++;
+      });
+      const percentRetrait = Math.round((completedCountRetrait / totalSections) * 100);
+
       const tourneePercent = document.getElementById("tournee-progress-percent");
       const tourneeBar = document.getElementById("tournee-progress-bar");
-      if (tourneePercent) tourneePercent.textContent = `${percent}%`;
-      if (tourneeBar) tourneeBar.style.width = `${percent}%`;
+      if (tourneePercent) tourneePercent.textContent = `${percentTournee}%`;
+      if (tourneeBar) tourneeBar.style.width = `${percentTournee}%`;
 
       const retraitPercent = document.getElementById("retrait-progress-percent");
       const retraitBar = document.getElementById("retrait-progress-bar");
-      if (retraitPercent) retraitPercent.textContent = `${percent}%`;
-      if (retraitBar) retraitBar.style.width = `${percent}%`;
+      if (retraitPercent) retraitPercent.textContent = `${percentRetrait}%`;
+      if (retraitBar) retraitBar.style.width = `${percentRetrait}%`;
     }
 
     async function addNewProduct() {
