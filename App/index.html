@@ -140,9 +140,9 @@
       top: 0;
       z-index: 25;
       background-color: var(--bg-color);
-      padding-top: 4px;
-      padding-bottom: 0px;
-      margin-bottom: 0px;
+      padding-top: 8px;
+      padding-bottom: 6px;
+      margin-bottom: 14px;
     }
 
     header {
@@ -150,7 +150,7 @@
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 14px;
       padding: 12px 20px;
-      margin-bottom: 6px;
+      margin-bottom: 12px;
       box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.25);
       display: flex;
       justify-content: space-between;
@@ -495,7 +495,7 @@
 
     .tab-content.active {
       display: block;
-      margin-top: 6px;
+      margin-top: 0;
       animation: fadeIn 0.25s ease;
     }
 
@@ -3483,6 +3483,11 @@
     function hideAuthScreen() {
       document.getElementById("login-container").style.display = "none";
       document.getElementById("main-app-wrapper").style.display = "block";
+      
+      // Sélection immédiate de l'onglet par défaut (Mobile: Saisie / Tournée | Desktop: Retrait Mensuel)
+      const defaultTabId = (window.innerWidth <= 768) ? "tab-tournee" : "tab-retrait";
+      const defaultBtn = document.querySelector(`.tab-btn[data-tab="${defaultTabId}"], .mobile-nav-item[data-tab="${defaultTabId}"]`);
+      if (defaultBtn) defaultBtn.click();
     }
 
     function showLoading(text) {
@@ -3629,9 +3634,7 @@
         initializeTourneeSelects();
         renderAllViews();
         
-        // Activer l'onglet "Saisie / Tournée" par défaut dès la connexion (V3.9.7)
-        const tourneeTabBtn = document.querySelector('[data-tab="tab-tournee"]');
-        if (tourneeTabBtn) tourneeTabBtn.click();
+
         
       } catch (err) {
         console.error("Erreur loadData", err);
