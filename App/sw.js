@@ -1,7 +1,8 @@
-const CACHE_NAME = 'expires-lab-v19';
+const CACHE_NAME = 'expires-lab-v20';
 const ASSETS = [
   './index.html',
   './Application - périmés.html',
+  './code_2d_example.png',
   './supabase.js',
   './html5-qrcode.min.js',
   './manifest.json'
