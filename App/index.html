@@ -3487,6 +3487,14 @@
     }
 
     async function checkAuthSession() {
+      // Détecter si le lien est une réinitialisation de mot de passe (type=recovery)
+      const isRecovery = window.location.hash && window.location.hash.includes("type=recovery");
+      if (isRecovery && !window.location.hash.includes("error_code")) {
+        hideLoading();
+        showNewPasswordScreen();
+        return;
+      }
+
       showLoading("Vérification de la session...");
       const { data: { session }, error } = await supabaseClient.auth.getSession();
       
@@ -3497,6 +3505,18 @@
       }
       
       await handleLoginSuccess(session.user);
+    }
+
+    function showNewPasswordScreen() {
+      document.getElementById("login-container").style.display = "flex";
+      document.getElementById("main-app-wrapper").style.display = "none";
+      document.getElementById("login-form").style.display = "none";
+      document.getElementById("register-form").style.display = "none";
+      document.getElementById("reset-password-form").style.display = "none";
+      document.getElementById("new-password-form").style.display = "block";
+      document.getElementById("login-header").querySelector("h2").textContent = "Nouveau mot de passe";
+      document.getElementById("login-error-msg").style.display = "none";
+      document.getElementById("login-info-msg").style.display = "none";
     }
 
     function showAuthScreen() {
@@ -4021,6 +4041,11 @@
           return;
         }
         
+        // Nettoyer l'URL hash
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState(null, null, window.location.pathname);
+        }
+        
         showInfo("✅ Votre mot de passe a été mis à jour avec succès !");
         await handleLoginSuccess(data.user);
       });
@@ -4028,15 +4053,7 @@
       supabaseClient.auth.onAuthStateChange(async (event, session) => {
         if (event === 'PASSWORD_RECOVERY') {
           hideLoading();
-          document.getElementById("login-container").style.display = "flex";
-          document.getElementById("main-app-wrapper").style.display = "none";
-          document.getElementById("login-form").style.display = "none";
-          document.getElementById("register-form").style.display = "none";
-          document.getElementById("reset-password-form").style.display = "none";
-          document.getElementById("new-password-form").style.display = "block";
-          document.getElementById("login-header").querySelector("h2").textContent = "Nouveau mot de passe";
-          document.getElementById("login-error-msg").style.display = "none";
-          document.getElementById("login-info-msg").style.display = "none";
+          showNewPasswordScreen();
         }
       });
       
