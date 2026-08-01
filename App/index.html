@@ -2191,6 +2191,41 @@
         border-bottom: 2px solid var(--border-color);
       }
       
+      /* Option A : Cartes KPI ultra-compactes 3 colonnes sur 1 seule ligne sur mobile */
+      .stats-container {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 6px !important;
+        margin-bottom: 12px !important;
+      }
+      .stat-card {
+        padding: 8px 4px !important;
+        border-radius: 12px !important;
+        flex-direction: column !important;
+        text-align: center !important;
+        justify-content: center !important;
+        align-items: center !important;
+        gap: 4px !important;
+        min-width: 0 !important;
+      }
+      .stat-icon {
+        width: 32px !important;
+        height: 32px !important;
+        border-radius: 8px !important;
+      }
+      .stat-icon svg {
+        width: 16px !important;
+        height: 16px !important;
+      }
+      .stat-info h3 {
+        font-size: 1.15rem !important;
+        margin: 0 !important;
+      }
+      .stat-info p {
+        font-size: 0.68rem !important;
+        line-height: 1.15 !important;
+        margin-top: 1px !important;
+      }
+      
       /* Card padding reduction and min-width override (V3.9.4) */
       .card {
         padding: 16px;
