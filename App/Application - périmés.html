@@ -2728,9 +2728,14 @@
         <div style="display: flex; flex-direction: column; gap: 16px;">
           <!-- MODE TOURNEE ASSISTANT FLEXIBLE (V3 - ACCORDION REPLIABLE) -->
           <div class="card" style="margin-bottom: 0;">
-            <h3 class="card-title accordion-header-btn" data-target="card-body-assistant" style="font-size: 1.05rem; margin-bottom: 0;" title="Cliquer pour afficher/masquer l'assistant">
-              <span style="font-weight: 700;">⚙️ Assistant Tournée</span>
-              <span style="display: flex; align-items: center; gap: 8px;">
+            <h3 class="card-title accordion-header-btn" data-target="card-body-assistant" style="font-size: 1rem; margin-bottom: 0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;" title="Cliquer pour afficher/masquer l'assistant">
+              <span style="font-weight: 700; white-space: nowrap;">⚙️ Assistant Tournée</span>
+              <span style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <span style="display: flex; align-items: center; gap: 4px;" onclick="event.stopPropagation();">
+                  <select id="header-assistant-start-month" class="form-control" style="padding: 4px 8px; font-size: 0.8rem; height: auto; width: auto; font-weight: 600; cursor: pointer; background-color: var(--primary-light); color: var(--primary-color); border: 1px solid rgba(15, 118, 110, 0.25); border-radius: 6px;">
+                    <!-- Rempli en JS -->
+                  </select>
+                </span>
                 <span class="accordion-action-badge">➕ Configurer</span>
                 <span class="accordion-arrow" style="font-size: 0.8rem; color: var(--text-muted);">▶</span>
               </span>
@@ -4218,10 +4223,12 @@
     // Remplir les listes déroulantes de l'assistant de tournée flexible (V3)
     function initializeTourneeSelects() {
       const selectMonth = document.getElementById("assistant-start-month");
+      const selectMonthHeader = document.getElementById("header-assistant-start-month");
       const selectDuration = document.getElementById("assistant-duration");
 
       // Remplir le mois de début de la tournée (de M-1 à M+6 pour offrir du choix)
-      selectMonth.innerHTML = "";
+      if (selectMonth) selectMonth.innerHTML = "";
+      if (selectMonthHeader) selectMonthHeader.innerHTML = "";
       
       const startSeed = new Date(state.currentDate);
       startSeed.setMonth(startSeed.getMonth() - 1); // Commencer à M-1 pour flexibilité
@@ -4233,26 +4240,37 @@
         const year = loopDate.getFullYear();
         const monthNum = String(loopDate.getMonth() + 1).padStart(2, '0');
         const key = `${year}-${monthNum}`;
+        const labelText = formatMonthYearFrench(loopDate);
 
-        const opt = document.createElement("option");
-        opt.value = key;
-        opt.textContent = formatMonthYearFrench(loopDate);
-        
         // Par défaut: sélectionner M+2 (Août 2026 si courant Juin 2026)
         const defaultTargetDate = new Date(state.currentDate);
         defaultTargetDate.setMonth(defaultTargetDate.getMonth() + 2);
         const defaultTargetKey = `${defaultTargetDate.getFullYear()}-${String(defaultTargetDate.getMonth() + 1).padStart(2, '0')}`;
+        const isSelected = (key === defaultTargetKey);
         
-        if (key === defaultTargetKey) {
-          opt.selected = true;
+        if (isSelected) {
           state.tourneeStartMonth = key;
         }
 
-        selectMonth.appendChild(opt);
+        if (selectMonth) {
+          const opt = document.createElement("option");
+          opt.value = key;
+          opt.textContent = labelText;
+          if (isSelected) opt.selected = true;
+          selectMonth.appendChild(opt);
+        }
+
+        if (selectMonthHeader) {
+          const optHeader = document.createElement("option");
+          optHeader.value = key;
+          optHeader.textContent = labelText;
+          if (isSelected) optHeader.selected = true;
+          selectMonthHeader.appendChild(optHeader);
+        }
       }
 
       // Remplir la durée
-      selectDuration.value = state.tourneeDuration;
+      if (selectDuration) selectDuration.value = state.tourneeDuration;
 
       // Définir la date d'expiration par défaut du formulaire de saisie sur le mois cible de départ
       document.getElementById("form-expiry").value = state.tourneeStartMonth;
@@ -4387,6 +4405,10 @@
 
       // Écouteur générique pour les accordéons repliables (Assistant Tournée, Suivi des Sections, Visualisation Pastille)
       document.addEventListener("click", (e) => {
+        // Ignorer les clics sur les éléments select dans le header
+        if (e.target.tagName === "SELECT" || e.target.tagName === "OPTION" || e.target.closest("select")) {
+          return;
+        }
         const header = e.target.closest(".accordion-header-btn");
         if (header) {
           const targetId = header.getAttribute("data-target");
