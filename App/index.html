@@ -3730,12 +3730,16 @@
           upc: p.upc || ""
         }));
         
-        await loadSupabaseCatalogToMemory();
+        // 1. Rendre l'interface immédiatement réactive et afficher les vues
         populateSectionDropdowns();
         initializeTourneeSelects();
         renderAllViews();
+        hideLoading();
         
-
+        // 2. Charger le grand catalogue d'auto-complétion en arrière-plan sans bloquer l'interface
+        loadSupabaseCatalogToMemory().catch(err => {
+          console.error("Erreur chargement catalogue arrière-plan:", err);
+        });
         
       } catch (err) {
         console.error("Erreur loadData", err);
