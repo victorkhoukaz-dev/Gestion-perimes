@@ -2133,8 +2133,7 @@
       /* Option A: Supprimer l'espace vide sous le header sur mobile */
       .app-header-container {
         margin-bottom: 0 !important;
-        padding-bottom: 0 !important;
-        padding-top: 4px !important;
+        padding: 4px 0 0 0 !important;
       }
 
       /* Header mobile pro & compact (Ligne supérieure) */
@@ -2145,6 +2144,7 @@
         padding: 10px 14px !important;
         gap: 8px !important;
         border-radius: 10px !important;
+        margin-bottom: 0 !important;
       }
       
       .header-title p,
@@ -2181,10 +2181,12 @@
         display: flex !important;
         align-items: center;
         gap: 8px;
-        font-size: 1.15rem;
+        font-size: 1.1rem;
         font-weight: 700;
         color: var(--primary-color);
-        margin: 2px 0 8px 2px;
+        margin: 6px 0 0 0;
+        padding: 4px 4px 8px 4px;
+        border-bottom: 2px solid var(--border-color);
       }
       
       /* Card padding reduction and min-width override (V3.9.4) */
@@ -2398,10 +2400,10 @@
           Guide & Tutoriel
         </button>
       </nav>
-    </div>
 
-    <!-- TITRE DE SECTION SÉPARÉ UNIQUE SUR MOBILE (Option A) -->
-    <div id="mobile-section-header" class="mobile-section-header">📝 Saisie / Tournée</div>
+      <!-- TITRE DE SECTION SÉPARÉ UNIQUE SUR MOBILE (Option A) -->
+      <div id="mobile-section-header" class="mobile-section-header">📝 Saisie / Tournée</div>
+    </div>
 
       <!-- BARRE DE NAVIGATION EN BAS D'ÉCRAN (STYLE APP NATIVE MOBILE) -->
       <nav class="mobile-bottom-nav">
