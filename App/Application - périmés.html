@@ -2191,6 +2191,41 @@
         border-bottom: 2px solid var(--border-color);
       }
       
+      /* Option A : Cartes KPI ultra-compactes 3 colonnes sur 1 seule ligne sur mobile */
+      .stats-container {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 6px !important;
+        margin-bottom: 12px !important;
+      }
+      .stat-card {
+        padding: 8px 4px !important;
+        border-radius: 12px !important;
+        flex-direction: column !important;
+        text-align: center !important;
+        justify-content: center !important;
+        align-items: center !important;
+        gap: 4px !important;
+        min-width: 0 !important;
+      }
+      .stat-icon {
+        width: 32px !important;
+        height: 32px !important;
+        border-radius: 8px !important;
+      }
+      .stat-icon svg {
+        width: 16px !important;
+        height: 16px !important;
+      }
+      .stat-info h3 {
+        font-size: 1.15rem !important;
+        margin: 0 !important;
+      }
+      .stat-info p {
+        font-size: 0.68rem !important;
+        line-height: 1.15 !important;
+        margin-top: 1px !important;
+      }
+      
       /* Card padding reduction and min-width override (V3.9.4) */
       .card {
         padding: 16px;
@@ -2288,6 +2323,9 @@
           <label for="login-password">Mot de passe</label>
           <input type="password" id="login-password" required placeholder="••••••••">
         </div>
+        <div style="text-align: right; margin-top: -6px; margin-bottom: 14px;">
+          <a href="#" id="link-show-reset" style="font-size: 0.8rem; color: var(--primary); text-decoration: none;">Mot de passe oublié ?</a>
+        </div>
         <button type="submit" class="btn btn-login">Se connecter</button>
         <p class="switch-auth-mode">Nouveau ? <a href="#" id="link-show-register">Créer un compte de pharmacie</a></p>
       </form>
@@ -2312,6 +2350,25 @@
         </div>
         <button type="submit" class="btn btn-login">Créer la pharmacie et le compte</button>
         <p class="switch-auth-mode">Déjà inscrit ? <a href="#" id="link-show-login">Se connecter</a></p>
+      </form>
+
+      <form id="reset-password-form" style="display: none;">
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px;">Saisissez votre adresse courriel. Nous vous enverrons un lien pour réinitialiser votre mot de passe.</p>
+        <div class="form-group">
+          <label for="reset-email">Adresse courriel</label>
+          <input type="email" id="reset-email" required placeholder="nom@pharmacie.com">
+        </div>
+        <button type="submit" class="btn btn-login">Envoyer le lien de réinitialisation</button>
+        <p class="switch-auth-mode"><a href="#" id="link-reset-to-login">Retour à la connexion</a></p>
+      </form>
+
+      <form id="new-password-form" style="display: none;">
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px;">Saisissez votre nouveau mot de passe ci-dessous.</p>
+        <div class="form-group">
+          <label for="new-password">Nouveau mot de passe (Min. 6 car.)</label>
+          <input type="password" id="new-password" required minlength="6" placeholder="••••••••">
+        </div>
+        <button type="submit" class="btn btn-login">Mettre à jour le mot de passe</button>
       </form>
       
       <div id="login-loading" class="login-loading" style="display: none;">
@@ -3446,6 +3503,17 @@
       document.getElementById("login-container").style.display = "flex";
       document.getElementById("main-app-wrapper").style.display = "none";
       
+      // Détecter les erreurs de réinitialisation dans l'URL hash (ex: lien expiré ou invalide)
+      if (window.location.hash && window.location.hash.includes("error_code")) {
+        try {
+          const hashParams = new URLSearchParams(window.location.hash.substring(1));
+          const errorDesc = hashParams.get("error_description");
+          if (errorDesc) {
+            showError("⚠️ Lien invalide ou expiré (" + decodeURIComponent(errorDesc).replace(/\+/g, " ") + "). Veuillez refaire une demande de mot de passe.");
+          }
+        } catch (e) {}
+      }
+
       // Gérer l'affichage d'invitation (V3.7)
       const urlParams = new URLSearchParams(window.location.search);
       const inviteId = urlParams.get("invite");
@@ -3519,6 +3587,14 @@
       const text = formatErrorMessage(message);
       errDiv.textContent = text.startsWith("⚠️") ? text : "⚠️ " + text;
       errDiv.style.display = "block";
+    }
+
+    function showInfo(message) {
+      const infoDiv = document.getElementById("login-info-msg");
+      if (infoDiv) {
+        infoDiv.innerHTML = message;
+        infoDiv.style.display = "block";
+      }
     }
 
     async function handleLoginSuccess(user) {
@@ -3845,16 +3921,44 @@
         e.preventDefault();
         document.getElementById("login-form").style.display = "none";
         document.getElementById("register-form").style.display = "block";
+        document.getElementById("reset-password-form").style.display = "none";
+        document.getElementById("new-password-form").style.display = "none";
         document.getElementById("login-header").querySelector("h2").textContent = "Créer un compte";
         document.getElementById("login-error-msg").style.display = "none";
+        document.getElementById("login-info-msg").style.display = "none";
       });
       
       document.getElementById("link-show-login").addEventListener("click", (e) => {
         e.preventDefault();
         document.getElementById("login-form").style.display = "block";
         document.getElementById("register-form").style.display = "none";
+        document.getElementById("reset-password-form").style.display = "none";
+        document.getElementById("new-password-form").style.display = "none";
         document.getElementById("login-header").querySelector("h2").textContent = "Gestion des Expirés";
         document.getElementById("login-error-msg").style.display = "none";
+        document.getElementById("login-info-msg").style.display = "none";
+      });
+
+      document.getElementById("link-show-reset").addEventListener("click", (e) => {
+        e.preventDefault();
+        document.getElementById("login-form").style.display = "none";
+        document.getElementById("register-form").style.display = "none";
+        document.getElementById("reset-password-form").style.display = "block";
+        document.getElementById("new-password-form").style.display = "none";
+        document.getElementById("login-header").querySelector("h2").textContent = "Réinitialisation";
+        document.getElementById("login-error-msg").style.display = "none";
+        document.getElementById("login-info-msg").style.display = "none";
+      });
+
+      document.getElementById("link-reset-to-login").addEventListener("click", (e) => {
+        e.preventDefault();
+        document.getElementById("login-form").style.display = "block";
+        document.getElementById("register-form").style.display = "none";
+        document.getElementById("reset-password-form").style.display = "none";
+        document.getElementById("new-password-form").style.display = "none";
+        document.getElementById("login-header").querySelector("h2").textContent = "Gestion des Expirés";
+        document.getElementById("login-error-msg").style.display = "none";
+        document.getElementById("login-info-msg").style.display = "none";
       });
       
       document.getElementById("login-form").addEventListener("submit", async (e) => {
@@ -3864,6 +3968,7 @@
         
         showLoading("Connexion en cours...");
         document.getElementById("login-error-msg").style.display = "none";
+        document.getElementById("login-info-msg").style.display = "none";
         
         const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
         
@@ -3874,6 +3979,65 @@
         }
         
         await handleLoginSuccess(data.user);
+      });
+
+      document.getElementById("reset-password-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const email = document.getElementById("reset-email").value.trim();
+        
+        showLoading("Envoi du courriel...");
+        document.getElementById("login-error-msg").style.display = "none";
+        document.getElementById("login-info-msg").style.display = "none";
+        
+        const redirectUrl = window.location.origin + window.location.pathname;
+        const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+          redirectTo: redirectUrl
+        });
+        
+        hideLoading();
+        if (error) {
+          showError("Erreur lors de l'envoi : " + error.message);
+        } else {
+          document.getElementById("reset-password-form").style.display = "none";
+          document.getElementById("login-form").style.display = "block";
+          document.getElementById("login-header").querySelector("h2").textContent = "Gestion des Expirés";
+          showInfo("ℹ️ Un courriel contenant un lien de réinitialisation vous a été envoyé. Veuillez vérifier votre boîte de réception.");
+        }
+      });
+
+      document.getElementById("new-password-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const newPassword = document.getElementById("new-password").value;
+        
+        showLoading("Mise à jour du mot de passe...");
+        document.getElementById("login-error-msg").style.display = "none";
+        document.getElementById("login-info-msg").style.display = "none";
+        
+        const { data, error } = await supabaseClient.auth.updateUser({ password: newPassword });
+        
+        if (error) {
+          hideLoading();
+          showError("Erreur lors de la mise à jour : " + error.message);
+          return;
+        }
+        
+        showInfo("✅ Votre mot de passe a été mis à jour avec succès !");
+        await handleLoginSuccess(data.user);
+      });
+
+      supabaseClient.auth.onAuthStateChange(async (event, session) => {
+        if (event === 'PASSWORD_RECOVERY') {
+          hideLoading();
+          document.getElementById("login-container").style.display = "flex";
+          document.getElementById("main-app-wrapper").style.display = "none";
+          document.getElementById("login-form").style.display = "none";
+          document.getElementById("register-form").style.display = "none";
+          document.getElementById("reset-password-form").style.display = "none";
+          document.getElementById("new-password-form").style.display = "block";
+          document.getElementById("login-header").querySelector("h2").textContent = "Nouveau mot de passe";
+          document.getElementById("login-error-msg").style.display = "none";
+          document.getElementById("login-info-msg").style.display = "none";
+        }
       });
       
       document.getElementById("register-form").addEventListener("submit", async (e) => {
