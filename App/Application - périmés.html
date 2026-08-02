@@ -3019,6 +3019,7 @@
               <div style="display: flex; gap: 8px; align-items: center;">
                 <input type="text" id="config-pharmacy-code" class="form-control" readonly style="background-color: white; font-family: monospace; font-size: 1.1rem; font-weight: 700; letter-spacing: 2px; text-align: center; color: var(--primary-color); flex: 1;">
                 <button class="btn btn-secondary" id="btn-copy-pharmacy-code" style="padding: 8px 12px; font-size: 0.85rem;">Copier</button>
+                <button class="btn btn-secondary" id="btn-regen-pharmacy-code" style="padding: 8px 12px; font-size: 0.85rem;" title="Régénérer un nouveau code de sécurité">🔄</button>
               </div>
             </div>
 
@@ -3040,13 +3041,14 @@
                 <tr>
                   <th>Membre / Courriel</th>
                   <th style="width: 90px; text-align: center;">Initiales</th>
+                  <th style="width: 110px; text-align: center;">Activité</th>
                   <th style="width: 120px;">Rôle</th>
                   <th style="width: 90px; text-align: center;">Statut</th>
-                  <th style="width: 100px; text-align: right;" id="th-team-actions">Action</th>
+                  <th style="width: 150px; text-align: right;" id="th-team-actions">Actions</th>
                 </tr>
               </thead>
               <tbody id="team-members-list">
-                <tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 16px;">Chargement des membres...</td></tr>
+                <tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 16px;">Chargement des membres...</td></tr>
               </tbody>
             </table>
           </div>
@@ -4652,6 +4654,37 @@
           if (codeInput && codeInput.value) {
             navigator.clipboard.writeText(codeInput.value);
             showToast("Code pharmacie copié : " + codeInput.value, "success");
+          }
+        });
+      }
+
+      const btnRegenCode = document.getElementById("btn-regen-pharmacy-code");
+      if (btnRegenCode) {
+        btnRegenCode.addEventListener("click", async () => {
+          if (!sessionPharmacy) return;
+          if (confirm("Voulez-vous régénérer le code à 6 caractères de votre pharmacie ? Les techniciens devront utiliser ce nouveau code pour s'inscrire.")) {
+            showLoading("Régénération du code...");
+            try {
+              const chars = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
+              let newCode = "PH-";
+              for (let i = 0; i < 4; i++) newCode += chars.charAt(Math.floor(Math.random() * chars.length));
+
+              const { error: updateErr } = await supabaseClient
+                .from("pharmacies")
+                .update({ code: newCode })
+                .eq("id", sessionPharmacy.id);
+
+              if (updateErr) throw updateErr;
+
+              sessionPharmacy.code = newCode;
+              const input = document.getElementById("config-pharmacy-code");
+              if (input) input.value = newCode;
+              showToast("Nouveau code pharmacie généré : " + newCode, "success");
+            } catch (err) {
+              showError("Erreur régénération code : " + formatErrorMessage(err));
+            } finally {
+              hideLoading();
+            }
           }
         });
       }
@@ -6919,7 +6952,7 @@
         if (error) throw error;
 
         if (!members || members.length === 0) {
-          container.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 16px;">Aucun membre trouvé.</td></tr>`;
+          container.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 16px;">Aucun membre trouvé.</td></tr>`;
           return;
         }
 
@@ -6935,18 +6968,23 @@
             ? `<span class="badge" style="background: var(--primary-light); color: var(--primary-color); font-weight: 700;">Propriétaire</span>`
             : `<span class="badge" style="background: #e2e8f0; color: #334155;">Technicien(ne)</span>`;
           
+          // Calculer le nombre d'actions/saisies effectuées par ce membre
+          const activityCount = state.products ? state.products.filter(p => p.techInitials === m.initials || p.removedBy === m.initials).length : 0;
+
           html += `
             <tr>
               <td>
                 <strong>${m.email || 'Sans courriel'}</strong> ${isMe ? '<span style="font-size: 0.75rem; color: var(--primary-color); font-weight: 700;">(Vous)</span>' : ''}
               </td>
               <td style="text-align: center;"><strong>${m.initials || 'N/A'}</strong></td>
+              <td style="text-align: center;"><span style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">${activityCount} action(s)</span></td>
               <td>${roleBadge}</td>
               <td style="text-align: center;"><span class="badge success">Actif</span></td>
               ${isOwner ? `
                 <td style="text-align: right;">
-                  ${!isMe && !isMemOwner ? `
-                    <button type="button" class="btn btn-danger btn-remove-member" data-id="${m.id}" data-email="${m.email}" style="padding: 4px 8px; font-size: 0.75rem;">Retirer</button>
+                  ${!isMe ? `
+                    <button type="button" class="btn btn-secondary btn-toggle-role" data-id="${m.id}" data-role="${m.role}" data-email="${m.email}" style="padding: 4px 6px; font-size: 0.75rem; margin-right: 4px;" title="Changer de rôle">${isMemOwner ? '→ Tech' : '→ Owner'}</button>
+                    <button type="button" class="btn btn-danger btn-remove-member" data-id="${m.id}" data-email="${m.email}" style="padding: 4px 6px; font-size: 0.75rem;">Retirer</button>
                   ` : ''}
                 </td>
               ` : ''}
@@ -6956,6 +6994,35 @@
 
         container.innerHTML = html;
 
+        // Attacher les écouteurs de changement de rôle
+        container.querySelectorAll(".btn-toggle-role").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            const memberId = btn.getAttribute("data-id");
+            const memberEmail = btn.getAttribute("data-email");
+            const currentRole = btn.getAttribute("data-role");
+            const newRole = (currentRole === "owner" || currentRole === "admin") ? "tech" : "owner";
+            const roleLabel = newRole === "owner" ? "Propriétaire" : "Technicien(ne)";
+
+            if (confirm(`Voulez-vous modifier le rôle de ${memberEmail} pour : ${roleLabel} ?`)) {
+              showLoading("Mise à jour du rôle...");
+              try {
+                const { error: roleErr } = await supabaseClient
+                  .from("profiles")
+                  .update({ role: newRole })
+                  .eq("id", memberId);
+                if (roleErr) throw roleErr;
+                showToast(`Rôle mis à jour (${roleLabel}).`, "success");
+                await renderTeamMembersUI();
+              } catch (err) {
+                showError("Erreur changement de rôle : " + formatErrorMessage(err));
+              } finally {
+                hideLoading();
+              }
+            }
+          });
+        });
+
+        // Attacher les écouteurs de suppression
         container.querySelectorAll(".btn-remove-member").forEach(btn => {
           btn.addEventListener("click", async () => {
             const memberId = btn.getAttribute("data-id");

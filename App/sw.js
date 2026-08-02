@@ -1,4 +1,4 @@
-const CACHE_NAME = 'expires-lab-v26';
+const CACHE_NAME = 'expires-lab-v27';
 const ASSETS = [
   './index.html',
   './Application - périmés.html',
