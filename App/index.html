@@ -2871,20 +2871,6 @@
             </div>
           </div>
 
-          <!-- PASTILLE DU PRODUIT EN COURS (ACCORDION OUVERT) -->
-          <div class="card" style="margin-bottom: 0;">
-            <h3 class="card-title accordion-header-btn" data-target="card-body-sticker" style="font-size: 1.05rem; margin-bottom: 0;" title="Cliquer pour afficher/masquer la pastille">
-              <span style="font-weight: 700;">🏷️ Visualisation Pastille</span>
-              <span style="display: flex; align-items: center; gap: 8px;">
-                <span class="accordion-action-badge">➖ Masquer</span>
-                <span class="accordion-arrow" style="font-size: 0.8rem; color: var(--text-muted);">▼</span>
-              </span>
-            </h3>
-            <div id="card-body-sticker" style="display: block; margin-top: 14px;">
-              <div class="sticker-preview-box" id="form-sticker-preview">
-                <p style="color: var(--text-muted); font-size: 0.9rem;">Saisissez une date d'expiration pour voir la pastille correspondante.</p>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -6202,6 +6188,7 @@
     // ----------------------------------------------------
     function updateFormStickerPreview(expiryVal) {
       const previewBox = document.getElementById("form-sticker-preview");
+      if (!previewBox) return;
       if (!expiryVal) {
         previewBox.innerHTML = '<p style="color: var(--text-muted); font-size: 0.9rem;">Saisissez une date d\'expiration pour voir la pastille correspondante.</p>';
         return;
