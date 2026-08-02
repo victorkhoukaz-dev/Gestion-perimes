@@ -6880,6 +6880,100 @@
         const link = `${origin}${path}?invite=${sessionPharmacy.id}&name=${encodeURIComponent(sessionPharmacy.name)}`;
         inviteInput.value = link;
       }
+
+      // Rendre l'équipe et le code pharmacie
+      renderTeamMembersUI();
+    }
+
+    async function renderTeamMembersUI() {
+      const container = document.getElementById("team-members-list");
+      if (!container || !sessionPharmacy) return;
+
+      const codeInput = document.getElementById("config-pharmacy-code");
+      if (codeInput) {
+        codeInput.value = sessionPharmacy.code || "N/A";
+      }
+
+      const inviteInput = document.getElementById("config-invite-link");
+      if (inviteInput && sessionPharmacy) {
+        const origin = window.location.origin === "null" || !window.location.origin ? "file://" : window.location.origin;
+        const path = window.location.pathname;
+        const link = `${origin}${path}?invite=${sessionPharmacy.id}&name=${encodeURIComponent(sessionPharmacy.name)}`;
+        inviteInput.value = link;
+      }
+
+      try {
+        const { data: members, error } = await supabaseClient
+          .from("profiles")
+          .select("*")
+          .eq("pharmacy_id", sessionPharmacy.id);
+
+        if (error) throw error;
+
+        if (!members || members.length === 0) {
+          container.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 16px;">Aucun membre trouvé.</td></tr>`;
+          return;
+        }
+
+        const isOwner = sessionProfile && (sessionProfile.role === "owner" || sessionProfile.role === "admin");
+        const thActions = document.getElementById("th-team-actions");
+        if (thActions) thActions.style.display = isOwner ? "table-cell" : "none";
+
+        let html = "";
+        members.forEach(m => {
+          const isMe = sessionProfile && m.id === sessionProfile.id;
+          const isMemOwner = m.role === "owner" || m.role === "admin";
+          const roleBadge = isMemOwner 
+            ? `<span class="badge" style="background: var(--primary-light); color: var(--primary-color); font-weight: 700;">Propriétaire</span>`
+            : `<span class="badge" style="background: #e2e8f0; color: #334155;">Technicien(ne)</span>`;
+          
+          html += `
+            <tr>
+              <td>
+                <strong>${m.email || 'Sans courriel'}</strong> ${isMe ? '<span style="font-size: 0.75rem; color: var(--primary-color); font-weight: 700;">(Vous)</span>' : ''}
+              </td>
+              <td style="text-align: center;"><strong>${m.initials || 'N/A'}</strong></td>
+              <td>${roleBadge}</td>
+              <td style="text-align: center;"><span class="badge success">Actif</span></td>
+              ${isOwner ? `
+                <td style="text-align: right;">
+                  ${!isMe && !isMemOwner ? `
+                    <button type="button" class="btn btn-danger btn-remove-member" data-id="${m.id}" data-email="${m.email}" style="padding: 4px 8px; font-size: 0.75rem;">Retirer</button>
+                  ` : ''}
+                </td>
+              ` : ''}
+            </tr>
+          `;
+        });
+
+        container.innerHTML = html;
+
+        container.querySelectorAll(".btn-remove-member").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            const memberId = btn.getAttribute("data-id");
+            const memberEmail = btn.getAttribute("data-email");
+            if (confirm(`Voulez-vous vraiment retirer l'accès de ${memberEmail} à cette pharmacie ?`)) {
+              showLoading("Retrait du membre...");
+              try {
+                const { error: delError } = await supabaseClient
+                  .from("profiles")
+                  .delete()
+                  .eq("id", memberId);
+                if (delError) throw delError;
+                showToast("Membre retiré de la pharmacie.", "success");
+                await renderTeamMembersUI();
+              } catch (err) {
+                showError("Erreur lors du retrait : " + formatErrorMessage(err));
+              } finally {
+                hideLoading();
+              }
+            }
+          });
+        });
+      } catch (err) {
+        console.error("Erreur team list", err);
+        container.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--danger-color); padding: 16px;">Erreur de chargement des membres.</td></tr>`;
+      }
     }
 
     function deleteSection(sectionName) {
