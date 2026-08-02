@@ -3485,26 +3485,26 @@
     </div>
   </div>
 
-  <!-- MODAL DE PRÉVISUALISATION DES MODULES PHARMAOPS (V4.0) -->
-  <div id="module-preview-overlay" class="guide-modal-overlay" style="display: none;">
-    <div class="guide-modal-card" style="max-width: 520px; border-radius: 16px; padding: 24px;">
+  <!-- MODAL DE PRÉVISUALISATION DES MODULES PHARMAOPS (V4.0 - POPUP CENTRÉ) -->
+  <div id="module-preview-overlay" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(6px); z-index: 99999; align-items: center; justify-content: center; padding: 16px;">
+    <div class="modal" style="max-width: 540px; width: 100%; border-radius: 16px; padding: 24px; background: var(--card-bg); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.35); border: 1px solid var(--border-color); position: relative;">
       <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
         <div style="display: flex; align-items: center; gap: 12px;">
-          <span id="preview-module-icon" style="font-size: 2rem;">💊</span>
+          <span id="preview-module-icon" style="font-size: 2.2rem;">💊</span>
           <div>
-            <h2 id="preview-module-title" style="margin: 0; font-size: 1.2rem; color: var(--primary-color);">Module Narcaudit</h2>
+            <h2 id="preview-module-title" style="margin: 0; font-size: 1.25rem; color: var(--primary-color);">Module Narcaudit</h2>
             <span id="preview-module-badge" class="badge" style="background: #fef3c7; color: #d97706; font-weight: 700; margin-top: 4px; display: inline-block;">⚡ Bientôt Disponible</span>
           </div>
         </div>
-        <button id="btn-close-module-preview" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-muted);">&times;</button>
+        <button id="btn-close-module-preview" style="background: none; border: none; font-size: 1.6rem; cursor: pointer; color: var(--text-muted); padding: 4px 8px; border-radius: 6px;" title="Fermer">&times;</button>
       </div>
 
-      <div id="preview-module-body" style="font-size: 0.9rem; color: var(--text-color); line-height: 1.5;">
+      <div id="preview-module-body" style="font-size: 0.9rem; color: var(--text-color); line-height: 1.6;">
         <!-- Injecté par JS -->
       </div>
 
-      <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 10px;">
-        <button class="btn btn-secondary" id="btn-preview-dismiss">Fermer</button>
+      <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 10px;">
+        <button class="btn btn-primary" id="btn-preview-dismiss" style="padding: 8px 20px;">Fermer l'aperçu</button>
       </div>
     </div>
   </div>
@@ -4708,20 +4708,33 @@
       document.getElementById("menu-mod-narco")?.addEventListener("click", (e) => {
         e.preventDefault();
         if (menu) menu.style.display = "none";
+        showToast("Ouverture du module Narcaudit...", "info");
         showNarcoModulePreview();
       });
 
       document.getElementById("menu-mod-generics")?.addEventListener("click", (e) => {
         e.preventDefault();
         if (menu) menu.style.display = "none";
+        showToast("Ouverture de l'Analyse Génériques...", "info");
         showGenericsModulePreview();
       });
 
       const overlay = document.getElementById("module-preview-overlay");
       const closeBtn = document.getElementById("btn-close-module-preview");
       const dismissBtn = document.getElementById("btn-preview-dismiss");
-      if (closeBtn) closeBtn.addEventListener("click", () => overlay.style.display = "none");
-      if (dismissBtn) dismissBtn.addEventListener("click", () => overlay.style.display = "none");
+      const closePreviewModal = () => {
+        if (overlay) {
+          overlay.style.display = "none";
+          overlay.classList.remove("active");
+        }
+      };
+      if (closeBtn) closeBtn.addEventListener("click", closePreviewModal);
+      if (dismissBtn) dismissBtn.addEventListener("click", closePreviewModal);
+      if (overlay) {
+        overlay.addEventListener("click", (e) => {
+          if (e.target === overlay) closePreviewModal();
+        });
+      }
 
       // Ajout de section
       document.getElementById("add-section-form").addEventListener("submit", (e) => {
