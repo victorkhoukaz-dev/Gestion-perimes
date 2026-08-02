@@ -2601,8 +2601,8 @@
             <span style="color: #94a3b8;" id="header-user-email">email@test.com</span>
           </div>
           <div class="month-badge" id="current-month-badge" style="background: rgba(255,255,255,0.12); color: #ffffff; border: 1px solid rgba(255,255,255,0.2);">Juin 2026</div>
-          <button class="btn btn-secondary" id="btn-nav-to-hub" title="Retourner à l'accueil Hub PharmaOps" style="padding: 6px 12px; font-size: 0.85rem; border-color: rgba(255,255,255,0.3); background-color: rgba(255,255,255,0.15); color: #ffffff;">
-            🏠 Hub
+          <button class="btn btn-secondary" id="btn-nav-to-hub" title="Retourner à la page d'accueil PharmaOps" style="padding: 6px 12px; font-size: 0.95rem; border-color: rgba(255,255,255,0.3); background-color: rgba(255,255,255,0.15); color: #ffffff;">
+            🏠
           </button>
           <button class="btn btn-secondary" id="btn-logout" title="Se déconnecter" style="padding: 6px 12px; font-size: 0.85rem; border-color: rgba(255,255,255,0.2); background-color: rgba(255,255,255,0.1); color: #ffffff;">
             Déconnexion
@@ -7403,11 +7403,9 @@
       badge.style.color = "#d97706";
 
       document.getElementById("preview-module-body").innerHTML = `
-        <p style="margin-bottom: 12px;"><strong>Contrôle intelligent et conciliation des narcotiques et substances contrôlées.</strong></p>
         <ul style="padding-left: 20px; margin-bottom: 14px; line-height: 1.6;">
           <li><strong>Spot-Checks ciblés (~20 molécules)</strong> : Algorithme sélectionnant intelligemment les produits à haut risque à vérifier chaque semaine.</li>
-          <li><strong>Visuels galéniques 2D</strong> : Aperçus des comprimés, flacons et nectars pour une vérification visuelle ultra-rapide.</li>
-          <li><strong>Conciliation RxPro / Kroll</strong> : Importation directe des données du système informatique du laboratoire.</li>
+          <li><strong>Conciliation d'inventaire</strong> : Importation directe des données du système informatique de votre laboratoire.</li>
           <li><strong>Conformité OPQ & Santé Canada</strong> : Génération de registres d'inspection officiels prêts à être imprimés.</li>
         </ul>
         <div style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 10px; border-radius: 8px; font-size: 0.85rem; color: #166534;">
@@ -7424,7 +7422,7 @@
 
       const isOwner = sessionProfile && (sessionProfile.role === "owner" || sessionProfile.role === "admin");
       document.getElementById("preview-module-icon").textContent = "📊";
-      document.getElementById("preview-module-title").textContent = "Analyse des Achats Génériques";
+      document.getElementById("preview-module-title").textContent = "Analyse des volumes d'achats génériques, opportunités de substitution et leviers de négociation";
       
       const badge = document.getElementById("preview-module-badge");
       
@@ -7446,11 +7444,10 @@
         badge.style.color = "#4338ca";
 
         document.getElementById("preview-module-body").innerHTML = `
-          <p style="margin-bottom: 12px;"><strong>Outil décisionnel d'analyse des volumes d'achats génériques et d'optimisation des ristournes.</strong></p>
           <ul style="padding-left: 20px; margin-bottom: 14px; line-height: 1.6;">
-            <li><strong>Historique sur 4 ans</strong> : Suivi comparatif des volumes d'achats par fabricant et par molécule.</li>
-            <li><strong>Détection des opportunités</strong> : Identification des variations de prix et leviers de substitution les plus rentables.</li>
-            <li><strong>Conformité Loi 25 (100% Local-First)</strong> : Les fichiers d'achats Excel/CSV sont traités directement dans votre navigateur sans qu'aucune donnée commerciale ne quitte votre ordinateur.</li>
+            <li><strong>Historique & Analyse Multi-Angles</strong> : Suivi comparatif sur 4 ans des volumes d'achats par fabricant et par molécule. Explorez vos données sous de multiples angles (par fabricant, par molécule-clé, par trimestre) pour isoler en 1 clic les molécules ayant eu le plus d'impact financier sur vos variations de volumes.</li>
+            <li><strong>Détection des opportunités</strong> : Identification des variations de prix, hausses/baisses de ristournes et leviers de négociation directe auprès des représentants.</li>
+            <li><strong>Confidentialité (Loi 25)</strong> : Données financières traitées de manière 100% locale dans votre navigateur. Aucun rapport d'achat ne quitte votre ordinateur.</li>
           </ul>
           <div style="background: #eff6ff; border: 1px solid #bfdbfe; padding: 10px; border-radius: 8px; font-size: 0.85rem; color: #1e40af;">
             🔑 <em>Accès confirmé en tant que <strong>Propriétaire</strong>. Le module d'importation d'achats locaux est activable sur demande.</em>
