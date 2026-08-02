@@ -3106,6 +3106,10 @@
               Réactiver le Tutoriel
             </button>
 
+            <button class="btn btn-danger" id="btn-reset-db" style="margin-left: auto;">
+              Réinitialiser la Base de Données
+            </button>
+          </div>
         </div>
 
         <!-- CONFORMITÉ & CONFIDENTIALITÉ LOI 25 (V4.0) -->
@@ -4736,12 +4740,12 @@
       });
 
       // Exports / Imports généraux
-      document.getElementById("btn-backup-export").addEventListener("click", exportBackupJSON);
-      document.getElementById("import-file-input").addEventListener("change", importBackupJSON);
-      document.getElementById("btn-export-csv-all").addEventListener("click", exportAllToCSV);
-      document.getElementById("btn-export-csv-month").addEventListener("click", exportMonthToCSV);
-      document.getElementById("btn-reset-db").addEventListener("click", resetDatabase);
-      document.getElementById("btn-reset-tutorial").addEventListener("click", () => {
+      document.getElementById("btn-backup-export")?.addEventListener("click", exportBackupJSON);
+      document.getElementById("import-file-input")?.addEventListener("change", importBackupJSON);
+      document.getElementById("btn-export-csv-all")?.addEventListener("click", exportAllToCSV);
+      document.getElementById("btn-export-csv-month")?.addEventListener("click", exportMonthToCSV);
+      document.getElementById("btn-reset-db")?.addEventListener("click", resetDatabase);
+      document.getElementById("btn-reset-tutorial")?.addEventListener("click", () => {
         localStorage.removeItem("exp_skip_tutorial");
         showToast("Tutoriel de démarrage réactivé.", "success");
       });
