@@ -2332,23 +2332,38 @@
 
       <form id="register-form" style="display: none;">
         <div id="reg-invite-alert" class="login-alert info" style="display: none; margin-bottom: 16px; font-size: 0.85rem;"></div>
+        
+        <div id="reg-mode-selector" style="display: flex; gap: 8px; margin-bottom: 16px;">
+          <button type="button" id="btn-reg-mode-create" class="btn btn-secondary" style="flex: 1; font-size: 0.8rem; padding: 8px; border-radius: 8px; border: 1.5px solid var(--primary-color); background-color: var(--primary-light); color: var(--primary-color); font-weight: 700;">🏢 Nouvelle Pharmacie</button>
+          <button type="button" id="btn-reg-mode-join" class="btn btn-secondary" style="flex: 1; font-size: 0.8rem; padding: 8px; border-radius: 8px; border: 1px solid var(--border-color); background-color: var(--card-bg); color: var(--text-muted); font-weight: 600;">👥 Rejoindre avec Code</button>
+        </div>
+
         <div class="form-group" id="reg-pharmacy-name-group">
           <label for="reg-pharmacy-name">Nom de la Pharmacie</label>
           <input type="text" id="reg-pharmacy-name" required placeholder="ex: Pharmacie Jean Coutu Vkhoukaz">
         </div>
+
+        <div class="form-group" id="reg-pharmacy-code-group" style="display: none;">
+          <label for="reg-pharmacy-code">Code Pharmacie (6 caractères)</label>
+          <input type="text" id="reg-pharmacy-code" placeholder="ex: PH-KVHV" style="text-transform: uppercase; font-family: monospace; letter-spacing: 2px; font-weight: 700;">
+        </div>
+
         <div class="form-group">
           <label for="reg-initials">Vos initiales de technicien(ne)</label>
           <input type="text" id="reg-initials" required placeholder="ex: SB" maxlength="4" style="text-transform: uppercase;">
         </div>
+
         <div class="form-group">
           <label for="reg-email">Adresse courriel</label>
           <input type="email" id="reg-email" required placeholder="nom@pharmacie.com">
         </div>
+
         <div class="form-group">
           <label for="reg-password">Mot de passe (Min. 6 car.)</label>
           <input type="password" id="reg-password" required minlength="6" placeholder="">
         </div>
-        <button type="submit" class="btn btn-login">Créer la pharmacie et le compte</button>
+
+        <button type="submit" id="btn-submit-register" class="btn btn-login">Créer la pharmacie et le compte</button>
         <p class="switch-auth-mode">Déjà inscrit ? <a href="#" id="link-show-login">Se connecter</a></p>
       </form>
 
@@ -2990,15 +3005,50 @@
           </div>
         </div>
 
-        <!-- INVITATION DES EMPLOYES (V3.7) -->
+        <!-- INVITATION & GESTION DE L'ÉQUIPE (V3.8) -->
         <div class="card" style="grid-column: 1 / -1; margin-bottom: 0;">
-          <h2 class="card-title">Invitation des Employés (Multi-Postes)</h2>
+          <h2 class="card-title">👥 Gestion de l'Équipe & Accès</h2>
           <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
-            Partagez ce lien avec vos collègues ou techniciens pour qu'ils puissent s'inscrire et rejoindre l'inventaire de votre pharmacie (sans créer de doublon de pharmacie).
+            Partagez le code à 6 caractères ou le lien d'invitation avec vos techniciens et collègues pour qu'ils rejoignent l'inventaire de votre pharmacie.
           </p>
-          <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-            <input type="text" id="config-invite-link" class="form-control" readonly style="background-color: var(--primary-light); cursor: text; font-family: monospace; font-size: 0.85rem; flex: 1; min-width: 250px;">
-            <button class="btn" id="btn-copy-invite-link">Copier le lien</button>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 20px;">
+            <!-- Code Pharmacie -->
+            <div style="background: var(--primary-light); padding: 14px; border-radius: 10px; border: 1px solid rgba(15, 118, 110, 0.2);">
+              <label style="font-size: 0.75rem; font-weight: 700; color: var(--primary-color); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 6px;">Code Pharmacie (6 caractères)</label>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <input type="text" id="config-pharmacy-code" class="form-control" readonly style="background-color: white; font-family: monospace; font-size: 1.1rem; font-weight: 700; letter-spacing: 2px; text-align: center; color: var(--primary-color); flex: 1;">
+                <button class="btn btn-secondary" id="btn-copy-pharmacy-code" style="padding: 8px 12px; font-size: 0.85rem;">Copier</button>
+              </div>
+            </div>
+
+            <!-- Lien d'invitation -->
+            <div style="background: var(--bg-color); padding: 14px; border-radius: 10px; border: 1px solid var(--border-color);">
+              <label style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 6px;">Lien d'invitation direct</label>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <input type="text" id="config-invite-link" class="form-control" readonly style="background-color: white; font-family: monospace; font-size: 0.8rem; flex: 1;">
+                <button class="btn btn-secondary" id="btn-copy-invite-link" style="padding: 8px 12px; font-size: 0.85rem;">Copier</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Liste des Membres -->
+          <h3 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 10px; color: var(--text-color);">Membres de la Pharmacie</h3>
+          <div style="overflow-x: auto;">
+            <table class="data-table" style="width: 100%; font-size: 0.85rem;">
+              <thead>
+                <tr>
+                  <th>Membre / Courriel</th>
+                  <th style="width: 90px; text-align: center;">Initiales</th>
+                  <th style="width: 120px;">Rôle</th>
+                  <th style="width: 90px; text-align: center;">Statut</th>
+                  <th style="width: 100px; text-align: right;" id="th-team-actions">Action</th>
+                </tr>
+              </thead>
+              <tbody id="team-members-list">
+                <tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 16px;">Chargement des membres...</td></tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
@@ -3562,6 +3612,9 @@
         document.getElementById("register-form").style.display = "block";
         document.getElementById("login-header").querySelector("h2").textContent = "Rejoindre une pharmacie";
         
+        const modeSelector = document.getElementById("reg-mode-selector");
+        if (modeSelector) modeSelector.style.display = "none";
+
         if (inviteAlert) {
           inviteAlert.innerHTML = `👋 Vous êtes invité(e) à rejoindre la pharmacie :<br><strong>${decodeURIComponent(inviteName)}</strong>`;
           inviteAlert.style.display = "block";
@@ -3575,10 +3628,8 @@
       } else {
         // Mode normal
         if (inviteAlert) inviteAlert.style.display = "none";
-        if (nameGroup) {
-          nameGroup.style.display = "block";
-          document.getElementById("reg-pharmacy-name").required = true;
-        }
+        const modeSelector = document.getElementById("reg-mode-selector");
+        if (modeSelector) modeSelector.style.display = "flex";
       }
     }
 
@@ -3955,6 +4006,64 @@
     }
 
     function setupAuthEventHandlers() {
+      let currentRegMode = "create"; // "create" or "join"
+
+      const setRegisterMode = (mode) => {
+        currentRegMode = mode;
+        const btnCreate = document.getElementById("btn-reg-mode-create");
+        const btnJoin = document.getElementById("btn-reg-mode-join");
+        const nameGroup = document.getElementById("reg-pharmacy-name-group");
+        const codeGroup = document.getElementById("reg-pharmacy-code-group");
+        const nameInput = document.getElementById("reg-pharmacy-name");
+        const codeInput = document.getElementById("reg-pharmacy-code");
+        const submitBtn = document.getElementById("btn-submit-register");
+
+        if (!btnCreate || !btnJoin) return;
+
+        if (mode === "create") {
+          btnCreate.style.backgroundColor = "var(--primary-light)";
+          btnCreate.style.borderColor = "var(--primary-color)";
+          btnCreate.style.color = "var(--primary-color)";
+          btnCreate.style.fontWeight = "700";
+
+          btnJoin.style.backgroundColor = "var(--card-bg)";
+          btnJoin.style.borderColor = "var(--border-color)";
+          btnJoin.style.color = "var(--text-muted)";
+          btnJoin.style.fontWeight = "600";
+
+          if (nameGroup) nameGroup.style.display = "block";
+          if (nameInput) nameInput.required = true;
+
+          if (codeGroup) codeGroup.style.display = "none";
+          if (codeInput) codeInput.required = false;
+
+          if (submitBtn) submitBtn.textContent = "Créer la pharmacie et le compte";
+        } else {
+          btnJoin.style.backgroundColor = "var(--primary-light)";
+          btnJoin.style.borderColor = "var(--primary-color)";
+          btnJoin.style.color = "var(--primary-color)";
+          btnJoin.style.fontWeight = "700";
+
+          btnCreate.style.backgroundColor = "var(--card-bg)";
+          btnCreate.style.borderColor = "var(--border-color)";
+          btnCreate.style.color = "var(--text-muted)";
+          btnCreate.style.fontWeight = "600";
+
+          if (nameGroup) nameGroup.style.display = "none";
+          if (nameInput) nameInput.required = false;
+
+          if (codeGroup) codeGroup.style.display = "block";
+          if (codeInput) codeInput.required = true;
+
+          if (submitBtn) submitBtn.textContent = "Rejoindre la pharmacie";
+        }
+      };
+
+      const btnModeCreate = document.getElementById("btn-reg-mode-create");
+      const btnModeJoin = document.getElementById("btn-reg-mode-join");
+      if (btnModeCreate) btnModeCreate.addEventListener("click", () => setRegisterMode("create"));
+      if (btnModeJoin) btnModeJoin.addEventListener("click", () => setRegisterMode("join"));
+
       document.getElementById("link-show-register").addEventListener("click", (e) => {
         e.preventDefault();
         document.getElementById("login-form").style.display = "none";
@@ -3964,6 +4073,7 @@
         document.getElementById("login-header").querySelector("h2").textContent = "Créer un compte";
         document.getElementById("login-error-msg").style.display = "none";
         document.getElementById("login-info-msg").style.display = "none";
+        setRegisterMode("create");
       });
       
       document.getElementById("link-show-login").addEventListener("click", (e) => {
@@ -4090,54 +4200,77 @@
         
         try {
           let targetPharmacyId = inviteId;
+          let userRole = "tech";
           
           if (!targetPharmacyId) {
-            // MODE NORMAL : Création d'une nouvelle pharmacie
-            const pharmacyName = document.getElementById("reg-pharmacy-name").value.trim();
-            
-            // 1. Créer la pharmacie d'abord
-            const { data: pharmData, error: pharmError } = await supabaseClient
-              .from("pharmacies")
-              .insert({ name: pharmacyName })
-              .select()
-              .single();
-              
-            if (pharmError) throw pharmError;
-            targetPharmacyId = pharmData.id;
-            
-            // 2. S'inscrire en liant la nouvelle pharmacie
-            const { data: signUpData, error: signUpError } = await supabaseClient.auth.signUp({
-              email,
-              password,
-              options: {
-                data: {
-                  pharmacy_id: targetPharmacyId,
-                  initials: initials
-                }
-              }
-            });
-            
-            if (signUpError) throw signUpError;
-            
-            const user = signUpData.user;
-            if (!user) throw new Error("Une erreur s'est produite lors de la création de l'utilisateur.");
-            
-            // 3. Assurer la présence du profil
-            const { error: profError } = await supabaseClient
-              .from("profiles")
-              .upsert({
-                id: user.id,
-                pharmacy_id: targetPharmacyId,
-                email: email,
-                initials: initials
-              });
-            if (profError) console.warn("Notice profiles upsert:", profError);
+            if (currentRegMode === "join") {
+              // MODE CODE : Rejoindre une pharmacie existante via le code 6 caractères
+              const enteredCode = document.getElementById("reg-pharmacy-code").value.toUpperCase().trim();
+              if (!enteredCode) throw new Error("Veuillez saisir un code de pharmacie.");
 
-            if (signUpData.session) {
-              await supabaseClient.auth.setSession(signUpData.session);
+              const { data: pharmData, error: pharmError } = await supabaseClient
+                .from("pharmacies")
+                .select("id, name")
+                .ilike("code", enteredCode)
+                .maybeSingle();
+
+              if (pharmError || !pharmData) {
+                throw new Error("Code de pharmacie introuvable. Veuillez vérifier le code à 6 caractères.");
+              }
+
+              targetPharmacyId = pharmData.id;
+              userRole = "tech";
+            } else {
+              // MODE CRÉATION : Créer une nouvelle pharmacie
+              const pharmacyName = document.getElementById("reg-pharmacy-name").value.trim();
+              
+              const { data: pharmData, error: pharmError } = await supabaseClient
+                .from("pharmacies")
+                .insert({ name: pharmacyName })
+                .select()
+                .single();
+                
+              if (pharmError) throw pharmError;
+              targetPharmacyId = pharmData.id;
+              userRole = "owner";
             }
-            
-            // 4. Créer la configuration par défaut
+          }
+
+          // Inscription Auth Supabase avec metadata
+          const { data: signUpData, error: signUpError } = await supabaseClient.auth.signUp({
+            email,
+            password,
+            options: {
+              data: {
+                pharmacy_id: targetPharmacyId,
+                initials: initials,
+                role: userRole
+              }
+            }
+          });
+          
+          if (signUpError) throw signUpError;
+          const user = signUpData.user;
+          if (!user) throw new Error("Une erreur s'est produite lors de la création de l'utilisateur.");
+
+          // Assurer la présence du profil
+          const { error: profError } = await supabaseClient
+            .from("profiles")
+            .upsert({
+              id: user.id,
+              pharmacy_id: targetPharmacyId,
+              email: email,
+              initials: initials,
+              role: userRole
+            });
+          if (profError) console.warn("Notice profiles upsert:", profError);
+
+          if (signUpData.session) {
+            await supabaseClient.auth.setSession(signUpData.session);
+          }
+
+          if (userRole === "owner") {
+            // Créer la configuration par défaut pour la nouvelle pharmacie
             const { error: configError } = await supabaseClient
               .from("configurations")
               .upsert({
@@ -4146,68 +4279,13 @@
                 sections: defaultSections,
                 sticker_colors: defaultStickerColors
               });
-              
             if (configError) console.warn("Notice config upsert:", configError);
-            
-            // 5. Précharger le catalogue
+
             showLoading("Préconfiguration du catalogue...");
             await preloadDefaultCatalog(targetPharmacyId);
-            
-            showToast("Compte créé avec succès !", "success");
-            
-            if (signUpData.session) {
-              await handleLoginSuccess(user);
-            } else {
-              hideLoading();
-              showToast("Compte créé ! Si requis par votre projet Supabase, veuillez valider votre adresse courriel.", "info");
-              showError("Compte créé avec succès ! Si un lien de confirmation vous a été envoyé par courriel, validez-le puis connectez-vous.");
-            }
+            showToast("Pharmacie et compte propriétaire créés avec succès !", "success");
           } else {
-            // MODE INVITATION : Rejoindre une pharmacie existante
-            const { data: signUpData, error: signUpError } = await supabaseClient.auth.signUp({
-              email,
-              password,
-              options: {
-                data: {
-                  pharmacy_id: targetPharmacyId,
-                  initials: initials
-                }
-              }
-            });
-            
-            if (signUpError) throw signUpError;
-            
-            const user = signUpData.user;
-            if (!user) throw new Error("Une erreur s'est produite lors de la création de l'utilisateur.");
-            
-            // Assurer la présence du profil
-            const { error: profError } = await supabaseClient
-              .from("profiles")
-              .upsert({
-                id: user.id,
-                pharmacy_id: targetPharmacyId,
-                email: email,
-                initials: initials
-              });
-            if (profError) console.warn("Notice profiles upsert:", profError);
-
-            if (signUpData.session) {
-              await supabaseClient.auth.setSession(signUpData.session);
-            }
-            
             showToast("Vous avez rejoint la pharmacie avec succès !", "success");
-            
-            // Nettoyer l'URL de l'invitation pour éviter les réinscriptions par erreur
-            window.history.replaceState({}, document.title, window.location.pathname);
-            
-            if (signUpData.session) {
-              await handleLoginSuccess(user);
-            } else {
-              hideLoading();
-              showToast("Compte créé ! Veuillez vérifier vos courriels pour valider votre inscription.", "info");
-              showError("Compte créé avec succès ! Veuillez valider votre courriel avant de vous connecter.");
-            }
-          }
           
         } catch (err) {
           console.error("Erreur lors de l'inscription:", err);
@@ -4552,6 +4630,17 @@
           showToast("Lien d'invitation copié dans le presse-papiers !", "success");
         }
       });
+
+      const btnCopyCode = document.getElementById("btn-copy-pharmacy-code");
+      if (btnCopyCode) {
+        btnCopyCode.addEventListener("click", () => {
+          const codeInput = document.getElementById("config-pharmacy-code");
+          if (codeInput && codeInput.value) {
+            navigator.clipboard.writeText(codeInput.value);
+            showToast("Code pharmacie copié : " + codeInput.value, "success");
+          }
+        });
+      }
       document.getElementById("btn-tutorial-close").addEventListener("click", closeTutorialModal);
       document.getElementById("btn-tutorial-guide").addEventListener("click", openGuideFromTutorial);
 
