@@ -6982,6 +6982,7 @@
               <td style="text-align: center;"><span class="badge success">Actif</span></td>
               ${isOwner ? `
                 <td style="text-align: right;">
+                  <button type="button" class="btn btn-secondary btn-edit-initials" data-id="${m.id}" data-email="${m.email}" data-initials="${m.initials || ''}" style="padding: 4px 6px; font-size: 0.75rem; margin-right: 4px;" title="Modifier les initiales">✏️ Init</button>
                   ${!isMe ? `
                     <button type="button" class="btn btn-secondary btn-toggle-role" data-id="${m.id}" data-role="${m.role}" data-email="${m.email}" style="padding: 4px 6px; font-size: 0.75rem; margin-right: 4px;" title="Changer de rôle">${isMemOwner ? '→ Tech' : '→ Owner'}</button>
                     <button type="button" class="btn btn-danger btn-remove-member" data-id="${m.id}" data-email="${m.email}" style="padding: 4px 6px; font-size: 0.75rem;">Retirer</button>
@@ -6993,6 +6994,37 @@
         });
 
         container.innerHTML = html;
+
+        // Attacher les écouteurs d'édition d'initiales
+        container.querySelectorAll(".btn-edit-initials").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            const memberId = btn.getAttribute("data-id");
+            const memberEmail = btn.getAttribute("data-email");
+            const oldInitials = btn.getAttribute("data-initials");
+            const newInitials = prompt(`Modifier les initiales pour ${memberEmail} :`, oldInitials);
+            if (newInitials !== null && newInitials.trim() !== "") {
+              const formatted = newInitials.toUpperCase().trim();
+              showLoading("Mise à jour...");
+              try {
+                const { error: initErr } = await supabaseClient
+                  .from("profiles")
+                  .update({ initials: formatted })
+                  .eq("id", memberId);
+                if (initErr) throw initErr;
+                if (sessionProfile && sessionProfile.id === memberId) {
+                  sessionProfile.initials = formatted;
+                  state.sessionInitials = formatted;
+                }
+                showToast(`Initiales mises à jour (${formatted}).`, "success");
+                await renderTeamMembersUI();
+              } catch (err) {
+                showError("Erreur modification initiales : " + formatErrorMessage(err));
+              } finally {
+                hideLoading();
+              }
+            }
+          });
+        });
 
         // Attacher les écouteurs de changement de rôle
         container.querySelectorAll(".btn-toggle-role").forEach(btn => {
