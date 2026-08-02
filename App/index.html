@@ -2328,6 +2328,19 @@
     .modal-overlay.active {
       display: flex !important;
     }
+
+    /* Styles de la Page d'Accueil Hub PharmaOps (V4.1) */
+    .hub-card {
+      transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    }
+    .hub-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 35px rgba(15, 118, 110, 0.12) !important;
+      border-color: #0f766e !important;
+    }
+    .hub-card:active {
+      transform: translateY(-2px);
+    }
   </style>
 </head>
 <body>
@@ -2425,6 +2438,100 @@
     </div>
   </div>
 
+  <!-- HUB LANDING PAGE PHARMAOPS (V4.1) -->
+  <div id="hub-landing-container" style="display: none; min-height: 100vh; background: var(--bg-color); font-family: var(--font-family);">
+    
+    <!-- EN-TÊTE DU HUB -->
+    <header style="background: linear-gradient(135deg, #0f766e 0%, #115e59 100%); color: white; padding: 16px 24px; box-shadow: 0 4px 12px rgba(15, 118, 110, 0.15);">
+      <div style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 32px; height: 32px;">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+          <div>
+            <h1 style="font-size: 1.3rem; margin: 0; font-weight: 800; letter-spacing: -0.5px; color: white;">PharmaOps</h1>
+            <p style="font-size: 0.75rem; margin: 0; opacity: 0.85; color: #ccfbf1;">Plateforme Unifiée de Gestion de Laboratoire</p>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <div style="text-align: right; line-height: 1.2;">
+            <div style="font-weight: 700; font-size: 0.9rem; color: white;" id="hub-pharmacy-name">Pharmacie...</div>
+            <div style="font-size: 0.75rem; color: #99f6e4;" id="hub-user-email">email@test.com</div>
+          </div>
+          <button class="btn btn-secondary" id="btn-hub-logout" style="padding: 6px 14px; font-size: 0.85rem; border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.15); color: white;">
+            Déconnexion
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTENU DU HUB -->
+    <main style="max-width: 1200px; margin: 0 auto; padding: 40px 24px;">
+      
+      <div style="text-align: center; margin-bottom: 40px;">
+        <h2 style="font-size: 1.8rem; font-weight: 800; color: var(--text-color); margin-bottom: 8px;">Bienvenue sur PharmaOps</h2>
+        <p style="font-size: 1rem; color: var(--text-muted); max-width: 600px; margin: 0 auto;">Sélectionnez un module de gestion pour démarrer votre session de travail au laboratoire.</p>
+      </div>
+
+      <!-- GRILLE DES 3 GRANDES CARTES -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-bottom: 40px;">
+        
+        <!-- CARTE 1 : EXPIRÉS LABO -->
+        <div class="hub-card" id="hub-card-expires" style="background: white; border-radius: 16px; border: 2px solid #0f766e; padding: 28px; box-shadow: 0 10px 25px rgba(15, 118, 110, 0.08); display: flex; flex-direction: column; justify-content: space-between; cursor: pointer;">
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+              <div style="width: 56px; height: 56px; border-radius: 14px; background: #f0fdf4; color: #0f766e; display: flex; align-items: center; justify-content: center; font-size: 1.8rem;">📦</div>
+              <span class="badge success" style="padding: 6px 10px; font-weight: 700; font-size: 0.75rem;">🟢 En Ligne / Actif</span>
+            </div>
+            <h3 style="font-size: 1.3rem; font-weight: 800; color: var(--text-color); margin-bottom: 8px;">Expirés Labo</h3>
+            <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 20px;">
+              Gestion des péremptions, suivi des pastilles mensuelles, scanner 1D/2D et retraits ciblés en 5 minutes par section.
+            </p>
+          </div>
+          <button class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 0.95rem; font-weight: 700; border-radius: 10px; justify-content: center;">
+            Accéder au module ➔
+          </button>
+        </div>
+
+        <!-- CARTE 2 : NARCAUDIT -->
+        <div class="hub-card" id="hub-card-narco" style="background: white; border-radius: 16px; border: 1px solid var(--border-color); padding: 28px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); display: flex; flex-direction: column; justify-content: space-between; cursor: pointer;">
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+              <div style="width: 56px; height: 56px; border-radius: 14px; background: #fef3c7; color: #d97706; display: flex; align-items: center; justify-content: center; font-size: 1.8rem;">💊</div>
+              <span class="badge" style="background: #fef3c7; color: #d97706; font-weight: 700; padding: 6px 10px; font-size: 0.75rem;">⚡ Intégration en cours</span>
+            </div>
+            <h3 style="font-size: 1.3rem; font-weight: 800; color: var(--text-color); margin-bottom: 8px;">Narcaudit</h3>
+            <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 20px;">
+              Conciliation automatique des narcotiques, spot-checks intelligents et génération de registres d'inspection officiels.
+            </p>
+          </div>
+          <button class="btn btn-secondary" style="width: 100%; padding: 12px; font-size: 0.95rem; font-weight: 700; border-radius: 10px; justify-content: center;">
+            Aperçu & Démo ➔
+          </button>
+        </div>
+
+        <!-- CARTE 3 : ANALYSE GÉNÉRIQUES -->
+        <div class="hub-card" id="hub-card-generics" style="background: white; border-radius: 16px; border: 1px solid var(--border-color); padding: 28px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); display: flex; flex-direction: column; justify-content: space-between; cursor: pointer;">
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+              <div style="width: 56px; height: 56px; border-radius: 14px; background: #e0e7ff; color: #4338ca; display: flex; align-items: center; justify-content: center; font-size: 1.8rem;">📊</div>
+              <span class="badge" style="background: #e0e7ff; color: #4338ca; font-weight: 700; padding: 6px 10px; font-size: 0.75rem;">🔒 Exclusif Propriétaire</span>
+            </div>
+            <h3 style="font-size: 1.3rem; font-weight: 800; color: var(--text-color); margin-bottom: 8px;">Analyse Génériques</h3>
+            <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 20px;">
+              Analyse des volumes d'achats sur 4 ans, opportunités de substitution et traitement 100% local (Loi 25).
+            </p>
+          </div>
+          <button class="btn btn-secondary" style="width: 100%; padding: 12px; font-size: 0.95rem; font-weight: 700; border-radius: 10px; justify-content: center;">
+            Aperçu & Sécurité ➔
+          </button>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
   <!-- ENVELOPPE VISUELLE DE L'APPLICATION (Masquée par défaut) -->
   <div id="main-app-wrapper" style="display: none;">
 
@@ -2494,6 +2601,9 @@
             <span style="color: #94a3b8;" id="header-user-email">email@test.com</span>
           </div>
           <div class="month-badge" id="current-month-badge" style="background: rgba(255,255,255,0.12); color: #ffffff; border: 1px solid rgba(255,255,255,0.2);">Juin 2026</div>
+          <button class="btn btn-secondary" id="btn-nav-to-hub" title="Retourner à l'accueil Hub PharmaOps" style="padding: 6px 12px; font-size: 0.85rem; border-color: rgba(255,255,255,0.3); background-color: rgba(255,255,255,0.15); color: #ffffff;">
+            🏠 Hub
+          </button>
           <button class="btn btn-secondary" id="btn-logout" title="Se déconnecter" style="padding: 6px 12px; font-size: 0.85rem; border-color: rgba(255,255,255,0.2); background-color: rgba(255,255,255,0.1); color: #ffffff;">
             Déconnexion
           </button>
@@ -3726,12 +3836,29 @@
 
     function hideAuthScreen() {
       document.getElementById("login-container").style.display = "none";
+      document.getElementById("hub-landing-container").style.display = "block";
+      document.getElementById("main-app-wrapper").style.display = "none";
+    }
+
+    function showAuthScreen() {
+      document.getElementById("login-container").style.display = "flex";
+      document.getElementById("hub-landing-container").style.display = "none";
+      document.getElementById("main-app-wrapper").style.display = "none";
+    }
+
+    function openExpiresModule() {
+      document.getElementById("hub-landing-container").style.display = "none";
       document.getElementById("main-app-wrapper").style.display = "block";
       
-      // Sélection immédiate de l'onglet par défaut (Mobile: Saisie / Tournée | Desktop: Retrait Mensuel)
+      // Sélection immédiate de l'onglet par défaut
       const defaultTabId = (window.innerWidth <= 768) ? "tab-tournee" : "tab-retrait";
       const defaultBtn = document.querySelector(`.tab-btn[data-tab="${defaultTabId}"], .mobile-nav-item[data-tab="${defaultTabId}"]`);
       if (defaultBtn) defaultBtn.click();
+    }
+
+    function returnToHub() {
+      document.getElementById("main-app-wrapper").style.display = "none";
+      document.getElementById("hub-landing-container").style.display = "block";
     }
 
     function showLoading(text) {
@@ -3803,6 +3930,12 @@
         const printPharm = document.getElementById("print-pharmacy-subtitle");
         if (printPharm) printPharm.textContent = pharmacy.name;
         document.getElementById("header-user-email").textContent = user.email;
+        
+        const hubPharm = document.getElementById("hub-pharmacy-name");
+        if (hubPharm) hubPharm.textContent = pharmacy.name;
+
+        const hubEmail = document.getElementById("hub-user-email");
+        if (hubEmail) hubEmail.textContent = user.email;
         
         if (profile.initials) {
           state.sessionInitials = profile.initials;
@@ -4753,6 +4886,39 @@
           if (e.target === overlay) closePreviewModal();
         });
       }
+
+      // Événements Hub PharmaOps Landing Page (V4.1)
+      document.getElementById("hub-card-expires")?.addEventListener("click", () => {
+        showToast("Ouverture du module Expirés Labo...", "success");
+        openExpiresModule();
+      });
+
+      document.getElementById("hub-card-narco")?.addEventListener("click", () => {
+        showToast("Ouverture du module Narcaudit...", "info");
+        showNarcoModulePreview();
+      });
+
+      document.getElementById("hub-card-generics")?.addEventListener("click", () => {
+        showToast("Ouverture de l'Analyse Génériques...", "info");
+        showGenericsModulePreview();
+      });
+
+      document.getElementById("btn-nav-to-hub")?.addEventListener("click", () => {
+        returnToHub();
+      });
+
+      document.getElementById("btn-hub-logout")?.addEventListener("click", async () => {
+        if (confirm("Voulez-vous vous déconnecter ?")) {
+          showLoading("Déconnexion...");
+          await supabaseClient.auth.signOut();
+          sessionUser = null;
+          sessionProfile = null;
+          sessionPharmacy = null;
+          showAuthScreen();
+          hideLoading();
+          showToast("Déconnexion réussie.", "info");
+        }
+      });
 
       // Ajout de section
       document.getElementById("add-section-form").addEventListener("submit", (e) => {
