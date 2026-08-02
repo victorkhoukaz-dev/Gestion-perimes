@@ -4111,22 +4111,28 @@
       
       document.getElementById("login-form").addEventListener("submit", async (e) => {
         e.preventDefault();
-        const email = document.getElementById("login-email").value;
-        const password = document.getElementById("login-password").value;
-        
-        showLoading("Connexion en cours...");
-        document.getElementById("login-error-msg").style.display = "none";
-        document.getElementById("login-info-msg").style.display = "none";
-        
-        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-        
-        if (error) {
+        try {
+          const email = document.getElementById("login-email").value.trim();
+          const password = document.getElementById("login-password").value;
+          
+          showLoading("Connexion en cours...");
+          document.getElementById("login-error-msg").style.display = "none";
+          document.getElementById("login-info-msg").style.display = "none";
+          
+          const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+          
+          if (error) {
+            hideLoading();
+            showError("Erreur de connexion : " + error.message);
+            return;
+          }
+          
+          await handleLoginSuccess(data.user);
+        } catch (err) {
+          console.error("Erreur login submit", err);
           hideLoading();
-          showError("Erreur de connexion : " + error.message);
-          return;
+          showError("Erreur lors de la connexion : " + formatErrorMessage(err));
         }
-        
-        await handleLoginSuccess(data.user);
       });
 
       document.getElementById("reset-password-form").addEventListener("submit", async (e) => {
