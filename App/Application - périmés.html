@@ -2307,8 +2307,8 @@
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
         </svg>
-        <h2>Gestion des Expirés</h2>
-        <p>Contrôle de laboratoire - Accès sécurisé</p>
+        <h2>PharmaOps Suite</h2>
+        <p>Plateforme Unifiée de Gestion de Laboratoire</p>
       </div>
       
       <div id="login-error-msg" class="login-alert danger" style="display: none;"></div>
@@ -2422,9 +2422,37 @@
             <path d="M15.5 3.5L10.5 11" />
             <path d="M12 2a4 4 0 0 1 4 4c0 2-4 5-4 5s-4-3-4-5a4 4 0 0 1 4-4z" fill="currentColor" fill-opacity="0.2" />
           </svg>
-          <div class="header-title">
-            <h1>Gestion des Expirés</h1>
-            <p>Plateforme de contrôle interne du laboratoire</p>
+          <div class="header-title" style="position: relative; cursor: pointer;" id="suite-switcher-trigger">
+            <h1 style="display: flex; align-items: center; gap: 6px;">
+              PharmaOps Suite <span style="font-size: 0.75rem; background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 4px; font-weight: 600;">▼</span>
+            </h1>
+            <p id="header-module-name">📦 Module Expirés Labo (Actif)</p>
+
+            <!-- Menu Déroulant des Modules -->
+            <div id="suite-switcher-menu" style="display: none; position: absolute; top: 100%; left: 0; margin-top: 8px; background: white; color: #1e293b; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 270px; z-index: 1000; overflow: hidden; border: 1px solid var(--border-color);">
+              <div style="padding: 10px 12px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Modules PharmaOps</div>
+              <a href="#" id="menu-mod-expires" style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; text-decoration: none; color: #0f766e; background: #f0fdf4; font-weight: 700; font-size: 0.85rem; border-bottom: 1px solid #f1f5f9;">
+                <span>📦</span>
+                <div>
+                  <div>Expirés Labo</div>
+                  <span style="font-size: 0.7rem; font-weight: 600; color: #16a34a;">● En ligne / Actif</span>
+                </div>
+              </a>
+              <a href="#" id="menu-mod-narco" style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; text-decoration: none; color: #334155; font-size: 0.85rem; border-bottom: 1px solid #f1f5f9;">
+                <span>💊</span>
+                <div>
+                  <div>Narcaudit</div>
+                  <span style="font-size: 0.7rem; color: #d97706; font-weight: 600;">⚡ Narcotiques (Bientôt)</span>
+                </div>
+              </a>
+              <a href="#" id="menu-mod-generics" style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; text-decoration: none; color: #334155; font-size: 0.85rem;">
+                <span>📊</span>
+                <div>
+                  <div>Analyse Génériques</div>
+                  <span style="font-size: 0.7rem; color: #6366f1; font-weight: 600;">🔒 Achats (Propriétaire)</span>
+                </div>
+              </a>
+            </div>
           </div>
         </div>
         <div class="header-right" style="gap: 12px;">
@@ -3078,9 +3106,27 @@
               Réactiver le Tutoriel
             </button>
 
-            <button class="btn btn-danger" id="btn-reset-db" style="margin-left: auto;">
-              Réinitialiser la Base de Données
-            </button>
+        </div>
+
+        <!-- CONFORMITÉ & CONFIDENTIALITÉ LOI 25 (V4.0) -->
+        <div class="card" style="grid-column: 1 / -1; margin-bottom: 0;">
+          <h2 class="card-title">🔒 Confidentialité & Conformité Loi 25</h2>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px;">
+            La suite PharmaOps est conçue selon les normes de confidentialité et de protection des données du Conseil de l'Ordre des Pharmaciens du Québec (Loi 25).
+          </p>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px;">
+            <div style="background: var(--bg-color); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+              <strong style="color: var(--primary-color); display: block; margin-bottom: 4px; font-size: 0.85rem;">🚫 Zéro Donnée Patient</strong>
+              <span style="font-size: 0.8rem; color: var(--text-muted);">Aucun dossier patient, NAM, nom ou prescription n'est jamais traité ou conservé dans PharmaOps.</span>
+            </div>
+            <div style="background: var(--bg-color); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+              <strong style="color: var(--primary-color); display: block; margin-bottom: 4px; font-size: 0.85rem;">🛡️ Isolation Cloud RLS</strong>
+              <span style="font-size: 0.8rem; color: var(--text-muted);">Chaque pharmacie dispose d'un périmètre hermétique sécurisé par Row Level Security en base de données.</span>
+            </div>
+            <div style="background: var(--bg-color); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+              <strong style="color: var(--primary-color); display: block; margin-bottom: 4px; font-size: 0.85rem;">💻 Traitement Local (Local-First)</strong>
+              <span style="font-size: 0.8rem; color: var(--text-muted);">Les fichiers d'achats génériques et données financières sont analysés localement dans votre navigateur.</span>
+            </div>
           </div>
         </div>
       </div>
@@ -3435,8 +3481,29 @@
     </div>
   </div>
 
-  <!-- FLASH OVERLAY ON SUCCESS -->
-  <div id="scan-flash-overlay" class="scan-flash-overlay"></div>
+  <!-- MODAL DE PRÉVISUALISATION DES MODULES PHARMAOPS (V4.0) -->
+  <div id="module-preview-overlay" class="guide-modal-overlay" style="display: none;">
+    <div class="guide-modal-card" style="max-width: 520px; border-radius: 16px; padding: 24px;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <span id="preview-module-icon" style="font-size: 2rem;">💊</span>
+          <div>
+            <h2 id="preview-module-title" style="margin: 0; font-size: 1.2rem; color: var(--primary-color);">Module Narcaudit</h2>
+            <span id="preview-module-badge" class="badge" style="background: #fef3c7; color: #d97706; font-weight: 700; margin-top: 4px; display: inline-block;">⚡ Bientôt Disponible</span>
+          </div>
+        </div>
+        <button id="btn-close-module-preview" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-muted);">&times;</button>
+      </div>
+
+      <div id="preview-module-body" style="font-size: 0.9rem; color: var(--text-color); line-height: 1.5;">
+        <!-- Injecté par JS -->
+      </div>
+
+      <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 10px;">
+        <button class="btn btn-secondary" id="btn-preview-dismiss">Fermer</button>
+      </div>
+    </div>
+  </div>
 
   <!-- LOGIQUE JAVASCRIPT DE L'APPLICATION -->
   <script src="html5-qrcode.min.js"></script>
@@ -4611,6 +4678,46 @@
           renderInventoryTable();
         });
       });
+
+      // Sélecteur de Suite PharmaOps (V4.0)
+      const trigger = document.getElementById("suite-switcher-trigger");
+      const menu = document.getElementById("suite-switcher-menu");
+      if (trigger && menu) {
+        trigger.addEventListener("click", (e) => {
+          e.stopPropagation();
+          menu.style.display = menu.style.display === "none" ? "block" : "none";
+        });
+
+        document.addEventListener("click", (e) => {
+          if (menu && !trigger.contains(e.target)) {
+            menu.style.display = "none";
+          }
+        });
+      }
+
+      document.getElementById("menu-mod-expires")?.addEventListener("click", (e) => {
+        e.preventDefault();
+        if (menu) menu.style.display = "none";
+        showToast("Vous êtes déjà sur le module Expirés Labo.", "info");
+      });
+
+      document.getElementById("menu-mod-narco")?.addEventListener("click", (e) => {
+        e.preventDefault();
+        if (menu) menu.style.display = "none";
+        showNarcoModulePreview();
+      });
+
+      document.getElementById("menu-mod-generics")?.addEventListener("click", (e) => {
+        e.preventDefault();
+        if (menu) menu.style.display = "none";
+        showGenericsModulePreview();
+      });
+
+      const overlay = document.getElementById("module-preview-overlay");
+      const closeBtn = document.getElementById("btn-close-module-preview");
+      const dismissBtn = document.getElementById("btn-preview-dismiss");
+      if (closeBtn) closeBtn.addEventListener("click", () => overlay.style.display = "none");
+      if (dismissBtn) dismissBtn.addEventListener("click", () => overlay.style.display = "none");
 
       // Ajout de section
       document.getElementById("add-section-form").addEventListener("submit", (e) => {
@@ -7081,6 +7188,74 @@
         console.error("Erreur team list", err);
         container.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--danger-color); padding: 16px;">Erreur de chargement des membres.</td></tr>`;
       }
+    }
+
+    function showNarcoModulePreview() {
+      const overlay = document.getElementById("module-preview-overlay");
+      if (!overlay) return;
+      document.getElementById("preview-module-icon").textContent = "💊";
+      document.getElementById("preview-module-title").textContent = "Narcaudit — Registres & Spot-Checks";
+      const badge = document.getElementById("preview-module-badge");
+      badge.textContent = "⚡ Intégration en cours";
+      badge.style.background = "#fef3c7";
+      badge.style.color = "#d97706";
+
+      document.getElementById("preview-module-body").innerHTML = `
+        <p style="margin-bottom: 12px;"><strong>Contrôle intelligent et conciliation des narcotiques et substances contrôlées.</strong></p>
+        <ul style="padding-left: 20px; margin-bottom: 14px; line-height: 1.6;">
+          <li><strong>Spot-Checks ciblés (~20 molécules)</strong> : Algorithme sélectionnant intelligemment les produits à haut risque à vérifier chaque semaine.</li>
+          <li><strong>Visuels galéniques 2D</strong> : Aperçus des comprimés, flacons et nectars pour une vérification visuelle ultra-rapide.</li>
+          <li><strong>Conciliation RxPro / Kroll</strong> : Importation directe des données du système informatique du laboratoire.</li>
+          <li><strong>Conformité OPQ & Santé Canada</strong> : Génération de registres d'inspection officiels prêts à être imprimés.</li>
+        </ul>
+        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 10px; border-radius: 8px; font-size: 0.85rem; color: #166534;">
+          💡 <em>Ce module sera activé prochainement directement dans votre suite PharmaOps sans frais supplémentaires !</em>
+        </div>
+      `;
+      overlay.style.display = "flex";
+    }
+
+    function showGenericsModulePreview() {
+      const overlay = document.getElementById("module-preview-overlay");
+      if (!overlay) return;
+
+      const isOwner = sessionProfile && (sessionProfile.role === "owner" || sessionProfile.role === "admin");
+      document.getElementById("preview-module-icon").textContent = "📊";
+      document.getElementById("preview-module-title").textContent = "Analyse des Achats Génériques";
+      
+      const badge = document.getElementById("preview-module-badge");
+      
+      if (!isOwner) {
+        badge.textContent = "🔒 Accès Restreint (Propriétaire)";
+        badge.style.background = "#fee2e2";
+        badge.style.color = "#dc2626";
+
+        document.getElementById("preview-module-body").innerHTML = `
+          <p style="margin-bottom: 12px; color: var(--danger-color); font-weight: 700;">⚠️ Accès réservé au Pharmacien Propriétaire</p>
+          <p style="margin-bottom: 14px;">Conformément à la politique de confidentialité commerciale du laboratoire et aux exigences de la Loi 25, ce module d'analyse des achats et de négociation est réservé exclusivement au(x) propriétaire(s) de la pharmacie.</p>
+          <div style="background: #f8fafc; border: 1px solid var(--border-color); padding: 10px; border-radius: 8px; font-size: 0.85rem; color: var(--text-muted);">
+            🔒 Vos droits actuels : <strong>Technicien(ne)</strong>. Si vous avez besoin d'un accès administration, contactez le propriétaire de la pharmacie.
+          </div>
+        `;
+      } else {
+        badge.textContent = "🔒 Exclusif Propriétaire (Loi 25)";
+        badge.style.background = "#e0e7ff";
+        badge.style.color = "#4338ca";
+
+        document.getElementById("preview-module-body").innerHTML = `
+          <p style="margin-bottom: 12px;"><strong>Outil décisionnel d'analyse des volumes d'achats génériques et d'optimisation des ristournes.</strong></p>
+          <ul style="padding-left: 20px; margin-bottom: 14px; line-height: 1.6;">
+            <li><strong>Historique sur 4 ans</strong> : Suivi comparatif des volumes d'achats par fabricant et par molécule.</li>
+            <li><strong>Détection des opportunités</strong> : Identification des variations de prix et leviers de substitution les plus rentables.</li>
+            <li><strong>Conformité Loi 25 (100% Local-First)</strong> : Les fichiers d'achats Excel/CSV sont traités directement dans votre navigateur sans qu'aucune donnée commerciale ne quitte votre ordinateur.</li>
+          </ul>
+          <div style="background: #eff6ff; border: 1px solid #bfdbfe; padding: 10px; border-radius: 8px; font-size: 0.85rem; color: #1e40af;">
+            🔑 <em>Accès confirmé en tant que <strong>Propriétaire</strong>. Le module d'importation d'achats locaux est activable sur demande.</em>
+          </div>
+        `;
+      }
+
+      overlay.style.display = "flex";
     }
 
     function deleteSection(sectionName) {
