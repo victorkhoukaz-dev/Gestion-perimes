@@ -4292,7 +4292,15 @@
             showToast("Pharmacie et compte propriétaire créés avec succès !", "success");
           } else {
             showToast("Vous avez rejoint la pharmacie avec succès !", "success");
-          
+          }
+
+          if (signUpData.session) {
+            await handleLoginSuccess(user);
+          } else {
+            hideLoading();
+            showToast("Compte créé ! Veuillez vous connecter.", "info");
+          }
+
         } catch (err) {
           console.error("Erreur lors de l'inscription:", err);
           showError("Erreur lors de l'inscription : " + formatErrorMessage(err));
