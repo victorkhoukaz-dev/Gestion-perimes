@@ -3846,6 +3846,10 @@
       document.getElementById("main-app-wrapper").style.display = "none";
     }
 
+        function openGenericsModule() {
+      window.location.href = 'generics_monthly.html';
+    }
+
     function openExpiresModule() {
       document.getElementById("hub-landing-container").style.display = "none";
       document.getElementById("main-app-wrapper").style.display = "block";
@@ -4867,7 +4871,7 @@
         e.preventDefault();
         if (menu) menu.style.display = "none";
         showToast("Ouverture de l'Analyse Génériques...", "info");
-        showGenericsModulePreview();
+        window.location.href = 'generics_monthly.html';
       });
 
       const overlay = document.getElementById("module-preview-overlay");
@@ -4900,7 +4904,7 @@
 
       document.getElementById("hub-card-generics")?.addEventListener("click", () => {
         showToast("Ouverture de l'Analyse Génériques...", "info");
-        showGenericsModulePreview();
+        window.location.href = 'generics_monthly.html';
       });
 
       document.getElementById("btn-nav-to-hub")?.addEventListener("click", () => {

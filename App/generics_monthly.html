@@ -1,0 +1,3039 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tableau de Bord Mensuel - Analyse des Achats Génériques 2026</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Chart.js & SheetJS CDNs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            color-scheme: light;
+            --primary-color: #10b981;    /* Emerald Green Enterprise Accent */
+            --primary-hover: #059669;
+            --primary-light: #ecfdf5;
+            --bg-color: #f8fafc;        /* Slate 50 Canvas */
+            --card-bg: #ffffff;
+            --navy-header-bg: #0f172a;  /* Rich Navy Header */
+            --navy-header-text: #ffffff;
+            --surface-muted: #f1f5f9;
+            --text-color: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --border-strong: #cbd5e1;
+
+            --surface-color: var(--card-bg);
+            --surface-border: var(--border-color);
+            --surface-hover: var(--surface-muted);
+            --text-primary: var(--text-color);
+            --text-secondary: var(--text-muted);
+            --accent-primary: #10b981;
+            --accent-primary-hover: #059669;
+            --accent-success: #10b981;
+            --accent-danger: #ef4444;
+            --accent-warning: #f59e0b;
+            --accent-purple: #8b5cf6;
+
+            --radius-sm: 8px;
+            --radius-md: 16px;
+            --radius-lg: 24px;
+            --radius-full: 9999px;
+
+            --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
+            --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+
+            --font-display: 'Outfit', sans-serif;
+            --font-sans: 'Inter', sans-serif;
+        }
+
+        [data-theme="dark"] {
+            color-scheme: dark;
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --surface-muted: #334155;
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --border-strong: #475569;
+            --primary-color: #34d399;
+            --primary-hover: #6ee7b7;
+            --primary-light: #064e3b;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.5;
+            padding: 1.25rem 1.5rem 3rem;
+            min-height: 100vh;
+            transition: background-color 0.2s, color 0.2s;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 1550px;
+            margin: 0 auto;
+        }
+
+        /* HEADER (Option 1 + Option 2: Rich Navy Header & Dual-App Switcher) */
+        .app-header-container {
+            position: sticky;
+            top: 0;
+            z-index: 25;
+            background-color: var(--bg-color);
+            padding-top: 4px;
+            padding-bottom: 6px;
+            margin-bottom: 16px;
+            transition: background-color 0.2s;
+        }
+
+        header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 12px 20px;
+            box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.25);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            color: #ffffff;
+            transition: all 0.2s ease;
+        }
+
+        .header-brand-group {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .header-logo-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: rgba(52, 211, 153, 0.15);
+            border: 1px solid rgba(52, 211, 153, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #34d399;
+            flex-shrink: 0;
+        }
+
+        .header-logo-icon svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .header-title h1 {
+            font-family: var(--font-display);
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #ffffff;
+            background: none;
+            -webkit-text-fill-color: initial;
+            line-height: 1.2;
+        }
+
+        .header-title p {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin-top: 2px;
+        }
+
+        /* Option 2: Integration Switcher Pills in Header */
+        .app-switcher {
+            display: flex;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 9999px;
+            padding: 3px;
+            gap: 3px;
+        }
+
+        .switcher-btn {
+            padding: 6px 14px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            border-radius: 9999px;
+            color: #94a3b8;
+            text-decoration: none;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .switcher-btn:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .switcher-btn.active {
+            background: #10b981;
+            color: #ffffff;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-header-action {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            padding: 7px 14px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            border-radius: 9999px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.15s ease;
+        }
+
+        .btn-header-action:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .theme-toggle-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #ffffff;
+            font-size: 1.1rem;
+            transition: background 0.2s;
+        }
+
+        .theme-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* NAVIGATION TABS (Segmented Floating Pill Bar) */
+        .nav-tabs-bar {
+            background-color: var(--surface-muted);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 4px;
+            display: flex;
+            gap: 6px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+        }
+
+        .nav-tab-item {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 9px 16px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.15s ease;
+        }
+
+        .nav-tab-item:hover {
+            color: var(--primary-color);
+            background-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .nav-tab-item.active {
+            color: var(--primary-color);
+            background-color: var(--card-bg);
+            box-shadow: var(--shadow-sm);
+            font-weight: 700;
+        }
+
+        /* CARDS & KPI METRICS */
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 22px;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 20px;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .card h2, .card h3, .card h4 {
+            font-family: var(--font-display);
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 0.25rem;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 0.88rem;
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .kpi-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 18px 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .kpi-title {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .kpi-value {
+            font-family: var(--font-display);
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 4px;
+        }
+
+        .kpi-sub {
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            color: var(--text-muted);
+        }
+
+        .growth-up {
+            color: var(--accent-success);
+            font-weight: 600;
+        }
+
+        .growth-down {
+            color: var(--accent-danger);
+            font-weight: 600;
+        }
+
+        /* BADGES & ACTION BUTTONS */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: var(--radius-full);
+            font-size: 0.78rem;
+            font-weight: 600;
+            border: 1px solid transparent;
+        }
+
+        .badge-success {
+            background-color: #ecfdf5;
+            color: #047857;
+            border-color: #a7f3d0;
+        }
+
+        .badge-interactive {
+            background-color: var(--surface-muted);
+            color: var(--text-color);
+            border-color: var(--border-color);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .badge-interactive:hover {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        /* 3-Column Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+
+        /* Insights Section */
+        .insights-section {
+            margin-bottom: 2rem;
+        }
+
+        .insights-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .select-year {
+            background-color: var(--surface-color);
+            color: var(--text-primary);
+            border: 1px solid var(--surface-border);
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-family: var(--font-sans);
+            font-weight: 500;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .insights-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .insights-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .insight-box {
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .insight-box.growers {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(16, 185, 129, 0.01) 100%);
+            border: 1px solid rgba(16, 185, 129, 0.15);
+        }
+
+        .insight-box.decliners {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.05) 0%, rgba(239, 68, 68, 0.01) 100%);
+            border: 1px solid rgba(239, 68, 68, 0.15);
+        }
+
+        .insight-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .insight-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px dashed var(--surface-border);
+        }
+
+        .insight-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .insight-company-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .insight-company-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .insight-company-reason {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 0.15rem;
+        }
+
+        .insight-change {
+            font-family: var(--font-display);
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-align: right;
+        }
+
+        /* Exploration Grid */
+        .explore-grid {
+            display: grid;
+            grid-template-columns: 420px 1fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        @media (max-width: 1150px) {
+            .explore-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .explore-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            max-height: 850px;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            background-color: var(--surface-color);
+            border: 1px solid var(--surface-border);
+            border-radius: 0.5rem;
+            padding: 0.5rem 0.75rem;
+        }
+
+        .search-box input {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            width: 100%;
+            outline: none;
+            font-family: var(--font-sans);
+            font-size: 0.9rem;
+        }
+
+        .search-box input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .companies-table-container {
+            overflow-y: auto;
+            flex-grow: 1;
+            border: 1px solid var(--surface-border);
+            border-radius: 0.5rem;
+            background-color: var(--surface-color);
+        }
+
+        .companies-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .companies-table th, .companies-table td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+
+        .companies-table th {
+            background-color: rgba(31, 41, 55, 0.5);
+            font-weight: 600;
+            color: var(--text-secondary);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            border-bottom: 1px solid var(--surface-border);
+        }
+
+        .companies-table tbody tr {
+            border-bottom: 1px solid var(--surface-border);
+            cursor: pointer;
+            transition: background-color 0.15s;
+        }
+
+        .companies-table tbody tr:hover, .companies-table tbody tr.selected {
+            background-color: var(--surface-hover);
+        }
+
+        .companies-table tbody tr.selected {
+            border-left: 3px solid var(--accent-primary);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.15rem 0.4rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            font-family: var(--font-display);
+        }
+
+        .badge-success {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--accent-success);
+        }
+
+        .badge-danger {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--accent-danger);
+        }
+
+        .badge-neutral {
+            background-color: rgba(156, 163, 175, 0.1);
+            color: var(--text-secondary);
+        }
+
+        /* Detail Panel */
+        .explore-detail {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            min-width: 0;
+        }
+
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--surface-border);
+            padding-bottom: 1rem;
+        }
+
+        .detail-title {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .detail-kpis {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        @media (max-width: 600px) {
+            .detail-kpis {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .detail-middle-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 1024px) {
+            .detail-middle-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .molecule-impact-box {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--surface-border);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            height: 250px;
+            overflow-y: auto;
+        }
+
+        .molecule-impact-lists {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            flex-grow: 1;
+        }
+
+        @media (max-width: 480px) {
+            .molecule-impact-lists {
+                grid-template-columns: 1fr;
+            }
+            .molecule-impact-box {
+                height: auto;
+            }
+        }
+
+        .molecule-impact-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            padding: 0.4rem 0.5rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .molecule-impact-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: translateX(2px);
+        }
+
+        .molecule-impact-item .mol-name {
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: var(--text-primary);
+        }
+
+        .molecule-impact-item .mol-val {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: 500;
+            font-size: 0.7rem;
+        }
+
+        .detail-table-card {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .molecules-table-container {
+            overflow: auto;
+            max-height: 450px;
+            border: 1px solid var(--surface-border);
+            border-radius: 0.5rem;
+            width: 100%;
+        }
+
+        .molecules-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+
+        .molecules-table th, .molecules-table td {
+            padding: 0.5rem 0.6rem;
+            text-align: left;
+        }
+
+        .molecules-table th {
+            background-color: rgba(31, 41, 55, 0.5);
+            font-weight: 600;
+            color: var(--text-secondary);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            border-bottom: 1px solid var(--surface-border);
+        }
+
+        .molecules-table tbody tr {
+            border-bottom: 1px solid var(--surface-border);
+        }
+
+        .molecules-table tbody tr:hover {
+            background-color: rgba(31, 41, 55, 0.2);
+        }
+
+        .numeric {
+            text-align: right;
+            font-family: var(--font-sans);
+        }
+        
+        .numeric-header {
+            text-align: right;
+        }
+
+        /* Modal and Data Manager Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(11, 15, 25, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+        .modal-content {
+            background: var(--surface-color);
+            border: 1px solid var(--surface-border);
+            border-radius: 1rem;
+            width: 650px;
+            max-width: 95%;
+            padding: 2.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+        .dropzone {
+            border: 2px dashed var(--accent-primary);
+            border-radius: 0.75rem;
+            padding: 2.5rem;
+            text-align: center;
+            background: rgba(59, 130, 246, 0.03);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            color: var(--text-secondary);
+        }
+        .dropzone:hover, .dropzone.dragover {
+            background: rgba(59, 130, 246, 0.08);
+            border-color: #60a5fa;
+            color: var(--text-primary);
+        }
+        .btn {
+            font-family: var(--font-display);
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .btn-primary {
+            background: var(--accent-primary);
+            color: #ffffff;
+        }
+        .btn-primary:hover {
+            background: var(--accent-primary-hover);
+        }
+        .btn-danger {
+            background: var(--accent-danger);
+            color: #ffffff;
+        }
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        .btn-secondary {
+            background: rgba(31, 41, 55, 0.6);
+            border: 1px solid var(--surface-border);
+            color: var(--text-primary);
+        }
+        .btn-secondary:hover {
+            background: rgba(31, 41, 55, 0.9);
+            border-color: var(--text-secondary);
+        }
+        .btn-outline-danger {
+            background: transparent;
+            border: 1px solid var(--accent-danger);
+            color: var(--accent-danger);
+        }
+        .btn-outline-danger:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+        .badge-interactive {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent-primary);
+            border: 1px dashed var(--accent-primary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .badge-interactive:hover {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        /* Styles pour l'impression propre sur 2 pages en Paysage */
+        @media print {
+            @page {
+                size: landscape;
+                margin: 8mm;
+            }
+            html, body {
+                background: #0b0f19 !important;
+                color: #ffffff !important;
+                font-size: 10px !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                height: auto !important;
+                overflow: visible !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            /* Masquer les commandes et les boutons non pertinents */
+            .header-actions, 
+            .search-box, 
+            button, 
+            #data-manager-btn, 
+            .modal-overlay, 
+            #moleculeSearchInput, 
+            #molecule-table-view-select,
+            .badge-interactive,
+            .btn {
+                display: none !important;
+            }
+            .container {
+                max-width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            .dashboard-header {
+                margin-bottom: 0.8rem !important;
+                padding-bottom: 0.4rem !important;
+            }
+            .dashboard-header h1 {
+                font-size: 1.4rem !important;
+            }
+            /* KPI Grid : 4 colonnes en paysage */
+            .kpi-grid {
+                display: grid !important;
+                grid-template-columns: repeat(4, 1fr) !important;
+                gap: 0.6rem !important;
+                margin-bottom: 0.8rem !important;
+            }
+            .kpi-card {
+                padding: 0.6rem !important;
+                background: rgba(17, 24, 39, 0.7) !important;
+                border: 1px solid rgba(255, 255, 255, 0.1) !important;
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+            .kpi-card .kpi-value {
+                font-size: 1.3rem !important;
+            }
+            .kpi-card .kpi-label {
+                font-size: 0.7rem !important;
+            }
+            /* Grille des graphiques généraux : 2 colonnes x 2 lignes */
+            .dashboard-grid {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                gap: 0.8rem !important;
+                margin-bottom: 1rem !important;
+                page-break-after: always; /* Force la coupure de page propre après les 4 graphiques principaux */
+                break-after: page;
+            }
+            .card {
+                background: rgba(17, 24, 39, 0.7) !important;
+                border: 1px solid rgba(255, 255, 255, 0.1) !important;
+                padding: 0.6rem !important;
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+            .card h3 {
+                font-size: 0.85rem !important;
+                margin-bottom: 0.2rem !important;
+            }
+            .card .subtitle {
+                font-size: 0.7rem !important;
+                margin-bottom: 0.4rem !important;
+            }
+            .chart-container {
+                height: 180px !important;
+                position: relative !important;
+            }
+            /* Page 2: Insights et Explore Grid */
+            .insights-section {
+                margin-top: 1rem !important;
+                margin-bottom: 1.5rem !important;
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+            .insights-grid {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                gap: 0.8rem !important;
+            }
+            .explore-grid {
+                display: grid !important;
+                grid-template-columns: 260px 1fr !important;
+                gap: 0.8rem !important;
+                margin-top: 1rem !important;
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+            .companies-list-container {
+                max-height: 380px !important;
+                height: auto !important;
+            }
+            .companies-list {
+                max-height: 340px !important;
+                overflow: hidden !important;
+            }
+            .company-item {
+                padding: 0.25rem 0.4rem !important;
+            }
+            .detail-company-container {
+                height: auto !important;
+            }
+            .detail-middle-grid {
+                display: grid !important;
+                grid-template-columns: 1.2fr 1fr !important;
+                gap: 0.6rem !important;
+                margin-bottom: 0.8rem !important;
+            }
+            .detail-chart-container {
+                height: 160px !important;
+                position: relative !important;
+            }
+            .molecule-impact-box {
+                height: auto !important;
+                padding: 0.6rem !important;
+            }
+            .molecules-table-container {
+                max-height: 220px !important;
+                overflow: hidden !important;
+            }
+            .molecules-table th, .molecules-table td {
+                padding: 0.3rem 0.4rem !important;
+                font-size: 0.75rem !important;
+            }
+            .insight-badge {
+                font-size: 0.65rem !important;
+                padding: 0.1rem 0.25rem !important;
+            }
+        }
+    </style>
+<script src="supabase.js"></script>
+<script>
+  const SUPABASE_URL = "https://hhmwlzaeipyrowwjlbbj.supabase.co";
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhobXdsemFlaXB5cm93d2psYmJqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2MDM5NjYsImV4cCI6MjA5OTE3OTk2Nn0.vv1Zw3oFDilKSxh7FEocWi8Y2pzu7uX1rf_L0Jhf1m4";
+
+  if (window.supabase && !window.supabaseClient) {
+    window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  }
+
+  window.getEmptyRawData = function() {
+    return {
+      totals: { "2022": 0, "2023": 0, "2024": 0, "2025": 0, "2026": 0 },
+      years: [2022, 2023, 2024, 2025, 2026],
+      manufacturers: [],
+      monthly_2026: {}
+    };
+  };
+
+  (function() {
+    async function fetchPharmacyId() {
+      if (!window.supabaseClient) return null;
+      try {
+        const userRes = await window.supabaseClient.auth.getUser();
+        const user = userRes?.data?.user;
+        if (!user) return null;
+        const { data: profile } = await window.supabaseClient
+          .from('profiles')
+          .select('pharmacy_id')
+          .eq('id', user.id)
+          .maybeSingle();
+        return profile?.pharmacy_id || user.id;
+      } catch(e) {
+        return null;
+      }
+    }
+
+    window.syncGenericsDataToCloud = async function(dataObj) {
+      try {
+        if (!window.supabaseClient) return;
+        const userRes = await window.supabaseClient.auth.getUser();
+        const user = userRes?.data?.user;
+        if (!user) {
+          alert("Session expirée. Veuillez vous reconnecter sur PharmaOps.");
+          window.location.href = "index.html";
+          return;
+        }
+
+        const pharmacyId = await fetchPharmacyId();
+        if (!pharmacyId) return;
+
+        const payload = {
+          pharmacy_id: pharmacyId,
+          user_id: user.id,
+          period_type: 'monthly',
+          year: 2026,
+          month: null,
+          data: dataObj,
+          updated_at: new Date().toISOString()
+        };
+
+        const { error } = await window.supabaseClient
+          .from('generics_purchases')
+          .upsert(payload, { onConflict: 'pharmacy_id,period_type,year' });
+
+        if (error) {
+          console.warn('[Supabase Sync monthly] Note sauvegarde:', error.message);
+        } else {
+          console.log('[Supabase Sync monthly] Sauvegarde réussie sur Supabase Cloud pour pharmacie:', pharmacyId);
+        }
+      } catch(err) {
+        console.error('[Supabase Sync monthly] Erreur:', err);
+      }
+    };
+
+    window.loadGenericsDataFromCloud = async function() {
+      try {
+        if (!window.supabaseClient) return;
+        const userRes = await window.supabaseClient.auth.getUser();
+        const user = userRes?.data?.user;
+        if (!user) {
+          console.log('[Supabase Sync monthly] Aucun utilisateur connecté. Redirection vers login.');
+          window.location.href = "index.html";
+          return;
+        }
+
+        const pharmacyId = await fetchPharmacyId();
+        if (!pharmacyId) {
+          rawData = getEmptyRawData();
+          if (typeof refreshDashboardUI === 'function') refreshDashboardUI();
+          return;
+        }
+
+        const { data, error } = await window.supabaseClient
+          .from('generics_purchases')
+          .select('data')
+          .eq('pharmacy_id', pharmacyId)
+          .eq('period_type', 'monthly')
+          .order('updated_at', { ascending: false })
+          .limit(1);
+
+        if (!error && data && data.length > 0 && data[0].data && Object.keys(data[0].data).length > 0) {
+          rawData = data[0].data;
+          console.log('[Supabase Sync monthly] Données cloud chargées depuis Supabase pour:', pharmacyId);
+        } else {
+          // Aucun enregistrement -> État vierge 0,00$ (0% LocalStorage)
+          rawData = getEmptyRawData();
+          console.log('[Supabase Sync monthly] Aucune donnée sur Supabase. Démarrage vierge à $0,00 pour:', pharmacyId);
+        }
+
+        if (typeof refreshDashboardUI === 'function') refreshDashboardUI();
+      } catch(err) {
+        console.error('[Supabase Sync monthly] Erreur chargement:', err);
+      }
+    };
+
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(window.loadGenericsDataFromCloud, 100);
+    });
+  })();
+</script>
+</head>
+<body>
+
+  <div style="background: linear-gradient(135deg, #0f766e 0%, #0d524c 100%); padding: 12px 24px; color: white; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 12px rgba(0,0,0,0.15); margin-bottom: 20px; border-radius: 0 0 12px 12px;">
+    <div style="display: flex; align-items: center; gap: 16px;">
+      <a href="index.html" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); color: white; text-decoration: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 8px;">
+        <span>🏠</span> Retour à PharmaOps
+      </a>
+      <span style="font-size: 1.1rem; font-weight: 700; letter-spacing: 0.5px;">PharmaOps</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <span style="background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 500;">📊 Module Analyse Génériques</span>
+    </div>
+  </div>
+
+    <div class="container">
+        <!-- App Header Container (Option 1 + Option 2: Rich Navy Header & Dual-App Switcher) -->
+        <div class="app-header-container">
+            <header>
+                <div class="header-brand-group">
+                    <div class="header-logo-icon">
+                        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19.5 12.572l-7.5 7.428l-7.5 -7.428m15 -6l-7.5 7.428l-7.5 -7.428"></path><path d="M9 3h6v4H9z"></path></svg>
+                    </div>
+                    <div class="header-title">
+                        <h1>Tableau de Bord Mensuel des Achats Génériques (2026)</h1>
+                        <p>Analyse comparative mensuelle Janvier-Mai 2026 vs Historique 2022-2025</p>
+                    </div>
+                </div>
+
+                <div class="header-actions">
+                    <button id="importDataBtn" class="btn-header-action">⚙️ Gérer les Données</button>
+                    <button onclick="window.print()" class="btn-header-action">🖨️ PDF</button>
+                    <button class="theme-toggle-btn" onclick="toggleTheme()" title="Basculer le thème clair/sombre">
+                        <span id="theme-icon">☀️</span>
+                    </button>
+                </div>
+            </header>
+        </div>
+
+        <!-- Navigation Tabs (Segmented Floating Pill Bar) -->
+        <div class="nav-tabs-bar">
+            <a href="generics_annual.html" class="nav-tab-item">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 012-2h2a2 2 0 012 2v6a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path><path d="M3 19v-10a2 2 0 012-2h2a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path><path d="M15 19v-14a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                Analyse Annuelle (2022-2025)
+            </a>
+            <a href="Tableau_de_bord_Mensuel_2026.html" class="nav-tab-item active">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                Suivi Mensuel 2026
+            </a>
+        </div>
+
+        <!-- KPI Grid -->
+        <div class="kpi-grid">
+            <div class="card kpi-card">
+                <span class="kpi-title" id="kpi-cumul-title">Cumul Annuel 2026</span>
+                <span class="kpi-value" id="kpi-cumul-2026">$0.00</span>
+                <span class="kpi-sub" id="kpi-cumul-sub">--</span>
+            </div>
+            <div class="card kpi-card">
+                <span class="kpi-title" id="kpi-moy-title">Moyenne Mensuelle 2026</span>
+                <span class="kpi-value" id="kpi-moy-2026">$0.00</span>
+                <span class="kpi-sub" id="kpi-moy-sub">--</span>
+            </div>
+            <div class="card kpi-card">
+                <span class="kpi-title" id="kpi-proj-title">Projection Annuelle 2026</span>
+                <span class="kpi-value" id="kpi-proj-2026" style="color: var(--accent-purple);">$0.00</span>
+                <span class="kpi-sub" id="kpi-proj-sub">Sur la base du run-rate actuel</span>
+            </div>
+            <div class="card kpi-card">
+                <span class="kpi-title">Fabricants Actifs 2026</span>
+                <span class="kpi-value" id="kpi-companies-count">0</span>
+                <span class="kpi-sub" id="kpi-companies-sub" style="color: var(--text-secondary)">Sur la période Jan-Mai</span>
+            </div>
+        </div>
+
+        <!-- Charts Grid Row (2x2 Grid) -->
+        <div class="dashboard-grid">
+            <div class="card">
+                <h3>Comparaison Annuelle & Projection</h3>
+                <div class="subtitle" style="margin-bottom: 1.5rem;">Achats réels vs projection de fin d'année 2026 (Run-rate)</div>
+                <div class="chart-container">
+                    <canvas id="annualTrendChart"></canvas>
+                </div>
+            </div>
+            <div class="card">
+                <h3>Suivi Mensuel vs Moyennes</h3>
+                <div class="subtitle" style="margin-bottom: 1.5rem;">Ventes mensuelles 2026 vs moyennes mensuelles 2024 et 2025</div>
+                <div class="chart-container">
+                    <canvas id="monthlyBaselineChart"></canvas>
+                </div>
+            </div>
+            <div class="card">
+                <h3>Répartition des Achats par Fabricant (2026)</h3>
+                <div class="subtitle" style="margin-bottom: 1.5rem;">Parts de marché cumulées (Top 5 + Autres) sur l'année en cours</div>
+                <div class="chart-container">
+                    <canvas id="supplierMarketShareChart"></canvas>
+                </div>
+            </div>
+            <div class="card">
+                <h3>Évolution des Top 5 Fabricants (2026)</h3>
+                <div class="subtitle" style="margin-bottom: 1.5rem;">Évolution des achats mensuels des 5 plus grands fournisseurs en 2026</div>
+                <div class="chart-container">
+                    <canvas id="topCompaniesMonthlyChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dynamic Insights Section -->
+        <div class="insights-section">
+            <div class="card">
+                <div class="insights-header">
+                    <div>
+                        <h3>Analyse des Écarts Mensuels (2026)</h3>
+                        <div class="subtitle">Identifie les plus fortes hausses et baisses d'un mois sur l'autre et les molécules explicatives</div>
+                    </div>
+                    <div>
+                        <select id="insightsMonthSelect" class="select-year">
+                            <option value="5">Mai vs Avril 2026</option>
+                            <option value="4">Avril vs Mars 2026</option>
+                            <option value="3">Mars vs Février 2026</option>
+                            <option value="2">Février vs Janvier 2026</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="insights-grid">
+                    <div class="insight-box growers">
+                        <h4 style="color: var(--accent-success); display: flex; align-items: center; gap: 0.5rem;">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                            Top 5 des plus fortes hausses mensuelles
+                        </h4>
+                        <ul id="growers-list" class="insight-list">
+                            <!-- JS Generated -->
+                        </ul>
+                    </div>
+                    <div class="insight-box decliners">
+                        <h4 style="color: var(--accent-danger); display: flex; align-items: center; gap: 0.5rem;">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 17h8m0 0v-8m0 8l-8-8-4 4-6-6"></path></svg>
+                            Top 5 des plus fortes baisses mensuelles
+                        </h4>
+                        <ul id="decliners-list" class="insight-list">
+                            <!-- JS Generated -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Exploration Section -->
+        <div class="explore-grid">
+            <!-- Sidebar Table -->
+            <div class="explore-sidebar">
+                <div class="search-box">
+                    <svg width="20" height="20" fill="none" stroke="var(--text-secondary)" stroke-width="2" viewBox="0 0 24 24" style="margin-right: 0.5rem;"><circle cx="11" cy="11" r="8"></circle><path d="M21 21l-4.35-4.35"></path></svg>
+                    <input type="text" id="companySearchInput" placeholder="Rechercher un fabricant...">
+                </div>
+                <div class="card" style="padding: 0; flex-grow: 1; display: flex; flex-direction: column; overflow: hidden;">
+                    <div class="companies-table-container">
+                        <table class="companies-table">
+                            <thead>
+                                <tr>
+                                    <th>Compagnie</th>
+                                    <th class="numeric-header">Cumul 2026</th>
+                                    <th class="numeric-header">vs Moy. 2025</th>
+                                </tr>
+                            </thead>
+                            <tbody id="companies-table-body">
+                                <!-- JS Generated -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detail Panel -->
+            <div class="explore-detail">
+                <div class="card">
+                    <div class="detail-header">
+                        <div>
+                            <div class="detail-title" id="detail-company-name">Fabricant</div>
+                            <div class="subtitle" id="detail-company-subtitle">Analyse mensuelle détaillée de la compagnie</div>
+                        </div>
+                    </div>
+
+                    <div class="detail-kpis" style="margin-top: 1.5rem; margin-bottom: 1.5rem;">
+                        <div class="card kpi-card" style="background-color: rgba(31, 41, 55, 0.3); border-color: rgba(31, 41, 55, 0.5);">
+                            <span class="kpi-title" id="detail-kpi-cumul-title" style="font-size: 0.75rem;">Cumul Annuel 2026</span>
+                            <span class="kpi-value" id="detail-kpi-sales2026" style="font-size: 1.5rem;">$0.00</span>
+                        </div>
+                        <div class="card kpi-card" style="background-color: rgba(31, 41, 55, 0.3); border-color: rgba(31, 41, 55, 0.5);">
+                            <span class="kpi-title" style="font-size: 0.75rem;">Variation vs Moyenne 2025</span>
+                            <span class="kpi-value" id="detail-kpi-growth" style="font-size: 1.5rem;">--</span>
+                        </div>
+                        <div class="card kpi-card" style="background-color: rgba(31, 41, 55, 0.3); border-color: rgba(31, 41, 55, 0.5);">
+                            <span class="kpi-title" style="font-size: 0.75rem;">Moyenne Mensuelle 2026</span>
+                            <span class="kpi-value" id="detail-kpi-moy2026" style="font-size: 1.5rem;">$0.00</span>
+                        </div>
+                    </div>
+
+                    <div id="detail-mom-banner" class="card" style="background: rgba(31, 41, 55, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 1.5rem; padding: 0.75rem 1rem; display: none; justify-content: space-between; align-items: center; border-radius: 8px;">
+                        <span style="font-size: 0.85rem; font-weight: 500; color: var(--text-secondary);">
+                            Évolution mensuelle (<span id="detail-mom-period-label">Juin vs Mai 2026</span>) :
+                        </span>
+                        <span id="detail-mom-value" style="font-size: 1.1rem; font-weight: 700;">
+                            0,00 $ (0,0%)
+                        </span>
+                    </div>
+
+                    <div class="detail-middle-grid">
+                        <div>
+                            <h4 style="margin-bottom: 1rem;">Achats Mensuels 2026 vs Moyenne Mensuelle 2025</h4>
+                            <div class="chart-container" style="height: 250px;">
+                                <canvas id="companyMonthlyChart"></canvas>
+                            </div>
+                        </div>
+                        <div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                <h4 style="margin: 0;">Impact Molécules</h4>
+                                <select id="detail-impact-mode-select" class="select-year" style="font-size: 0.8rem; padding: 0.2rem 0.5rem; width: auto; background: rgba(31, 41, 55, 0.5); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 4px; color: var(--text-primary);">
+                                    <option value="annual">Cumul Annuel</option>
+                                    <option value="monthly">Évolution Mensuelle</option>
+                                </select>
+                            </div>
+                            <div class="molecule-impact-box">
+                                <div class="molecule-impact-lists">
+                                    <div>
+                                        <h5 style="color: var(--accent-success); margin-bottom: 0.5rem; font-size: 0.8rem; display: flex; align-items: center; gap: 0.25rem;">
+                                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                                            <span id="company-impact-growers-title">Top Hausses (2026)</span>
+                                        </h5>
+                                        <div id="company-growers-list" style="display: flex; flex-direction: column; gap: 0.4rem;">
+                                            <!-- Dynamic JS -->
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h5 style="color: var(--accent-danger); margin-bottom: 0.5rem; font-size: 0.8rem; display: flex; align-items: center; gap: 0.25rem;">
+                                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 17h8m0 0v-8m0 8l-8-8-4 4-6-6"></path></svg>
+                                            <span id="company-impact-decliners-title">Top Baisses (2026)</span>
+                                        </h5>
+                                        <div id="company-decliners-list" style="display: flex; flex-direction: column; gap: 0.4rem;">
+                                            <!-- Dynamic JS -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="detail-table-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                            <h4 style="margin: 0;">Évolution par Molécule (Cliquez sur les en-têtes pour trier)</h4>
+                            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                <select id="molecule-table-view-select" class="select-year" style="font-size: 0.8rem; padding: 0.25rem 0.5rem; width: auto; background: rgba(31, 41, 55, 0.5); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 4px; color: var(--text-primary); cursor: pointer;">
+                                    <option value="summary" selected>Synthèse (Moyennes)</option>
+                                    <option value="all">Détail Mensuel</option>
+                                </select>
+                                <div class="search-box" style="padding: 0.25rem 0.5rem; max-width: 200px;">
+                                    <input type="text" id="moleculeSearchInput" placeholder="Filtrer les molécules..." style="font-size: 0.8rem;">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="molecules-table-container">
+                            <table class="molecules-table">
+                                <thead id="molecules-table-header"></thead>
+                                <tbody id="molecules-table-body">
+                                    <!-- JS Generated -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Injection -->
+    <script>
+        let rawData = getEmptyRawData();
+    </script>
+
+        <!-- Main Logic -->
+    <script>
+        // Utilities
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('fr-CA', { style: 'currency', currency: 'CAD' }).format(value);
+        }
+
+        function formatCurrencyNoCents(value) {
+            return new Intl.NumberFormat('fr-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 }).format(value);
+        }
+
+        function formatPercent(value) {
+            if (value === 0 || isNaN(value)) return "0,0%";
+            const prefix = value > 0 ? "+" : "";
+            return prefix + value.toFixed(1).replace('.', ',') + "%";
+        }
+
+        // Active State Globals
+        let activeCompany = null;
+        let annualTrendChartObj = null;
+        let monthlyBaselineChartObj = null;
+        let topCompaniesMonthlyChartObj = null;
+        let companyMonthlyChartObj = null;
+        let supplierMarketShareChartObj = null;
+        
+        let moleculeSortKey = 'diff';
+        let moleculeSortDir = 'desc';
+
+        // Cumulative months count (dynamic)
+        let N_MONTHS = 5;
+        let monthNames = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai'];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initKpis();
+            initCharts();
+            populateInsights();
+            initExploreSidebar();
+
+            const sortedComps = getSortedCompanies();
+            if (sortedComps.length > 0) {
+                selectCompany(sortedComps[0].name);
+            } else {
+                clearCompanyDetails();
+            }
+
+            document.getElementById('insightsMonthSelect').addEventListener('change', populateInsights);
+            document.getElementById('companySearchInput').addEventListener('input', filterCompaniesTable);
+            document.getElementById('moleculeSearchInput').addEventListener('input', filterMoleculesTable);
+            
+            const tableViewSelect = document.getElementById('molecule-table-view-select');
+            if (tableViewSelect) {
+                tableViewSelect.addEventListener('change', () => {
+                    if (activeCompany) {
+                        filterMoleculesTable();
+                    }
+                });
+            }
+            
+            const detailImpactModeSelect = document.getElementById('detail-impact-mode-select');
+            if (detailImpactModeSelect) {
+                detailImpactModeSelect.addEventListener('change', updateMoleculeImpacts);
+            }
+        });
+
+        // Calculate and Populate KPIs
+        function initKpis() {
+            // Compute Jan-May 2026 total sales
+            let cumul2026 = 0;
+            rawData.manufacturers.forEach(comp => {
+                for (let m = 1; m <= N_MONTHS; m++) {
+                    cumul2026 += (comp.monthlySales && comp.monthlySales[m]) ? comp.monthlySales[m] : 0;
+                }
+            });
+
+            const moy2026 = cumul2026 / N_MONTHS;
+            const projected2026 = cumul2026 * (12 / N_MONTHS);
+
+            document.getElementById('kpi-cumul-2026').textContent = formatCurrency(cumul2026);
+            document.getElementById('kpi-moy-2026').textContent = formatCurrency(moy2026);
+            document.getElementById('kpi-proj-2026').textContent = formatCurrency(projected2026);
+
+            // Compare Moy. 2026 to Moy. 2025
+            const tot2025 = rawData.totals['2025'] || 0.0;
+            const moy2025 = tot2025 / 12;
+            const diffMoy = moy2025 > 0 ? ((moy2026 - moy2025) / moy2025) * 100 : 0;
+            
+            const moySub = document.getElementById('kpi-moy-sub');
+            moySub.textContent = `${formatPercent(diffMoy)} vs moyenne mensuelle 2025 (${formatCurrency(moy2025).replace('$', '').trim()} $)`;
+            moySub.className = 'kpi-sub ' + (diffMoy >= 0 ? 'growth-up' : 'growth-down');
+
+            // Compare projection 2026 to total 2025
+            const diffProj = tot2025 > 0 ? ((projected2026 - tot2025) / tot2025) * 100 : 0;
+            const projSub = document.getElementById('kpi-proj-sub');
+            projSub.textContent = `${formatPercent(diffProj)} vs total annuel 2025`;
+            projSub.className = 'kpi-sub ' + (diffProj >= 0 ? 'growth-up' : 'growth-down');
+
+            // Compare Cumul to 2025 YTD equivalent (N_MONTHS equivalent)
+            const equivalent2025Ytd = tot2025 * (N_MONTHS / 12);
+            const diffYtd = equivalent2025Ytd > 0 ? ((cumul2026 - equivalent2025Ytd) / equivalent2025Ytd) * 100 : 0;
+            
+            const shortMonths = ['Janv.', 'Févr.', 'Mars', 'Avril', 'Mai', 'Juin', 'Juil.', 'Août', 'Sept.', 'Oct.', 'Nov.', 'Déc.'];
+            const periodLabel = N_MONTHS === 1 ? 'Janvier' : `Janv.-${shortMonths[N_MONTHS-1]}`;
+            
+            const cumulSub = document.getElementById('kpi-cumul-sub');
+            cumulSub.textContent = `${formatPercent(diffYtd)} vs cumulatif ${periodLabel} 2025 (prorata)`;
+            cumulSub.className = 'kpi-sub ' + (diffYtd >= 0 ? 'growth-up' : 'growth-down');
+
+            document.getElementById('kpi-companies-count').textContent = getActiveCompaniesIn2026().length;
+        }
+
+        // List active companies in 2026
+        function getActiveCompaniesIn2026() {
+            return rawData.manufacturers.filter(comp => {
+                let hasSales = false;
+                for (let m = 1; m <= N_MONTHS; m++) {
+                    if (comp.monthlySales && comp.monthlySales[m] > 0) hasSales = true;
+                }
+                return hasSales;
+            });
+        }
+
+        // Initialize Global Charts
+        function initCharts() {
+            // Chart 1: Annual Trend & Projection 2026 (Stacked)
+            let cumul2026 = 0;
+            rawData.manufacturers.forEach(comp => {
+                for (let m = 1; m <= N_MONTHS; m++) {
+                    cumul2026 += (comp.monthlySales && comp.monthlySales[m]) ? comp.monthlySales[m] : 0;
+                }
+            });
+            const projectedRemaining = cumul2026 * (12 / N_MONTHS) - cumul2026;
+
+            const ctx1 = document.getElementById('annualTrendChart').getContext('2d');
+            annualTrendChartObj = new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: ['2022', '2023', '2024', '2025', '2026 (Projeté)'],
+                    datasets: [
+                        {
+                            label: 'Achats Réels / Cumulatif YTD ($)',
+                            data: [
+                                rawData.totals['2022'],
+                                rawData.totals['2023'],
+                                rawData.totals['2024'],
+                                rawData.totals['2025'],
+                                cumul2026
+                            ],
+                            backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                            borderColor: '#3b82f6',
+                            borderWidth: 2,
+                            borderRadius: { topLeft: 4, topRight: 4, bottomLeft: 4, bottomRight: 4 },
+                            stack: 'combined'
+                        },
+                        {
+                            label: 'Projection Fin d\'Année ($)',
+                            data: [0, 0, 0, 0, projectedRemaining],
+                            backgroundColor: 'rgba(139, 92, 246, 0.15)',
+                            borderColor: '#8b5cf6',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            borderRadius: { topLeft: 8, topRight: 8, bottomLeft: 0, bottomRight: 0 },
+                            stack: 'combined'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#9ca3af', font: { size: 10 } }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label.split(' ($)')[0] + ' : ' + formatCurrency(context.raw);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            stacked: true,
+                            beginAtZero: true,
+                            grid: { color: '#1f2937' },
+                            ticks: {
+                                color: '#9ca3af',
+                                callback: function(value) { return value / 1000 + 'k $'; }
+                            }
+                        },
+                        x: {
+                            stacked: true,
+                            grid: { display: false },
+                            ticks: { color: '#9ca3af' }
+                        }
+                    }
+                }
+            });
+
+            // Chart 2: Monthly 2026 vs Historical Averages
+            const monthlyData = Array(N_MONTHS).fill(0);
+            rawData.manufacturers.forEach(comp => {
+                for (let m = 1; m <= N_MONTHS; m++) {
+                    monthlyData[m-1] += (comp.monthlySales && comp.monthlySales[m]) ? comp.monthlySales[m] : 0;
+                }
+            });
+
+            const avg25 = (rawData.totals['2025'] || 0) / 12;
+            const avg24 = (rawData.totals['2024'] || 0) / 12;
+
+            const ctx2 = document.getElementById('monthlyBaselineChart').getContext('2d');
+            monthlyBaselineChartObj = new Chart(ctx2, {
+                type: 'line',
+                data: {
+                    labels: monthNames,
+                    datasets: [
+                        {
+                            label: 'Achats Mensuels 2026 ($)',
+                            data: monthlyData,
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            borderWidth: 3,
+                            tension: 0.2,
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
+                            fill: false
+                        },
+                        {
+                            label: 'Moyenne Mensuelle 2025 ($)',
+                            data: Array(N_MONTHS).fill(avg25),
+                            borderColor: '#10b981',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            pointRadius: 0,
+                            fill: false
+                        },
+                        {
+                            label: 'Moyenne Mensuelle 2024 ($)',
+                            data: Array(N_MONTHS).fill(avg24),
+                            borderColor: '#8b5cf6',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            pointRadius: 0,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#9ca3af', font: { size: 10 } }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label.split(' ($)')[0] + ' : ' + formatCurrency(context.raw);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            grid: { color: '#1f2937' },
+                            ticks: {
+                                color: '#9ca3af',
+                                callback: function(value) { return formatCurrency(value); }
+                            }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#9ca3af' }
+                        }
+                    }
+                }
+            });
+
+            // Chart 3: Top 5 Manufacturers Monthly Sales in 2026
+            const sortedComps = getSortedCompanies();
+            const top5Comps = sortedComps.slice(0, 5);
+            const colorPalette = ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b', '#ec4899'];
+
+            const datasets2026 = top5Comps.map((comp, idx) => {
+                const compData = [];
+                for (let m = 1; m <= N_MONTHS; m++) {
+                    compData.push((comp.monthlySales && comp.monthlySales[m]) ? comp.monthlySales[m] : 0);
+                }
+                return {
+                    label: comp.name,
+                    data: compData,
+                    borderColor: colorPalette[idx],
+                    backgroundColor: colorPalette[idx] + '10',
+                    borderWidth: 2.5,
+                    tension: 0.2,
+                    pointRadius: 3,
+                    pointHoverRadius: 5,
+                    fill: false
+                };
+            });
+
+            const ctx3 = document.getElementById('topCompaniesMonthlyChart').getContext('2d');
+            topCompaniesMonthlyChartObj = new Chart(ctx3, {
+                type: 'line',
+                data: {
+                    labels: monthNames,
+                    datasets: datasets2026
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#9ca3af', font: { size: 9 }, padding: 8 }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ' : ' + formatCurrency(context.raw);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: '#1f2937' },
+                            ticks: {
+                                color: '#9ca3af',
+                                callback: function(value) { return formatCurrency(value); }
+                            }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#9ca3af' }
+                        }
+                    }
+                }
+            });
+
+            // Chart 4: Supplier Market Share (Donut Chart)
+            const total2026Sales = sortedComps.reduce((acc, c) => acc + c.cumul, 0);
+            
+            let donutLabels = [];
+            let donutData = [];
+            let donutColors = [
+                'rgba(139, 92, 246, 0.8)', // Violet
+                'rgba(16, 185, 129, 0.8)',  // Emerald
+                'rgba(245, 158, 11, 0.8)',  // Amber
+                'rgba(59, 130, 246, 0.8)',  // Blue
+                'rgba(236, 72, 153, 0.8)',  // Pink
+                'rgba(156, 163, 175, 0.6)'  // Grey for Others
+            ];
+            
+            if (total2026Sales > 0) {
+                // Top 5
+                const top5 = sortedComps.slice(0, 5);
+                top5.forEach(comp => {
+                    if (comp.cumul > 0) {
+                        donutLabels.push(comp.name);
+                        donutData.push(comp.cumul);
+                    }
+                });
+                
+                // Others
+                if (sortedComps.length > 5) {
+                    const othersCumul = sortedComps.slice(5).reduce((acc, c) => acc + c.cumul, 0);
+                    if (othersCumul > 0) {
+                        donutLabels.push("Autres");
+                        donutData.push(othersCumul);
+                    }
+                }
+            } else {
+                donutLabels = ["Aucune donnée"];
+                donutData = [1];
+                donutColors = ['rgba(156, 163, 175, 0.2)'];
+            }
+
+            const ctx4 = document.getElementById('supplierMarketShareChart').getContext('2d');
+            supplierMarketShareChartObj = new Chart(ctx4, {
+                type: 'doughnut',
+                data: {
+                    labels: donutLabels,
+                    datasets: [{
+                        data: donutData,
+                        backgroundColor: donutColors.slice(0, donutLabels.length),
+                        borderColor: '#1f2937',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#9ca3af', font: { size: 9 }, padding: 8 }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    if (total2026Sales === 0) return "Aucune vente";
+                                    const val = context.raw;
+                                    const pct = ((val / total2026Sales) * 100).toFixed(1) + '%';
+                                    return context.label + ' : ' + formatCurrency(val) + ' (' + pct + ')';
+                                }
+                            }
+                        }
+                    },
+                    cutout: '60%'
+                }
+            });
+        }
+
+        // Get sorted list of companies by 2026 sales
+        function getSortedCompanies() {
+            return rawData.manufacturers.map(comp => {
+                let cumul = 0;
+                for (let m = 1; m <= N_MONTHS; m++) {
+                    cumul += (comp.monthlySales && comp.monthlySales[m]) ? comp.monthlySales[m] : 0;
+                }
+                return {
+                    name: comp.name,
+                    cumul: cumul,
+                    sales: comp.sales,
+                    monthlySales: comp.monthlySales,
+                    molecules: comp.molecules
+                };
+            }).sort((a, b) => b.cumul - a.cumul);
+        }
+
+        // Generate YoY Insights
+        function populateInsights() {
+            const currentMonthIdx = parseInt(document.getElementById('insightsMonthSelect').value); // 2 = Fev, 3 = Mar, 4 = Avr, 5 = Mai
+            const prevMonthIdx = currentMonthIdx - 1;
+
+            const stats = rawData.manufacturers.map(comp => {
+                const salesCurrent = (comp.monthlySales && comp.monthlySales[currentMonthIdx]) ? comp.monthlySales[currentMonthIdx] : 0;
+                const salesPrev = (comp.monthlySales && comp.monthlySales[prevMonthIdx]) ? comp.monthlySales[prevMonthIdx] : 0;
+                const diff = salesCurrent - salesPrev;
+
+                // Find top molecule change for this company
+                let topMolecule = "Aucun mouvement";
+                let topMoleculeChange = 0;
+
+                comp.molecules.forEach(mol => {
+                    const mCurrent = (mol.monthlySales && mol.monthlySales[currentMonthIdx]) ? mol.monthlySales[currentMonthIdx] : 0;
+                    const mPrev = (mol.monthlySales && mol.monthlySales[prevMonthIdx]) ? mol.monthlySales[prevMonthIdx] : 0;
+                    const mChange = mCurrent - mPrev;
+
+                    if (Math.abs(mChange) > Math.abs(topMoleculeChange)) {
+                        topMoleculeChange = mChange;
+                        topMolecule = mol.name;
+                    }
+                });
+
+                return {
+                    name: comp.name,
+                    change: diff,
+                    salesCurrent: salesCurrent,
+                    salesPrev: salesPrev,
+                    topMolecule: topMolecule,
+                    topMoleculeChange: topMoleculeChange
+                };
+            });
+
+            // Filter out companies that have no sales in both months
+            const activeStats = stats.filter(s => s.salesCurrent > 0 || s.salesPrev > 0);
+
+            // Sort for Growers & Decliners
+            const growers = [...activeStats].filter(c => c.change > 0).sort((a, b) => b.change - a.change).slice(0, 5);
+            const decliners = [...activeStats].filter(c => c.change < 0).sort((a, b) => a.change - b.change).slice(0, 5);
+
+            // Render Growers
+            const growersList = document.getElementById('growers-list');
+            growersList.innerHTML = '';
+            if (growers.length === 0) {
+                growersList.innerHTML = '<li class="subtitle" style="padding: 1rem 0;">Aucune hausse enregistrée.</li>';
+            } else {
+                growers.forEach(g => {
+                    const li = document.createElement('li');
+                    li.className = 'insight-item';
+                    
+                    let molText = "";
+                    if (g.topMoleculeChange > 0.01) {
+                        molText = `Hausse portée par <strong>${g.topMolecule}</strong> (+${formatCurrency(g.topMoleculeChange).replace('$', '').trim()} $)`;
+                    } else {
+                        molText = `Molécule principale : <strong>${g.topMolecule}</strong>`;
+                    }
+
+                    li.innerHTML = `
+                        <div class="insight-company-info">
+                            <span class="insight-company-name">${g.name}</span>
+                            <span class="insight-company-reason">${molText}</span>
+                        </div>
+                        <div class="insight-change growth-up">
+                            +${formatCurrency(g.change)}
+                            <div style="font-size: 0.75rem; color: var(--text-secondary); font-weight: normal;">
+                                MoM: ${formatPercent(g.salesPrev > 0 ? (g.change / g.salesPrev) * 100 : 0)}
+                            </div>
+                        </div>
+                    `;
+                    growersList.appendChild(li);
+                });
+            }
+
+            // Render Decliners
+            const declinersList = document.getElementById('decliners-list');
+            declinersList.innerHTML = '';
+            if (decliners.length === 0) {
+                declinersList.innerHTML = '<li class="subtitle" style="padding: 1rem 0;">Aucune baisse enregistrée.</li>';
+            } else {
+                decliners.forEach(d => {
+                    const li = document.createElement('li');
+                    li.className = 'insight-item';
+
+                    let molText = "";
+                    if (d.topMoleculeChange < -0.01) {
+                        molText = `Baisse liée à <strong>${d.topMolecule}</strong> (${formatCurrency(d.topMoleculeChange).replace('$', '').trim()} $)`;
+                    } else {
+                        molText = `Molécule principale : <strong>${d.topMolecule}</strong>`;
+                    }
+
+                    li.innerHTML = `
+                        <div class="insight-company-info">
+                            <span class="insight-company-name">${d.name}</span>
+                            <span class="insight-company-reason">${molText}</span>
+                        </div>
+                        <div class="insight-change growth-down">
+                            ${formatCurrency(d.change)}
+                            <div style="font-size: 0.75rem; color: var(--text-secondary); font-weight: normal;">
+                                MoM: ${formatPercent(d.salesPrev > 0 ? (d.change / d.salesPrev) * 100 : 0)}
+                            </div>
+                        </div>
+                    `;
+                    declinersList.appendChild(li);
+                });
+            }
+            updateDetailMom();
+            updateMoleculeImpacts();
+        }
+
+        // Initialize explore sidebar list
+        function initExploreSidebar() {
+            const sortedComps = getSortedCompanies();
+            renderCompaniesTable(sortedComps);
+        }
+
+        // Render companies table in the sidebar
+        function renderCompaniesTable(companies) {
+            const tbody = document.getElementById('companies-table-body');
+            tbody.innerHTML = '';
+
+            companies.forEach(comp => {
+                const tr = document.createElement('tr');
+                tr.setAttribute('data-company', comp.name);
+                if (activeCompany && activeCompany.name === comp.name) {
+                    tr.className = 'selected';
+                }
+
+                // Compare average monthly sales 2026 to average monthly sales 2025
+                const moy26 = comp.cumul / N_MONTHS;
+                const moy25 = (comp.sales && comp.sales['2025']) ? comp.sales['2025'] / 12 : 0.0;
+                
+                const pct = moy25 > 0 ? ((moy26 - moy25) / moy25) * 100 : 0.0;
+
+                let badgeClass = 'badge-neutral';
+                let badgeText = '0,0%';
+                if (pct > 0.1) {
+                    badgeClass = 'badge-success';
+                    badgeText = formatPercent(pct);
+                } else if (pct < -0.1) {
+                    badgeClass = 'badge-danger';
+                    badgeText = formatPercent(pct);
+                }
+
+                tr.innerHTML = `
+                    <td style="font-weight: 500;">${comp.name}</td>
+                    <td class="numeric">${formatCurrency(comp.cumul).replace('$', '').trim()} $</td>
+                    <td class="numeric"><span class="badge ${badgeClass}">${badgeText}</span></td>
+                `;
+
+                tr.addEventListener('click', () => {
+                    selectCompany(comp.name);
+                });
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Filter companies table based on search input
+        function filterCompaniesTable() {
+            const query = document.getElementById('companySearchInput').value.toLowerCase();
+            const filtered = getSortedCompanies().filter(c => c.name.toLowerCase().includes(query));
+            renderCompaniesTable(filtered);
+        }
+
+        // Clear company details panel when no data is loaded
+        function clearCompanyDetails() {
+            activeCompany = null;
+            document.getElementById('detail-company-name').textContent = "Aucun fabricant";
+            document.getElementById('detail-company-subtitle').textContent = "Veuillez importer des données pour commencer";
+            document.getElementById('detail-kpi-sales2026').textContent = "0,00 $";
+            document.getElementById('detail-kpi-moy2026').textContent = "0,00 $";
+            
+            const growthKpi = document.getElementById('detail-kpi-growth');
+            growthKpi.textContent = "0,0%";
+            growthKpi.className = 'kpi-value';
+
+            // Clear molecules table
+            renderMoleculesTable([]);
+
+            // Reset molecule search input
+            document.getElementById('moleculeSearchInput').value = '';
+
+            // Update Company Monthly Chart with zero data
+            updateCompanyMonthlyChart({
+                name: "Aucun",
+                monthlySales: {}
+            }, 0);
+
+            updateDetailMom();
+            updateMoleculeImpacts();
+        }
+
+        // Select a company to view in the detail panel
+        function selectCompany(companyName) {
+            const company = getSortedCompanies().find(m => m.name === companyName);
+            if (!company) return;
+
+            activeCompany = company;
+
+            // Highlight selected row in table
+            const rows = document.querySelectorAll('#companies-table-body tr');
+            rows.forEach(r => {
+                if (r.getAttribute('data-company') === companyName) {
+                    r.classList.add('selected');
+                } else {
+                    r.classList.remove('selected');
+                }
+            });
+
+            // Update details UI
+            document.getElementById('detail-company-name').textContent = company.name;
+            document.getElementById('detail-company-subtitle').textContent = `Évolution historique et répartition des molécules`;
+
+            // Sales 2026 KPI
+            document.getElementById('detail-kpi-sales2026').textContent = formatCurrency(company.cumul);
+            
+            // Average Monthly 2026 KPI
+            const moy26 = company.cumul / N_MONTHS;
+            document.getElementById('detail-kpi-moy2026').textContent = formatCurrency(moy26);
+
+            // Change KPI
+            const sales2025 = (company.sales && company.sales['2025']) ? company.sales['2025'] : 0;
+            const moy25 = sales2025 / 12;
+            const changePct = moy25 > 0 ? ((moy26 - moy25) / moy25) * 100 : 0;
+            
+            const growthKpi = document.getElementById('detail-kpi-growth');
+            growthKpi.textContent = formatPercent(changePct);
+            growthKpi.className = 'kpi-value ' + ((moy26 - moy25) >= 0 ? 'growth-up' : 'growth-down');
+
+            // Update Company Monthly Chart
+            updateCompanyMonthlyChart(company, moy25);
+
+            // Populate Molecules Table
+            renderMoleculesTable(company.molecules);
+            
+            // Populate molecule impact Top 3 Lists
+            updateMoleculeImpacts();
+
+            // Reset molecule search input
+            document.getElementById('moleculeSearchInput').value = '';
+
+            updateDetailMom();
+        }
+
+        // Calculate and update the Top 3 growers and decliners of molecules for selected company (Annual or Monthly mode)
+        function updateMoleculeImpacts() {
+            const growersList = document.getElementById('company-growers-list');
+            const declinersList = document.getElementById('company-decliners-list');
+            if (growersList) growersList.innerHTML = '';
+            if (declinersList) declinersList.innerHTML = '';
+
+            if (!activeCompany) return;
+
+            const modeSelect = document.getElementById('detail-impact-mode-select');
+            const isMonthly = modeSelect ? (modeSelect.value === 'monthly') : false;
+
+            const growersTitle = document.getElementById('company-impact-growers-title');
+            const declinersTitle = document.getElementById('company-impact-decliners-title');
+
+            let currentMonthIdx = N_MONTHS;
+            const select = document.getElementById('insightsMonthSelect');
+            if (select && select.value) {
+                currentMonthIdx = parseInt(select.value);
+            }
+            const prevMonthIdx = currentMonthIdx - 1;
+
+            let molImpacts = [];
+            let companyTotalChange = 0;
+
+            if (isMonthly) {
+                const currentMonthName = fullMonthNames[currentMonthIdx - 1] || 'Mois';
+                if (growersTitle) growersTitle.textContent = `Top Hausses (${currentMonthName})`;
+                if (declinersTitle) declinersTitle.textContent = `Top Baisses (${currentMonthName})`;
+
+                molImpacts = activeCompany.molecules.map(mol => {
+                    const mCurrent = (mol.monthlySales && mol.monthlySales[currentMonthIdx]) ? mol.monthlySales[currentMonthIdx] : 0;
+                    const mPrev = (mol.monthlySales && mol.monthlySales[prevMonthIdx]) ? mol.monthlySales[prevMonthIdx] : 0;
+                    return {
+                        name: mol.name,
+                        diff: mCurrent - mPrev,
+                        prevVal: mPrev
+                    };
+                });
+
+                const companyCurrent = (activeCompany.monthlySales && activeCompany.monthlySales[currentMonthIdx]) ? activeCompany.monthlySales[currentMonthIdx] : 0;
+                const companyPrev = (activeCompany.monthlySales && activeCompany.monthlySales[prevMonthIdx]) ? activeCompany.monthlySales[prevMonthIdx] : 0;
+                companyTotalChange = companyCurrent - companyPrev;
+
+            } else {
+                const shortMonths = ['Janv.', 'Févr.', 'Mars', 'Avril', 'Mai', 'Juin', 'Juil.', 'Août', 'Sept.', 'Oct.', 'Nov.', 'Déc.'];
+                const periodLabel = N_MONTHS === 1 ? 'Janvier' : `Janv.-${shortMonths[N_MONTHS-1]}`;
+                
+                if (growersTitle) growersTitle.textContent = `Top Hausses (${periodLabel})`;
+                if (declinersTitle) declinersTitle.textContent = `Top Baisses (${periodLabel})`;
+
+                const sales2025 = (activeCompany.sales && activeCompany.sales['2025']) ? activeCompany.sales['2025'] : 0;
+                const moy25 = sales2025 / 12;
+
+                molImpacts = activeCompany.molecules.map(mol => {
+                    let molCumul26 = 0;
+                    for (let m = 1; m <= N_MONTHS; m++) {
+                        molCumul26 += (mol.monthlySales && mol.monthlySales[m]) ? mol.monthlySales[m] : 0;
+                    }
+                    const molMoy25 = (mol.sales && mol.sales['2025']) ? mol.sales['2025'] / 12 : 0;
+                    const molDiff = molCumul26 - (molMoy25 * N_MONTHS);
+                    return {
+                        name: mol.name,
+                        diff: molDiff,
+                        prevVal: molMoy25 * N_MONTHS
+                    };
+                });
+
+                companyTotalChange = activeCompany.cumul - (moy25 * N_MONTHS);
+            }
+
+            const molGrowers = molImpacts.filter(m => m.diff > 0.01).sort((a, b) => b.diff - a.diff).slice(0, 3);
+            const molDecliners = molImpacts.filter(m => m.diff < -0.01).sort((a, b) => a.diff - b.diff).slice(0, 3);
+
+            // Render Growers
+            if (molGrowers.length === 0) {
+                growersList.innerHTML = '<div style="color: var(--text-secondary); font-size: 0.75rem; font-style: italic; padding: 0.5rem 0;">Aucune hausse</div>';
+            } else {
+                molGrowers.forEach(g => {
+                    const pctContrib = companyTotalChange > 0 ? `(${formatPercent((g.diff / companyTotalChange) * 100)})` : '';
+                    const div = document.createElement('div');
+                    div.className = 'molecule-impact-item';
+                    div.setAttribute('data-molname', g.name);
+                    div.onclick = () => selectMoleculeInDetail(g.name);
+                    div.innerHTML = `
+                        <span class="mol-name" title="${g.name}">${g.name}</span>
+                        <span class="mol-val" style="color: var(--accent-success);">
+                            <span>+${formatCurrency(g.diff).replace('$', '').trim()} $</span>
+                            <span style="opacity: 0.7; font-size: 0.65rem;">${pctContrib}</span>
+                        </span>
+                    `;
+                    growersList.appendChild(div);
+                });
+            }
+
+            // Render Decliners
+            if (molDecliners.length === 0) {
+                declinersList.innerHTML = '<div style="color: var(--text-secondary); font-size: 0.75rem; font-style: italic; padding: 0.5rem 0;">Aucune baisse</div>';
+            } else {
+                molDecliners.forEach(d => {
+                    const pctContrib = companyTotalChange < 0 ? `(${formatPercent((d.diff / companyTotalChange) * 100)})` : '';
+                    const div = document.createElement('div');
+                    div.className = 'molecule-impact-item';
+                    div.setAttribute('data-molname', d.name);
+                    div.onclick = () => selectMoleculeInDetail(d.name);
+                    div.innerHTML = `
+                        <span class="mol-name" title="${d.name}">${d.name}</span>
+                        <span class="mol-val" style="color: var(--accent-danger);">
+                            <span>${formatCurrency(d.diff).replace('$', '').trim()} $</span>
+                            <span style="opacity: 0.7; font-size: 0.65rem;">${pctContrib}</span>
+                        </span>
+                    `;
+                    declinersList.appendChild(div);
+                });
+            }
+        }
+
+        // Calculate and show MoM evolution for selected company
+        function updateDetailMom() {
+            const banner = document.getElementById('detail-mom-banner');
+            const periodLabel = document.getElementById('detail-mom-period-label');
+            const valueSpan = document.getElementById('detail-mom-value');
+            if (!banner || !valueSpan || !periodLabel) return;
+
+            if (!activeCompany) {
+                banner.style.display = 'none';
+                return;
+            }
+
+            banner.style.display = 'flex';
+
+            // Get selected month comparison from dropdown
+            let currentMonthIdx = N_MONTHS;
+            const select = document.getElementById('insightsMonthSelect');
+            if (select && select.value) {
+                currentMonthIdx = parseInt(select.value);
+            }
+            const prevMonthIdx = currentMonthIdx - 1;
+
+            if (currentMonthIdx < 2) {
+                periodLabel.textContent = "N/A";
+                valueSpan.textContent = "Aucune comparaison possible";
+                banner.style.background = 'rgba(31, 41, 55, 0.3)';
+                banner.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                return;
+            }
+
+            const currentMonthName = fullMonthNames[currentMonthIdx - 1];
+            const prevMonthName = fullMonthNames[prevMonthIdx - 1];
+            periodLabel.textContent = `${currentMonthName} vs ${prevMonthName} 2026`;
+
+            const salesCurrent = (activeCompany.monthlySales && activeCompany.monthlySales[currentMonthIdx]) ? activeCompany.monthlySales[currentMonthIdx] : 0;
+            const salesPrev = (activeCompany.monthlySales && activeCompany.monthlySales[prevMonthIdx]) ? activeCompany.monthlySales[prevMonthIdx] : 0;
+            const diff = salesCurrent - salesPrev;
+            const pct = salesPrev > 0 ? (diff / salesPrev) * 100 : 0;
+
+            const formattedDiff = formatCurrency(diff);
+            const formattedPct = formatPercent(pct);
+
+            if (diff > 0.01) {
+                valueSpan.innerHTML = `<span style="color: var(--accent-success); font-weight: 700;">+${formattedDiff} (+${formattedPct})</span>`;
+                banner.style.background = 'rgba(16, 185, 129, 0.08)';
+                banner.style.borderColor = 'rgba(16, 185, 129, 0.25)';
+            } else if (diff < -0.01) {
+                valueSpan.innerHTML = `<span style="color: var(--accent-danger); font-weight: 700;">${formattedDiff} (${formattedPct})</span>`;
+                banner.style.background = 'rgba(239, 68, 68, 0.08)';
+                banner.style.borderColor = 'rgba(239, 68, 68, 0.25)';
+            } else {
+                valueSpan.innerHTML = `<span style="color: var(--text-secondary);">0,00 $ (0,0%)</span>`;
+                banner.style.background = 'rgba(31, 41, 55, 0.3)';
+                banner.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+            }
+        }
+
+        // Search and scroll to specific molecule
+        function selectMoleculeInDetail(molName) {
+            document.getElementById('moleculeSearchInput').value = molName;
+            filterMoleculesTable();
+            
+            // Pulse highlight animation on the filtered row
+            setTimeout(() => {
+                const tr = document.querySelector(`#molecules-table-body tr[data-molecule="${molName}"]`);
+                if (tr) {
+                    tr.style.transition = 'background-color 0.3s ease';
+                    tr.style.backgroundColor = 'rgba(139, 92, 246, 0.25)'; // accent-primary background
+                    setTimeout(() => {
+                        tr.style.backgroundColor = '';
+                    }, 1500);
+                    tr.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            }, 100);
+        }
+
+        // Render company detail trend bar chart
+        function updateCompanyMonthlyChart(company, moy25) {
+            const ctx = document.getElementById('companyMonthlyChart').getContext('2d');
+
+            const monthlyData = [];
+            for (let m = 1; m <= N_MONTHS; m++) {
+                monthlyData.push((company.monthlySales && company.monthlySales[m]) ? company.monthlySales[m] : 0);
+            }
+
+            if (companyMonthlyChartObj) {
+                companyMonthlyChartObj.data.labels = monthNames;
+                companyMonthlyChartObj.data.datasets[0].data = monthlyData;
+                companyMonthlyChartObj.data.datasets[1].data = Array(N_MONTHS).fill(moy25);
+                companyMonthlyChartObj.update();
+            } else {
+                companyMonthlyChartObj = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: monthNames,
+                        datasets: [
+                            {
+                                label: 'Achats Mensuels 2026 ($)',
+                                data: monthlyData,
+                                backgroundColor: 'rgba(139, 92, 246, 0.7)',
+                                borderColor: '#8b5cf6',
+                                borderWidth: 2,
+                                borderRadius: 4
+                            },
+                            {
+                                label: 'Moyenne Mensuelle 2025 ($)',
+                                type: 'line',
+                                data: Array(N_MONTHS).fill(moy25),
+                                borderColor: '#10b981',
+                                borderWidth: 2,
+                                borderDash: [5, 5],
+                                pointRadius: 0,
+                                fill: false
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { color: '#9ca3af', font: { size: 11 } }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.dataset.label.split(' ($)')[0] + ' : ' + formatCurrency(context.raw);
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: '#1f2937' },
+                                ticks: {
+                                    color: '#9ca3af',
+                                    callback: function(value) { return formatCurrency(value); }
+                                }
+                            },
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: '#9ca3af' }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        function setMoleculeSort(key) {
+            if (moleculeSortKey === key) {
+                moleculeSortDir = moleculeSortDir === 'desc' ? 'asc' : 'desc';
+            } else {
+                moleculeSortKey = key;
+                moleculeSortDir = 'desc';
+            }
+            filterMoleculesTable();
+        }
+
+        function updateSortIcons() {
+            const keys = ['name', 'moy25', 'moy26', 'diff'];
+            for (let m = 1; m <= N_MONTHS; m++) {
+                keys.push('s' + m);
+            }
+            keys.forEach(k => {
+                const el = document.getElementById('sort-' + k);
+                if (!el) return;
+                if (k === moleculeSortKey) {
+                    el.textContent = moleculeSortDir === 'desc' ? ' ▼' : ' ▲';
+                    el.style.color = 'var(--accent-primary)';
+                } else {
+                    el.textContent = ' ↕';
+                    el.style.color = 'rgba(156, 163, 175, 0.3)';
+                }
+            });
+        }
+
+        // Render molecules table header dynamically
+        function renderMoleculesTableHeader() {
+            const thead = document.getElementById('molecules-table-header');
+            if (!thead) return;
+            
+            const shortMonths = ['Jan 26', 'Fév 26', 'Mar 26', 'Avr 26', 'Mai 26', 'Juin 26', 'Juil 26', 'Août 26', 'Sept 26', 'Oct 26', 'Nov 26', 'Déc 26'];
+            
+            const tableViewSelect = document.getElementById('molecule-table-view-select');
+            const viewMode = tableViewSelect ? tableViewSelect.value : 'all';
+
+            let thsHtml = `<th onclick="setMoleculeSort('name')" style="cursor: pointer; user-select: none;">Molécule <span id="sort-name"></span></th>`;
+            if (viewMode === 'all') {
+                for (let m = 1; m <= N_MONTHS; m++) {
+                    thsHtml += `<th onclick="setMoleculeSort('s${m}')" style="cursor: pointer; user-select: none;" class="numeric-header">${shortMonths[m-1]} <span id="sort-s${m}"></span></th>`;
+                }
+            }
+            thsHtml += `
+                <th onclick="setMoleculeSort('moy26')" style="cursor: pointer; user-select: none; color: var(--accent-primary); font-weight: 600;" class="numeric-header">Moy. 2026 <span id="sort-moy26"></span></th>
+                <th onclick="setMoleculeSort('moy25')" style="cursor: pointer; user-select: none; color: var(--accent-success); font-weight: 600;" class="numeric-header">Moy. 2025 <span id="sort-moy25"></span></th>
+                <th onclick="setMoleculeSort('diff')" style="cursor: pointer; user-select: none;" class="numeric-header">Écart Moyennes ($) <span id="sort-diff"></span></th>
+            `;
+            thead.innerHTML = `<tr>${thsHtml}</tr>`;
+        }
+
+        // Render molecules table
+        function moleculesMapped(mol) {
+            let cumul = 0;
+            for (let m = 1; m <= N_MONTHS; m++) {
+                cumul += (mol.monthlySales && mol.monthlySales[m]) ? mol.monthlySales[m] : 0;
+            }
+            const moy25 = (mol.sales && mol.sales['2025']) ? mol.sales['2025'] / 12 : 0.0;
+            const moy26 = cumul / N_MONTHS;
+            const diff = moy26 - moy25;
+
+            const result = {
+                name: mol.name,
+                moy25: moy25,
+                cumul: cumul,
+                moy26: moy26,
+                diff: diff
+            };
+
+            for (let m = 1; m <= N_MONTHS; m++) {
+                result['s' + m] = (mol.monthlySales && mol.monthlySales[m]) ? mol.monthlySales[m] : 0.0;
+            }
+
+            return result;
+        }
+
+        function renderMoleculesTable(molecules) {
+            renderMoleculesTableHeader();
+            const tbody = document.getElementById('molecules-table-body');
+            tbody.innerHTML = '';
+
+            const processedMols = molecules.map(moleculesMapped);
+
+            // Sort
+            processedMols.sort((a, b) => {
+                const valA = a[moleculeSortKey];
+                const valB = b[moleculeSortKey];
+                
+                if (moleculeSortKey === 'name') {
+                    return moleculeSortDir === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+                } else {
+                    const numA = isNaN(valA) ? 0 : valA;
+                    const numB = isNaN(valB) ? 0 : valB;
+                    return moleculeSortDir === 'asc' ? numA - numB : numB - numA;
+                }
+            });
+
+            updateSortIcons();
+
+            const tableViewSelect = document.getElementById('molecule-table-view-select');
+            const viewMode = tableViewSelect ? tableViewSelect.value : 'all';
+
+            if (processedMols.length === 0) {
+                const colspanVal = viewMode === 'all' ? (N_MONTHS + 4) : 4;
+                tbody.innerHTML = `<tr><td colspan="${colspanVal}" style="text-align: center; color: var(--text-secondary);">Aucune molécule enregistrée.</td></tr>`;
+                return;
+            }
+
+            processedMols.forEach(mol => {
+                const tr = document.createElement('tr');
+                tr.setAttribute('data-molecule', mol.name);
+
+                let diffClass = '';
+                let diffText = formatCurrency(mol.diff).replace('$', '').trim() + ' $';
+                if (mol.diff > 0.01) {
+                    diffClass = 'growth-up';
+                    diffText = '+' + diffText;
+                } else if (mol.diff < -0.01) {
+                    diffClass = 'growth-down';
+                } else {
+                    diffText = '0,00 $';
+                }
+
+                let tdsHtml = `<td style="font-weight: 500; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${mol.name}</td>`;
+                if (viewMode === 'all') {
+                    for (let m = 1; m <= N_MONTHS; m++) {
+                        const val = mol['s' + m] || 0;
+                        tdsHtml += `<td class="numeric">${val > 0 ? formatCurrency(val).replace('$', '').trim() + ' $' : '--'}</td>`;
+                    }
+                }
+                tdsHtml += `
+                    <td class="numeric" style="color: var(--accent-primary); font-weight: 600;">${mol.moy26 > 0 ? formatCurrency(mol.moy26).replace('$', '').trim() + ' $' : '--'}</td>
+                    <td class="numeric" style="color: var(--accent-success); font-weight: 600;">${mol.moy25 > 0 ? formatCurrency(mol.moy25).replace('$', '').trim() + ' $' : '--'}</td>
+                    <td class="numeric ${diffClass}" style="font-weight: 600;">${diffText}</td>
+                `;
+
+                tr.innerHTML = tdsHtml;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Filter molecules in the detail table
+        function filterMoleculesTable() {
+            if (!activeCompany) return;
+            const query = document.getElementById('moleculeSearchInput').value.toLowerCase();
+            const filtered = activeCompany.molecules.filter(m => m.name.toLowerCase().includes(query));
+            renderMoleculesTable(filtered);
+        }
+    </script>
+
+    <!-- Modal overlay for data management -->
+    <div id="dataManagerModal" class="modal-overlay">
+        <div class="modal-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--surface-border); padding-bottom: 1rem;">
+                <h3 style="font-family: var(--font-display); font-size: 1.25rem; font-weight: 700; color: var(--text-primary); margin: 0;">⚙️ Gestionnaire de Données</h3>
+                <span id="closeModalBtn" style="cursor: pointer; font-size: 1.5rem; color: var(--text-secondary);">&times;</span>
+            </div>
+
+            <!-- Import area -->
+            <div>
+                <h4 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-primary);">Importer des données (Excel .xlsx)</h4>
+                <div id="dropZone" class="dropzone">
+                    <span style="font-size: 2rem; display: block; margin-bottom: 0.5rem;">📥</span>
+                    Glissez-déposez vos fichiers Excel (.xlsx) ici, ou <span style="color: var(--accent-primary); font-weight: 600;">cliquez pour parcourir</span>
+                    <input type="file" id="excelFileInput" multiple accept=".xlsx" style="display: none;">
+                </div>
+                <div id="importStatus" style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.5rem; max-height: 100px; overflow-y: auto;"></div>
+            </div>
+
+            <!-- Actions -->
+            <div style="display: flex; flex-direction: column; gap: 0.75rem; border-top: 1px solid var(--surface-border); padding-top: 1.25rem;">
+                <h4 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 0.25rem; color: var(--text-primary);">Actions sur la plateforme</h4>
+                <div style="display: flex; gap: 1rem;">
+                    <button id="exportPopulatedHtmlBtn" class="btn btn-primary" style="flex: 1;">💾 Sauvegarder & Exporter (Rempli)</button>
+                    <button id="exportBlankHtmlBtn" class="btn btn-secondary" style="flex: 1;">📄 Exporter un Modèle Vierge</button>
+                </div>
+                <div style="display: flex; gap: 1rem;">
+                    <button id="resetDataBtn" class="btn btn-danger" style="flex: 1;">🗑️ Réinitialiser (Données d'origine)</button>
+                    <button id="clearAllDataBtn" class="btn btn-outline-danger" style="flex: 1;">🚫 Vider toutes les données (Mettre à 0)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Manager Logic -->
+    <script>
+        // Store the original embedded data in a global constant at startup
+        const defaultRawData = getEmptyRawData();
+
+        // Load custom data from localStorage if available
+        const savedData = null;
+        if (savedData) {
+            try {
+                rawData = JSON.parse(savedData);
+                console.log("Données chargées depuis le localStorage.");
+            } catch (e) {
+                console.error("Erreur lors de la lecture du localStorage:", e);
+            }
+        }
+
+        // Modal triggers
+        const modal = document.getElementById('dataManagerModal');
+        const openBtn = document.getElementById('importDataBtn');
+        const closeBtn = document.getElementById('closeModalBtn');
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('excelFileInput');
+        const importStatus = document.getElementById('importStatus');
+
+        openBtn.addEventListener('click', () => {
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('active'), 10);
+            importStatus.innerHTML = '';
+        });
+
+        const closeModal = () => {
+            modal.classList.remove('active');
+            setTimeout(() => modal.style.display = 'none', 300);
+        };
+
+        closeBtn.addEventListener('click', closeModal);
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+
+        // Drag and drop handlers
+        dropZone.addEventListener('click', () => fileInput.click());
+        
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFiles(files);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFiles(e.target.files);
+            }
+        });
+
+        // Dynamic months calculation based on rawData
+        function updateMonthsCount() {
+            let maxMonth = 1;
+            rawData.manufacturers.forEach(comp => {
+                if (comp.monthlySales) {
+                    for (let m = 1; m <= 12; m++) {
+                        const val = comp.monthlySales[String(m)] || comp.monthlySales[m];
+                        if (val > 0 && m > maxMonth) {
+                            maxMonth = m;
+                        }
+                    }
+                }
+            });
+            N_MONTHS = maxMonth;
+            monthNames = fullMonthNames.slice(0, N_MONTHS);
+            
+            // Update the dropdown select for Insights
+            const select = document.getElementById('insightsMonthSelect');
+            if (select) {
+                select.innerHTML = '';
+                for (let m = N_MONTHS; m >= 2; m--) {
+                    const option = document.createElement('option');
+                    option.value = m;
+                    option.textContent = `${fullMonthNames[m-1]} vs ${fullMonthNames[m-2]} 2026`;
+                    select.appendChild(option);
+                }
+                // Trigger change to update insights display
+                populateInsights();
+            }
+
+            // Update KPI titles
+            function getPeriodLabel() {
+                const shortMonths = ['Janv.', 'Févr.', 'Mars', 'Avril', 'Mai', 'Juin', 'Juil.', 'Août', 'Sept.', 'Oct.', 'Nov.', 'Déc.'];
+                if (N_MONTHS === 1) return 'Janvier';
+                return `Janv.-${shortMonths[N_MONTHS-1]}`;
+            }
+
+            const kpiCumulTitle = document.getElementById('kpi-cumul-title');
+            if (kpiCumulTitle) kpiCumulTitle.textContent = `Cumul Annuel 2026 (${getPeriodLabel()})`;
+            
+            const detailKpiCumulTitle = document.getElementById('detail-kpi-cumul-title');
+            if (detailKpiCumulTitle) detailKpiCumulTitle.textContent = `Cumul Annuel 2026 (${getPeriodLabel()})`;
+            
+            const kpiCompaniesSub = document.getElementById('kpi-companies-sub');
+            if (kpiCompaniesSub) kpiCompaniesSub.textContent = `Sur la période Janv.-${getPeriodLabel().split('-')[1] || 'Janv.'}`;
+        }
+
+        // Initialize full month names
+        const fullMonthNames = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+        // Update N_MONTHS and monthNames dynamically on startup
+        updateMonthsCount();
+
+        function saveAndRefreshDashboard() {
+            // LocalStorage désactivé - Supabase exclusif
+            
+            // Recalculate months
+            updateMonthsCount();
+            
+            // Re-render components
+            initKpis();
+            
+            // Recreate charts
+            if (annualTrendChartObj) annualTrendChartObj.destroy();
+            if (monthlyBaselineChartObj) monthlyBaselineChartObj.destroy();
+            if (topCompaniesMonthlyChartObj) topCompaniesMonthlyChartObj.destroy();
+            if (companyMonthlyChartObj) companyMonthlyChartObj.destroy();
+            if (supplierMarketShareChartObj) supplierMarketShareChartObj.destroy();
+            annualTrendChartObj = null;
+            monthlyBaselineChartObj = null;
+            topCompaniesMonthlyChartObj = null;
+            companyMonthlyChartObj = null;
+            supplierMarketShareChartObj = null;
+            initCharts();
+            
+            populateInsights();
+            initExploreSidebar();
+            
+            const sortedComps = getSortedCompanies();
+            if (sortedComps.length > 0) {
+                selectCompany(sortedComps[0].name);
+            } else {
+                clearCompanyDetails();
+            }
+        }
+
+        // Excel file processing
+        function handleFiles(files) {
+            importStatus.innerHTML = '<span style="color: var(--accent-primary);">Traitement des fichiers en cours...</span>';
+            let processedFiles = 0;
+            let totalRowsParsed = 0;
+            let successCount = 0;
+
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, {type: 'array'});
+                        const sheetName = workbook.SheetNames[0];
+                        const worksheet = workbook.Sheets[sheetName];
+                        const rows = XLSX.utils.sheet_to_json(worksheet, {header: 1});
+
+                        if (rows.length < 2) {
+                            throw new Error("Le fichier est vide ou n'a pas d'en-têtes.");
+                        }
+
+                        const headers = rows[0];
+                        let manColIdx = -1;
+                        let molColIdx = -1;
+                        let periodValColIdx = -1;
+                        let annualValColIdx = -1;
+                        let yearColIdx = -1;
+                        let periodColIdx = -1;
+
+                        for (let c = 0; c < headers.length; c++) {
+                            const h = String(headers[c] || '').toLowerCase().trim();
+                            if (h.includes("description groupe") || h === "groupe" || h === "fabricant" || h.includes("description d'achat")) {
+                                manColIdx = c;
+                            } else if (h === "générique" || h === "generique" || h === "molécule" || h === "molecule") {
+                                molColIdx = c;
+                            } else if (h.includes("ventes nets p") || h.includes("ventes nets periode") || h.includes("ventes periode valeur") || h.includes("période valeurs")) {
+                                periodValColIdx = c;
+                            } else if (h.includes("ventes nets a") || h.includes("ventes nets annuelle") || h.includes("ventes annuelle valeur") || h.includes("annuelles valeurs")) {
+                                annualValColIdx = c;
+                            } else if (h === "année" || h === "annee" || h === "year") {
+                                yearColIdx = c;
+                            } else if (h === "période" || h === "periode" || h === "period" || h === "mois") {
+                                periodColIdx = c;
+                            }
+                        }
+
+                        if (manColIdx === -1 || molColIdx === -1) {
+                            throw new Error("Colonnes 'Fabricant' ou 'Molécule' introuvables.");
+                        }
+
+                        let fileYear = null;
+                        let fileMonth = null;
+                        let isAnnual = false;
+
+                        // Check first few data rows to detect Year/Period
+                        for (let r = 1; r < Math.min(rows.length, 10); r++) {
+                            const row = rows[r];
+                            if (!row || row.length === 0) continue;
+                            if (yearColIdx !== -1 && row[yearColIdx]) {
+                                fileYear = parseInt(row[yearColIdx]);
+                            }
+                            if (periodColIdx !== -1 && row[periodColIdx]) {
+                                const pVal = parseInt(row[periodColIdx]);
+                                if (pVal === 12) {
+                                    isAnnual = true;
+                                } else if (pVal >= 1 && pVal <= 12) {
+                                    fileMonth = pVal;
+                                }
+                            }
+                        }
+
+                        // Backup detection from filename
+                        const fname = file.name.toLowerCase();
+                        if (!fileYear) {
+                            if (fname.includes("2022")) fileYear = 2022;
+                            else if (fname.includes("2023")) fileYear = 2023;
+                            else if (fname.includes("2024")) fileYear = 2024;
+                            else if (fname.includes("2025")) fileYear = 2025;
+                            else if (fname.includes("2026")) fileYear = 2026;
+                        }
+                        if (!fileMonth && !isAnnual) {
+                            if (fname.includes("janvier") || fname.includes("janv") || fname.includes(" 1 ")) fileMonth = 1;
+                            else if (fname.includes("fevrier") || fname.includes("février") || fname.includes("fevr") || fname.includes("févr")) fileMonth = 2;
+                            else if (fname.includes("mars") || fname.includes("mar")) fileMonth = 3;
+                            else if (fname.includes("avril") || fname.includes("avr")) fileMonth = 4;
+                            else if (fname.includes("mai")) fileMonth = 5;
+                            else if (fname.includes("juin") || fname.includes("jun")) fileMonth = 6;
+                            else if (fname.includes("juillet") || fname.includes("jul")) fileMonth = 7;
+                            else if (fname.includes("aout") || fname.includes("août") || fname.includes("aug")) fileMonth = 8;
+                            else if (fname.includes("septembre") || fname.includes("sep")) fileMonth = 9;
+                            else if (fname.includes("octobre") || fname.includes("oct")) fileMonth = 10;
+                            else if (fname.includes("novembre") || fname.includes("nov")) fileMonth = 11;
+                            else if (fname.includes("decembre") || fname.includes("décembre") || fname.includes("dec")) fileMonth = 12;
+                        }
+
+                        if (fname.includes("annuel") || fname.includes("resume") || fname.includes("résumé")) {
+                            isAnnual = true;
+                        }
+
+                        // Determine value column index
+                        let valColIdx = -1;
+                        if (isAnnual) {
+                            valColIdx = annualValColIdx !== -1 ? annualValColIdx : (periodValColIdx !== -1 ? periodValColIdx : -1);
+                        } else {
+                            valColIdx = periodValColIdx !== -1 ? periodValColIdx : (annualValColIdx !== -1 ? annualValColIdx : -1);
+                        }
+
+                        if (valColIdx === -1) {
+                            throw new Error("Colonne de montant des ventes introuvable.");
+                        }
+
+                        // Clear existing data for the detected year/month to avoid accumulation if file is re-imported
+                        if (isAnnual && fileYear) {
+                            const yrStr = String(fileYear);
+                            if (!rawData.totals) rawData.totals = {};
+                            rawData.totals[yrStr] = 0.0;
+                            rawData.manufacturers.forEach(comp => {
+                                comp.sales[yrStr] = 0.0;
+                                comp.molecules.forEach(mol => {
+                                    mol.sales[yrStr] = 0.0;
+                                });
+                            });
+                        } else if (!isAnnual && fileMonth) {
+                            const mStr = String(fileMonth);
+                            rawData.manufacturers.forEach(comp => {
+                                if (comp.monthlySales) {
+                                    comp.monthlySales[mStr] = 0.0;
+                                    comp.monthlySales[fileMonth] = 0.0;
+                                }
+                                comp.molecules.forEach(mol => {
+                                    if (mol.monthlySales) {
+                                        mol.monthlySales[mStr] = 0.0;
+                                        mol.monthlySales[fileMonth] = 0.0;
+                                    }
+                                });
+                            });
+                        }
+
+                        let rowsParsed = 0;
+                        for (let r = 1; r < rows.length; r++) {
+                            const row = rows[r];
+                            if (!row || row.length === 0) continue;
+
+                            const manName = String(row[manColIdx] || '').trim();
+                            const molName = String(row[molColIdx] || '').trim();
+                            if (!manName && !molName) continue;
+
+                            const rawVal = row[valColIdx];
+                            const val = parseFloat(rawVal) || 0.0;
+
+                            // Find or create manufacturer
+                            let compObj = rawData.manufacturers.find(c => c.name.toLowerCase() === manName.toLowerCase());
+                            if (!compObj) {
+                                compObj = {
+                                    name: manName,
+                                    sales: { "2022": 0.0, "2023": 0.0, "2024": 0.0, "2025": 0.0 },
+                                    monthlySales: { "1": 0.0, "2": 0.0, "3": 0.0, "4": 0.0, "5": 0.0, "6": 0.0, "7": 0.0, "8": 0.0, "9": 0.0, "10": 0.0, "11": 0.0, "12": 0.0 },
+                                    molecules: []
+                                };
+                                rawData.manufacturers.push(compObj);
+                            }
+
+                            // Find or create molecule
+                            let molObj = compObj.molecules.find(m => m.name.toLowerCase() === molName.toLowerCase());
+                            if (!molObj) {
+                                molObj = {
+                                    name: molName,
+                                    sales: { "2022": 0.0, "2023": 0.0, "2024": 0.0, "2025": 0.0 },
+                                    monthlySales: { "1": 0.0, "2": 0.0, "3": 0.0, "4": 0.0, "5": 0.0, "6": 0.0, "7": 0.0, "8": 0.0, "9": 0.0, "10": 0.0, "11": 0.0, "12": 0.0 }
+                                };
+                                compObj.molecules.push(molObj);
+                            }
+
+                            // Apply value
+                            if (isAnnual && fileYear) {
+                                const yrStr = String(fileYear);
+                                compObj.sales[yrStr] = (compObj.sales[yrStr] || 0) + val;
+                                molObj.sales[yrStr] = (molObj.sales[yrStr] || 0) + val;
+                                
+                                if (!rawData.totals) rawData.totals = {};
+                                rawData.totals[yrStr] = (rawData.totals[yrStr] || 0) + val;
+                            } else if (!isAnnual && fileMonth) {
+                                const mStr = String(fileMonth);
+                                compObj.monthlySales[mStr] = (compObj.monthlySales[mStr] || 0) + val;
+                                molObj.monthlySales[mStr] = (molObj.monthlySales[mStr] || 0) + val;
+                            }
+                            rowsParsed++;
+                        }
+
+                        totalRowsParsed += rowsParsed;
+                        successCount++;
+                        
+                        let labelText = isAnnual ? `Annuel ${fileYear || ''}` : `Mensuel ${fullMonthNames[(fileMonth || 1) - 1]} 2026`;
+                        importStatus.innerHTML += `<div style="color: var(--accent-success); margin-top: 0.25rem;">✔ ${file.name} traité avec succès (${labelText}, ${rowsParsed} lignes).</div>`;
+                    } catch (err) {
+                        console.error(err);
+                        importStatus.innerHTML += `<div style="color: var(--accent-danger); margin-top: 0.25rem;">✘ ${file.name} : ${err.message}</div>`;
+                    } finally {
+                        processedFiles++;
+                        if (processedFiles === files.length) {
+                            if (successCount > 0) {
+                                saveAndRefreshDashboard();
+                                importStatus.innerHTML += `<div style="font-weight: 600; color: var(--text-primary); margin-top: 0.5rem;">Importation terminée. ${successCount}/${files.length} fichiers chargés (${totalRowsParsed} lignes de ventes).</div>`;
+                            }
+                        }
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        // Action Buttons Logic
+        document.getElementById('resetDataBtn').addEventListener('click', () => {
+            if (confirm("Voulez-vous restaurer les données d'origine de la plateforme (Janvier à Mai 2026) ?")) {
+                rawData = getEmptyRawData(); if (typeof window.syncGenericsDataToCloud === "function") window.syncGenericsDataToCloud(rawData);
+                saveAndRefreshDashboard();
+                closeModal();
+            }
+        });
+
+        document.getElementById('clearAllDataBtn').addEventListener('click', () => {
+            if (confirm("Voulez-vous vider TOUTES les données ? Tout les graphiques et KPI seront mis à 0.")) {
+                rawData = getEmptyRawData(); if (typeof window.syncGenericsDataToCloud === "function") window.syncGenericsDataToCloud(rawData);
+                saveAndRefreshDashboard();
+                closeModal();
+            }
+        });
+
+        // Function to export the HTML file
+        function exportHtml(dataToEmbed) {
+            // Fetch current HTML page source
+            const pageSource = document.documentElement.outerHTML;
+            
+            // We need to replace the rawData definition in the script block
+            // Let's locate the rawData definition
+            const startToken = "let rawData = ";
+            const startIdx = pageSource.indexOf(startToken);
+            if (startIdx === -1) {
+                alert("Erreur de format du code source : impossible de localiser rawData.");
+                return;
+            }
+
+            // Find the end token
+            const endToken = "    <!-- Main Logic -->";
+            const endIdx = pageSource.indexOf(endToken);
+            if (endIdx === -1) {
+                alert("Erreur de format du code source : impossible de localiser la fin du script.");
+                return;
+            }
+
+            // We construct the HTML content
+            const before = pageSource.substring(0, startIdx + startToken.length);
+            const after = pageSource.substring(endIdx);
+            
+            const serializedData = JSON.stringify(dataToEmbed, null, 4);
+            const newHtml = before + serializedData + ";\n    <\/script>\n\n" + after;
+            
+            const blob = new Blob([newHtml], { type: 'text/html;charset=utf-8' });
+            return blob;
+        }
+
+        document.getElementById('exportPopulatedHtmlBtn').addEventListener('click', () => {
+            const blob = exportHtml(rawData);
+            if (!blob) return;
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = "Tableau_de_bord_Mensuel_2026.html";
+            a.click();
+            closeModal();
+        });
+
+        document.getElementById('exportBlankHtmlBtn').addEventListener('click', () => {
+            const blankData = {
+                totals: { "2022": 0.0, "2023": 0.0, "2024": 0.0, "2025": 0.0 },
+                years: [2022, 2023, 2024, 2025],
+                manufacturers: []
+            };
+            const blob = exportHtml(blankData);
+            if (!blob) return;
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = "Tableau_de_bord_Mensuel_Vierge.html";
+            closeModal();
+        });
+
+        /* --- Theme Switcher Script --- */
+        function initTheme() {
+            const savedTheme = localStorage.getItem('generiques_theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('generiques_theme', newTheme);
+            updateThemeIcon(newTheme);
+        }
+
+        function updateThemeIcon(theme) {
+            const iconSpan = document.getElementById('theme-icon');
+            if (iconSpan) {
+                iconSpan.innerHTML = theme === 'dark' ? '☀️' : '🌙';
+            }
+        }
+        initTheme();
+    </script>
+</body>
+</html>
