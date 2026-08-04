@@ -1129,7 +1129,7 @@
         const pharmacyId = await fetchPharmacyId();
         if (!pharmacyId) {
           rawData = getEmptyRawData();
-          if (typeof refreshDashboardUI === 'function') refreshDashboardUI();
+          if (typeof saveAndRefreshDashboard === 'function') saveAndRefreshDashboard({ persist: false });
           return;
         }
 
@@ -1150,7 +1150,7 @@
           console.log('[Supabase Sync monthly] Aucune donnée sur Supabase. Démarrage vierge à $0,00 pour:', pharmacyId);
         }
 
-        if (typeof refreshDashboardUI === 'function') refreshDashboardUI();
+        if (typeof saveAndRefreshDashboard === 'function') saveAndRefreshDashboard({ persist: false });
       } catch(err) {
         console.error('[Supabase Sync monthly] Erreur chargement:', err);
       }
@@ -1206,7 +1206,7 @@
                 <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 012-2h2a2 2 0 012 2v6a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path><path d="M3 19v-10a2 2 0 012-2h2a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path><path d="M15 19v-14a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
                 Analyse Annuelle (2022-2025)
             </a>
-            <a href="Tableau_de_bord_Mensuel_2026.html" class="nav-tab-item active">
+            <a href="generics_monthly.html" class="nav-tab-item active" aria-current="page">
                 <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                 Suivi Mensuel 2026
             </a>
@@ -2694,8 +2694,11 @@
         // Update N_MONTHS and monthNames dynamically on startup
         updateMonthsCount();
 
-        function saveAndRefreshDashboard() {
+        function saveAndRefreshDashboard({ persist = true } = {}) {
             // LocalStorage désactivé - Supabase exclusif
+            if (persist && typeof window.syncGenericsDataToCloud === "function") {
+                window.syncGenericsDataToCloud(rawData);
+            }
             
             // Recalculate months
             updateMonthsCount();
@@ -2941,7 +2944,7 @@
         // Action Buttons Logic
         document.getElementById('resetDataBtn').addEventListener('click', () => {
             if (confirm("Voulez-vous restaurer les données d'origine de la plateforme (Janvier à Mai 2026) ?")) {
-                rawData = getEmptyRawData(); if (typeof window.syncGenericsDataToCloud === "function") window.syncGenericsDataToCloud(rawData);
+                rawData = getEmptyRawData();
                 saveAndRefreshDashboard();
                 closeModal();
             }
@@ -2949,7 +2952,7 @@
 
         document.getElementById('clearAllDataBtn').addEventListener('click', () => {
             if (confirm("Voulez-vous vider TOUTES les données ? Tout les graphiques et KPI seront mis à 0.")) {
-                rawData = getEmptyRawData(); if (typeof window.syncGenericsDataToCloud === "function") window.syncGenericsDataToCloud(rawData);
+                rawData = getEmptyRawData();
                 saveAndRefreshDashboard();
                 closeModal();
             }
