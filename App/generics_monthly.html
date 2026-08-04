@@ -1156,7 +1156,49 @@
       }
     };
 
+    async function initializeGenericsHeader() {
+      if (!window.supabaseClient) return;
+      const userRes = await window.supabaseClient.auth.getUser();
+      const user = userRes?.data?.user;
+      if (!user) {
+        window.location.href = "index.html";
+        return;
+      }
+
+      const emailElement = document.getElementById('generics-user-email');
+      if (emailElement) emailElement.textContent = user.email || '';
+
+      const { data: profile } = await window.supabaseClient
+        .from('profiles')
+        .select('pharmacy_id')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      if (profile?.pharmacy_id) {
+        const { data: pharmacy } = await window.supabaseClient
+          .from('pharmacies')
+          .select('name')
+          .eq('id', profile.pharmacy_id)
+          .maybeSingle();
+        const pharmacyElement = document.getElementById('generics-pharmacy-name');
+        if (pharmacyElement) pharmacyElement.textContent = pharmacy?.name || 'Pharmacie';
+      }
+    }
+
+    async function logoutFromGenerics() {
+      if (!confirm("Voulez-vous vous déconnecter ?")) return;
+      const logoutButton = document.getElementById('btn-generics-logout');
+      if (logoutButton) {
+        logoutButton.disabled = true;
+        logoutButton.textContent = 'Déconnexion...';
+      }
+      await window.supabaseClient?.auth.signOut();
+      window.location.replace('index.html');
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('btn-generics-logout')?.addEventListener('click', logoutFromGenerics);
+      initializeGenericsHeader();
       setTimeout(window.loadGenericsDataFromCloud, 100);
     });
   })();
@@ -1164,15 +1206,22 @@
 </head>
 <body>
 
-  <div style="background: linear-gradient(135deg, #0f766e 0%, #0d524c 100%); padding: 12px 24px; color: white; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 12px rgba(0,0,0,0.15); margin-bottom: 20px; border-radius: 0 0 12px 12px;">
-    <div style="display: flex; align-items: center; gap: 16px;">
+  <div style="background: linear-gradient(135deg, #0f766e 0%, #115e59 100%); padding: 16px 24px; color: white; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; box-shadow: 0 4px 12px rgba(15,118,110,0.15); margin-bottom: 20px;">
+    <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
       <a href="index.html" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); color: white; text-decoration: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 8px;">
         <span>🏠</span> Retour à PharmaOps
       </a>
-      <span style="font-size: 1.1rem; font-weight: 700; letter-spacing: 0.5px;">PharmaOps</span>
+      <div>
+        <div style="font-size: 1.1rem; font-weight: 800; letter-spacing: 0.2px;">PharmaOps</div>
+        <div style="font-size: 0.75rem; color: #ccfbf1;">📊 Module Analyse Génériques — Mensuel</div>
+      </div>
     </div>
-    <div style="display: flex; align-items: center; gap: 12px;">
-      <span style="background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 500;">📊 Module Analyse Génériques</span>
+    <div style="display: flex; align-items: center; gap: 16px; margin-left: auto;">
+      <div style="text-align: right; line-height: 1.2;">
+        <div id="generics-pharmacy-name" style="font-weight: 700; font-size: 0.9rem; color: white;">Pharmacie...</div>
+        <div id="generics-user-email" style="font-size: 0.75rem; color: #99f6e4;">Compte...</div>
+      </div>
+      <button type="button" id="btn-generics-logout" style="padding: 7px 14px; border: 1px solid rgba(255,255,255,0.3); border-radius: 8px; background: rgba(255,255,255,0.15); color: white; font: inherit; font-size: 0.85rem; font-weight: 600; cursor: pointer;">Déconnexion</button>
     </div>
   </div>
 
