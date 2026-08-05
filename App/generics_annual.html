@@ -14,10 +14,10 @@
     <style>
         :root {
             color-scheme: light;
-            --primary-color: #10b981;    /* Emerald Green Enterprise Accent */
-            --primary-hover: #059669;
-            --primary-light: #ecfdf5;
-            --bg-color: #f8fafc;        /* Slate 50 Canvas */
+            --primary-color: #0f766e;
+            --primary-hover: #115e59;
+            --primary-light: #f0fdfa;
+            --bg-color: #f5f7fa;
             --card-bg: #ffffff;
             --navy-header-bg: #0f172a;  /* Rich Navy Header */
             --navy-header-text: #ffffff;
@@ -32,20 +32,20 @@
             --surface-hover: var(--surface-muted);
             --text-primary: var(--text-color);
             --text-secondary: var(--text-muted);
-            --accent-primary: #10b981;
-            --accent-primary-hover: #059669;
-            --accent-success: #10b981;
-            --accent-danger: #ef4444;
+            --accent-primary: #0f766e;
+            --accent-primary-hover: #115e59;
+            --accent-success: #059669;
+            --accent-danger: #dc2626;
             --accent-warning: #f59e0b;
-            --accent-purple: #8b5cf6;
+            --accent-purple: #6366f1;
 
             --radius-sm: 8px;
             --radius-md: 16px;
             --radius-lg: 24px;
             --radius-full: 9999px;
 
-            --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
-            --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+            --shadow-sm: 0 4px 14px rgba(15, 23, 42, 0.06);
+            --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.10);
 
             --font-display: 'Outfit', sans-serif;
             --font-sans: 'Inter', sans-serif;
@@ -65,6 +65,12 @@
             --primary-light: #064e3b;
             --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
             --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        [data-theme="dark"] .companies-table th,
+        [data-theme="dark"] .molecules-table th,
+        [data-theme="dark"] .molecules-table tbody tr:hover {
+            background-color: #334155;
         }
 
         * {
@@ -184,7 +190,7 @@
         }
 
         .switcher-btn.active {
-            background: #10b981;
+            background: #0f766e;
             color: #ffffff;
             box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
         }
@@ -597,7 +603,7 @@
         }
 
         .companies-table th {
-            background-color: rgba(31, 41, 55, 0.5);
+            background-color: #f8fafc;
             font-weight: 600;
             color: var(--text-secondary);
             position: sticky;
@@ -684,6 +690,21 @@
             grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
             gap: 1.5rem;
             margin-bottom: 1.5rem;
+        }
+
+        .detail-kpi-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-top: 3px solid var(--primary-color);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .detail-kpi-card:nth-child(2) {
+            border-top-color: #059669;
+        }
+
+        .detail-kpi-card:nth-child(3) {
+            border-top-color: #6366f1;
         }
 
         @media (max-width: 1024px) {
@@ -866,7 +887,7 @@
         }
 
         .molecules-table th {
-            background-color: rgba(31, 41, 55, 0.5);
+            background-color: #f8fafc;
             font-weight: 600;
             color: var(--text-secondary);
             position: sticky;
@@ -880,7 +901,7 @@
         }
 
         .molecules-table tbody tr:hover {
-            background-color: rgba(31, 41, 55, 0.2);
+            background-color: #f1f5f9;
         }
 
         .numeric {
@@ -1503,15 +1524,15 @@
                     </div>
 
                     <div class="detail-kpis" style="margin-top: 1.5rem; margin-bottom: 1.5rem;">
-                        <div class="card kpi-card" style="background-color: rgba(31, 41, 55, 0.3); border-color: rgba(31, 41, 55, 0.5);">
+                        <div class="card kpi-card detail-kpi-card">
                             <span class="kpi-title" style="font-size: 0.75rem;">Ventes 2025</span>
                             <span class="kpi-value" id="detail-kpi-sales2025" style="font-size: 1.5rem;">$0.00</span>
                         </div>
-                        <div class="card kpi-card" style="background-color: rgba(31, 41, 55, 0.3); border-color: rgba(31, 41, 55, 0.5);">
+                        <div class="card kpi-card detail-kpi-card">
                             <span class="kpi-title" style="font-size: 0.75rem;">Variation 2024-2025</span>
                             <span class="kpi-value" id="detail-kpi-growth" style="font-size: 1.5rem;">--</span>
                         </div>
-                        <div class="card kpi-card" style="background-color: rgba(31, 41, 55, 0.3); border-color: rgba(31, 41, 55, 0.5);">
+                        <div class="card kpi-card detail-kpi-card">
                             <span class="kpi-title" style="font-size: 0.75rem;">Molécules commercialisées</span>
                             <span class="kpi-value" id="detail-kpi-mols" style="font-size: 1.5rem;">0</span>
                         </div>
@@ -1675,11 +1696,11 @@
                             rawData.totals['2024'],
                             rawData.totals['2025']
                         ],
-                        backgroundColor: 'rgba(59, 130, 246, 0.7)',
-                        borderColor: '#3b82f6',
-                        borderWidth: 2,
+                        backgroundColor: '#0f766e',
+                        borderColor: '#0f766e',
+                        borderWidth: 0,
                         borderRadius: 8,
-                        hoverBackgroundColor: 'rgba(59, 130, 246, 0.9)'
+                        hoverBackgroundColor: '#115e59'
                     }]
                 },
                 options: {
@@ -1698,7 +1719,7 @@
                     scales: {
                         y: {
                             beginAtZero: true,
-                            grid: { color: '#1f2937' },
+                            grid: { color: '#e2e8f0' },
                             ticks: {
                                 color: '#9ca3af',
                                 callback: function(value) {
@@ -1719,11 +1740,11 @@
             const top5Comps = sortedComps.slice(0, 5);
             
             const colorPalette = [
-                '#3b82f6', // Blue
-                '#10b981', // Emerald
-                '#8b5cf6', // Violet
+                '#0f766e', // PharmaOps teal
+                '#6366f1', // Indigo
                 '#f59e0b', // Amber
-                '#ec4899'  // Pink
+                '#0284c7', // Sky
+                '#e11d48'  // Rose
             ];
 
             const datasets = top5Comps.map((comp, idx) => {
@@ -1736,7 +1757,7 @@
                         comp.sales['2025']
                     ],
                     borderColor: colorPalette[idx],
-                    backgroundColor: colorPalette[idx] + '20', // Opacity
+                    backgroundColor: colorPalette[idx],
                     borderWidth: 3,
                     tension: 0.3,
                     pointRadius: 4,
@@ -1774,7 +1795,7 @@
                     scales: {
                         y: {
                             beginAtZero: true,
-                            grid: { color: '#1f2937' },
+                            grid: { color: '#e2e8f0' },
                             ticks: {
                                 color: '#9ca3af',
                                 callback: function(value) {
@@ -1800,12 +1821,12 @@
             let donutLabels = [];
             let donutData = [];
             let donutColors = [
-                'rgba(139, 92, 246, 0.8)', // Violet
-                'rgba(16, 185, 129, 0.8)',  // Emerald
-                'rgba(245, 158, 11, 0.8)',  // Amber
-                'rgba(59, 130, 246, 0.8)',  // Blue
-                'rgba(236, 72, 153, 0.8)',  // Pink
-                'rgba(156, 163, 175, 0.6)'  // Grey for Others
+                '#0f766e', // PharmaOps teal
+                '#6366f1', // Indigo
+                '#f59e0b', // Amber
+                '#0284c7', // Sky
+                '#e11d48', // Rose
+                '#cbd5e1'  // Slate for Others
             ];
             
             if (totalSalesMaxYear > 0) {
@@ -1866,7 +1887,7 @@
                     datasets: [{
                         data: donutData,
                         backgroundColor: donutColors.slice(0, donutLabels.length),
-                        borderColor: '#1f2937',
+                        borderColor: '#ffffff',
                         borderWidth: 2
                     }]
                 },
@@ -2261,10 +2282,10 @@
                         datasets: [{
                             label: 'Achats ($)',
                             data: chartData,
-                            borderColor: '#8b5cf6',
-                            backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                            borderColor: '#6366f1',
+                            backgroundColor: '#6366f1',
                             borderWidth: 3,
-                            fill: true,
+                            fill: false,
                             tension: 0.2,
                             pointRadius: 4
                         }]

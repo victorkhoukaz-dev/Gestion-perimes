@@ -14,10 +14,10 @@
     <style>
         :root {
             color-scheme: light;
-            --primary-color: #10b981;    /* Emerald Green Enterprise Accent */
-            --primary-hover: #059669;
-            --primary-light: #ecfdf5;
-            --bg-color: #f8fafc;        /* Slate 50 Canvas */
+            --primary-color: #0f766e;
+            --primary-hover: #115e59;
+            --primary-light: #f0fdfa;
+            --bg-color: #f5f7fa;
             --card-bg: #ffffff;
             --navy-header-bg: #0f172a;  /* Rich Navy Header */
             --navy-header-text: #ffffff;
@@ -32,20 +32,20 @@
             --surface-hover: var(--surface-muted);
             --text-primary: var(--text-color);
             --text-secondary: var(--text-muted);
-            --accent-primary: #10b981;
-            --accent-primary-hover: #059669;
-            --accent-success: #10b981;
-            --accent-danger: #ef4444;
+            --accent-primary: #0f766e;
+            --accent-primary-hover: #115e59;
+            --accent-success: #059669;
+            --accent-danger: #dc2626;
             --accent-warning: #f59e0b;
-            --accent-purple: #8b5cf6;
+            --accent-purple: #6366f1;
 
             --radius-sm: 8px;
             --radius-md: 16px;
             --radius-lg: 24px;
             --radius-full: 9999px;
 
-            --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
-            --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+            --shadow-sm: 0 4px 14px rgba(15, 23, 42, 0.06);
+            --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.10);
 
             --font-display: 'Outfit', sans-serif;
             --font-sans: 'Inter', sans-serif;
@@ -65,6 +65,12 @@
             --primary-light: #064e3b;
             --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
             --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        [data-theme="dark"] .companies-table th,
+        [data-theme="dark"] .molecules-table th,
+        [data-theme="dark"] .molecules-table tbody tr:hover {
+            background-color: #334155;
         }
 
         * {
@@ -184,7 +190,7 @@
         }
 
         .switcher-btn.active {
-            background: #10b981;
+            background: #0f766e;
             color: #ffffff;
             box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
         }
@@ -581,7 +587,7 @@
         }
 
         .companies-table th {
-            background-color: rgba(31, 41, 55, 0.5);
+            background-color: #f8fafc;
             font-weight: 600;
             color: var(--text-secondary);
             position: sticky;
@@ -667,6 +673,21 @@
             grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
             gap: 1.5rem;
             margin-bottom: 1.5rem;
+        }
+
+        .detail-kpi-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-top: 3px solid var(--primary-color);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .detail-kpi-card:nth-child(2) {
+            border-top-color: #059669;
+        }
+
+        .detail-kpi-card:nth-child(3) {
+            border-top-color: #6366f1;
         }
 
         @media (max-width: 1024px) {
@@ -831,7 +852,7 @@
         }
 
         .molecules-table th {
-            background-color: rgba(31, 41, 55, 0.5);
+            background-color: #f8fafc;
             font-weight: 600;
             color: var(--text-secondary);
             position: sticky;
@@ -845,7 +866,7 @@
         }
 
         .molecules-table tbody tr:hover {
-            background-color: rgba(31, 41, 55, 0.2);
+            background-color: #f1f5f9;
         }
 
         .numeric {
@@ -1474,21 +1495,21 @@
                     </div>
 
                     <div class="detail-kpis" style="margin-top: 1.5rem; margin-bottom: 1.5rem;">
-                        <div class="card kpi-card" style="background-color: rgba(31, 41, 55, 0.3); border-color: rgba(31, 41, 55, 0.5);">
+                        <div class="card kpi-card detail-kpi-card">
                             <span class="kpi-title" id="detail-kpi-cumul-title" style="font-size: 0.75rem;">Cumul Annuel 2026</span>
                             <span class="kpi-value" id="detail-kpi-sales2026" style="font-size: 1.5rem;">$0.00</span>
                         </div>
-                        <div class="card kpi-card" style="background-color: rgba(31, 41, 55, 0.3); border-color: rgba(31, 41, 55, 0.5);">
+                        <div class="card kpi-card detail-kpi-card">
                             <span class="kpi-title" style="font-size: 0.75rem;">Variation vs Moyenne 2025</span>
                             <span class="kpi-value" id="detail-kpi-growth" style="font-size: 1.5rem;">--</span>
                         </div>
-                        <div class="card kpi-card" style="background-color: rgba(31, 41, 55, 0.3); border-color: rgba(31, 41, 55, 0.5);">
+                        <div class="card kpi-card detail-kpi-card">
                             <span class="kpi-title" style="font-size: 0.75rem;">Moyenne Mensuelle 2026</span>
                             <span class="kpi-value" id="detail-kpi-moy2026" style="font-size: 1.5rem;">$0.00</span>
                         </div>
                     </div>
 
-                    <div id="detail-mom-banner" class="card" style="background: rgba(31, 41, 55, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 1.5rem; padding: 0.75rem 1rem; display: none; justify-content: space-between; align-items: center; border-radius: 8px;">
+                    <div id="detail-mom-banner" class="card" style="background: var(--card-bg); border: 1px solid var(--border-color); margin-bottom: 1.5rem; padding: 0.75rem 1rem; display: none; justify-content: space-between; align-items: center; border-radius: 8px;">
                         <span style="font-size: 0.85rem; font-weight: 500; color: var(--text-secondary);">
                             Évolution mensuelle (<span id="detail-mom-period-label">Juin vs Mai 2026</span>) :
                         </span>
@@ -1716,19 +1737,18 @@
                                 rawData.totals['2025'],
                                 cumul2026
                             ],
-                            backgroundColor: 'rgba(59, 130, 246, 0.7)',
-                            borderColor: '#3b82f6',
-                            borderWidth: 2,
+                            backgroundColor: '#0f766e',
+                            borderColor: '#0f766e',
+                            borderWidth: 0,
                             borderRadius: { topLeft: 4, topRight: 4, bottomLeft: 4, bottomRight: 4 },
                             stack: 'combined'
                         },
                         {
                             label: 'Projection Fin d\'Année ($)',
                             data: [0, 0, 0, 0, projectedRemaining],
-                            backgroundColor: 'rgba(139, 92, 246, 0.15)',
-                            borderColor: '#8b5cf6',
-                            borderWidth: 2,
-                            borderDash: [5, 5],
+                            backgroundColor: '#f59e0b',
+                            borderColor: '#f59e0b',
+                            borderWidth: 0,
                             borderRadius: { topLeft: 8, topRight: 8, bottomLeft: 0, bottomRight: 0 },
                             stack: 'combined'
                         }
@@ -1754,7 +1774,7 @@
                         y: {
                             stacked: true,
                             beginAtZero: true,
-                            grid: { color: '#1f2937' },
+                            grid: { color: '#e2e8f0' },
                             ticks: {
                                 color: '#9ca3af',
                                 callback: function(value) { return value / 1000 + 'k $'; }
@@ -1789,8 +1809,8 @@
                         {
                             label: 'Achats Mensuels 2026 ($)',
                             data: monthlyData,
-                            borderColor: '#3b82f6',
-                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            borderColor: '#0f766e',
+                            backgroundColor: '#0f766e',
                             borderWidth: 3,
                             tension: 0.2,
                             pointRadius: 4,
@@ -1800,7 +1820,7 @@
                         {
                             label: 'Moyenne Mensuelle 2025 ($)',
                             data: Array(N_MONTHS).fill(avg25),
-                            borderColor: '#10b981',
+                            borderColor: '#6366f1',
                             borderWidth: 2,
                             borderDash: [5, 5],
                             pointRadius: 0,
@@ -1809,7 +1829,7 @@
                         {
                             label: 'Moyenne Mensuelle 2024 ($)',
                             data: Array(N_MONTHS).fill(avg24),
-                            borderColor: '#8b5cf6',
+                            borderColor: '#f59e0b',
                             borderWidth: 2,
                             borderDash: [5, 5],
                             pointRadius: 0,
@@ -1836,7 +1856,7 @@
                     scales: {
                         y: {
                             beginAtZero: false,
-                            grid: { color: '#1f2937' },
+                            grid: { color: '#e2e8f0' },
                             ticks: {
                                 color: '#9ca3af',
                                 callback: function(value) { return formatCurrency(value); }
@@ -1853,7 +1873,7 @@
             // Chart 3: Top 5 Manufacturers Monthly Sales in 2026
             const sortedComps = getSortedCompanies();
             const top5Comps = sortedComps.slice(0, 5);
-            const colorPalette = ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b', '#ec4899'];
+            const colorPalette = ['#0f766e', '#6366f1', '#f59e0b', '#0284c7', '#e11d48'];
 
             const datasets2026 = top5Comps.map((comp, idx) => {
                 const compData = [];
@@ -1864,7 +1884,7 @@
                     label: comp.name,
                     data: compData,
                     borderColor: colorPalette[idx],
-                    backgroundColor: colorPalette[idx] + '10',
+                    backgroundColor: colorPalette[idx],
                     borderWidth: 2.5,
                     tension: 0.2,
                     pointRadius: 3,
@@ -1919,12 +1939,12 @@
             let donutLabels = [];
             let donutData = [];
             let donutColors = [
-                'rgba(139, 92, 246, 0.8)', // Violet
-                'rgba(16, 185, 129, 0.8)',  // Emerald
-                'rgba(245, 158, 11, 0.8)',  // Amber
-                'rgba(59, 130, 246, 0.8)',  // Blue
-                'rgba(236, 72, 153, 0.8)',  // Pink
-                'rgba(156, 163, 175, 0.6)'  // Grey for Others
+                '#0f766e', // PharmaOps teal
+                '#6366f1', // Indigo
+                '#f59e0b', // Amber
+                '#0284c7', // Sky
+                '#e11d48', // Rose
+                '#cbd5e1'  // Slate for Others
             ];
             
             if (total2026Sales > 0) {
@@ -1984,7 +2004,7 @@
                     datasets: [{
                         data: donutData,
                         backgroundColor: donutColors.slice(0, donutLabels.length),
-                        borderColor: '#1f2937',
+                        borderColor: '#ffffff',
                         borderWidth: 2
                     }]
                 },
@@ -2416,8 +2436,8 @@
             if (currentMonthIdx < 2) {
                 periodLabel.textContent = "N/A";
                 valueSpan.textContent = "Aucune comparaison possible";
-                banner.style.background = 'rgba(31, 41, 55, 0.3)';
-                banner.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                banner.style.background = 'var(--card-bg)';
+                banner.style.borderColor = 'var(--border-color)';
                 return;
             }
 
@@ -2443,8 +2463,8 @@
                 banner.style.borderColor = 'rgba(239, 68, 68, 0.25)';
             } else {
                 valueSpan.innerHTML = `<span style="color: var(--text-secondary);">0,00 $ (0,0%)</span>`;
-                banner.style.background = 'rgba(31, 41, 55, 0.3)';
-                banner.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                banner.style.background = 'var(--card-bg)';
+                banner.style.borderColor = 'var(--border-color)';
             }
         }
 
@@ -2490,16 +2510,16 @@
                             {
                                 label: 'Achats Mensuels 2026 ($)',
                                 data: monthlyData,
-                                backgroundColor: 'rgba(139, 92, 246, 0.7)',
-                                borderColor: '#8b5cf6',
-                                borderWidth: 2,
+                                backgroundColor: '#0f766e',
+                                borderColor: '#0f766e',
+                                borderWidth: 0,
                                 borderRadius: 4
                             },
                             {
                                 label: 'Moyenne Mensuelle 2025 ($)',
                                 type: 'line',
                                 data: Array(N_MONTHS).fill(moy25),
-                                borderColor: '#10b981',
+                                borderColor: '#6366f1',
                                 borderWidth: 2,
                                 borderDash: [5, 5],
                                 pointRadius: 0,
