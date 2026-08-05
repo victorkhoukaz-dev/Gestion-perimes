@@ -3786,6 +3786,7 @@
 
     function showAuthScreen() {
       document.getElementById("login-container").style.display = "flex";
+      document.getElementById("hub-landing-container").style.display = "none";
       document.getElementById("main-app-wrapper").style.display = "none";
       
       // Détecter les erreurs de réinitialisation dans l'URL hash (ex: lien expiré ou invalide)
@@ -3801,13 +3802,13 @@
 
       // Gérer l'affichage d'invitation (V3.7)
       const urlParams = new URLSearchParams(window.location.search);
-      const inviteId = urlParams.get("invite");
+      const inviteCode = urlParams.get("code");
       const inviteName = urlParams.get("name");
       
       const inviteAlert = document.getElementById("reg-invite-alert");
       const nameGroup = document.getElementById("reg-pharmacy-name-group");
       
-      if (inviteId && inviteName) {
+      if (inviteCode && inviteName) {
         // Mode invitation : pré-configurer le formulaire d'inscription
         document.getElementById("login-form").style.display = "none";
         document.getElementById("register-form").style.display = "block";
@@ -3817,14 +3818,22 @@
         if (modeSelector) modeSelector.style.display = "none";
 
         if (inviteAlert) {
-          inviteAlert.innerHTML = `👋 Vous êtes invité(e) à rejoindre la pharmacie :<br><strong>${decodeURIComponent(inviteName)}</strong>`;
+          inviteAlert.textContent = `👋 Vous êtes invité(e) à rejoindre la pharmacie : ${inviteName}`;
           inviteAlert.style.display = "block";
         }
         if (nameGroup) {
           nameGroup.style.display = "none";
           const nameInput = document.getElementById("reg-pharmacy-name");
-          nameInput.value = decodeURIComponent(inviteName);
+          nameInput.value = inviteName;
           nameInput.required = false;
+        }
+
+        const codeGroup = document.getElementById("reg-pharmacy-code-group");
+        const codeInput = document.getElementById("reg-pharmacy-code");
+        if (codeGroup) codeGroup.style.display = "block";
+        if (codeInput) {
+          codeInput.value = inviteCode.toUpperCase();
+          codeInput.required = true;
         }
       } else {
         // Mode normal
@@ -3837,12 +3846,6 @@
     function hideAuthScreen() {
       document.getElementById("login-container").style.display = "none";
       document.getElementById("hub-landing-container").style.display = "block";
-      document.getElementById("main-app-wrapper").style.display = "none";
-    }
-
-    function showAuthScreen() {
-      document.getElementById("login-container").style.display = "flex";
-      document.getElementById("hub-landing-container").style.display = "none";
       document.getElementById("main-app-wrapper").style.display = "none";
     }
 
@@ -3900,6 +3903,109 @@
       }
     }
 
+    const PENDING_ONBOARDING_KEY = "pharmaops_pending_onboarding";
+    const MASTER_CATALOG_PHARMACY_ID = "1602e82f-5ee5-4255-ace8-a7644ad3db40";
+    let onboardingExistingUser = false;
+
+    function getPendingOnboarding() {
+      try {
+        const raw = localStorage.getItem(PENDING_ONBOARDING_KEY);
+        return raw ? JSON.parse(raw) : null;
+      } catch (err) {
+        console.warn("Impossible de lire l'onboarding en attente", err);
+        return null;
+      }
+    }
+
+    function savePendingOnboarding(onboarding) {
+      localStorage.setItem(PENDING_ONBOARDING_KEY, JSON.stringify(onboarding));
+    }
+
+    function clearPendingOnboarding() {
+      localStorage.removeItem(PENDING_ONBOARDING_KEY);
+    }
+
+    async function completeControlledOnboarding(onboarding) {
+      if (!onboarding || !["create", "join"].includes(onboarding.mode)) {
+        throw new Error("Les informations d'inscription sont incomplètes.");
+      }
+
+      const functionName = onboarding.mode === "create"
+        ? "create_pharmacy_for_current_user"
+        : "join_pharmacy_for_current_user";
+
+      const parameters = onboarding.mode === "create"
+        ? {
+            p_pharmacy_name: onboarding.pharmacyName,
+            p_initials: onboarding.initials
+          }
+        : {
+            p_pharmacy_code: onboarding.pharmacyCode,
+            p_initials: onboarding.initials
+          };
+
+      const { data: pharmacyId, error } = await supabaseClient.rpc(functionName, parameters);
+      if (error) throw error;
+
+      if (onboarding.mode === "create") {
+        try {
+          const { error: configError } = await supabaseClient
+            .from("configurations")
+            .upsert({
+              pharmacy_id: pharmacyId,
+              expiry_window_months: 6,
+              sections: defaultSections,
+              sticker_colors: defaultStickerColors
+            });
+          if (configError) throw configError;
+
+          showLoading("Préconfiguration du catalogue...");
+          await preloadDefaultCatalog(pharmacyId);
+        } catch (provisioningError) {
+          // Membership already succeeded atomically in the protected function.
+          // A secondary setup problem must not send the owner through onboarding
+          // again or create a second pharmacy.
+          console.error("Préconfiguration partielle de la pharmacie", provisioningError);
+          showToast(
+            "La pharmacie est créée, mais sa configuration initiale devra être réessayée.",
+            "warning"
+          );
+        }
+      }
+
+      clearPendingOnboarding();
+      onboardingExistingUser = false;
+      return pharmacyId;
+    }
+
+    function showOnboardingScreen(profile) {
+      onboardingExistingUser = true;
+      showAuthScreen();
+      document.getElementById("login-form").style.display = "none";
+      document.getElementById("register-form").style.display = "block";
+      document.getElementById("reset-password-form").style.display = "none";
+      document.getElementById("new-password-form").style.display = "none";
+      document.getElementById("login-header").querySelector("h2").textContent = "Terminer l'inscription";
+
+      const emailInput = document.getElementById("reg-email");
+      const passwordInput = document.getElementById("reg-password");
+      if (emailInput) {
+        emailInput.required = false;
+        emailInput.closest(".form-group").style.display = "none";
+      }
+      if (passwordInput) {
+        passwordInput.required = false;
+        passwordInput.closest(".form-group").style.display = "none";
+      }
+
+      const initialsInput = document.getElementById("reg-initials");
+      if (initialsInput && profile?.initials && profile.initials !== "N/A") {
+        initialsInput.value = profile.initials;
+      }
+
+      showInfo("ℹ️ Votre compte est confirmé. Choisissez maintenant votre pharmacie.");
+    }
+
     async function handleLoginSuccess(user) {
       sessionUser = user;
       showLoading("Chargement de votre profil...");
@@ -3915,7 +4021,18 @@
         if (!profile) throw new Error("Profil utilisateur introuvable.");
         
         sessionProfile = profile;
-        if (!profile.pharmacy_id) throw new Error("Votre compte n'est lié à aucune pharmacie.");
+        if (!profile.pharmacy_id) {
+          const pendingOnboarding = getPendingOnboarding();
+          if (pendingOnboarding) {
+            showLoading("Finalisation de votre inscription...");
+            await completeControlledOnboarding(pendingOnboarding);
+            return await handleLoginSuccess(user);
+          }
+
+          hideLoading();
+          showOnboardingScreen(profile);
+          return;
+        }
         
         const { data: pharmacy, error: pharmError } = await supabaseClient
           .from("pharmacies")
@@ -4418,118 +4535,89 @@
       document.getElementById("register-form").addEventListener("submit", async (e) => {
         e.preventDefault();
         const initials = document.getElementById("reg-initials").value.toUpperCase().trim();
-        const email = document.getElementById("reg-email").value.trim();
-        const password = document.getElementById("reg-password").value;
-        
-        // Lire le paramètre d'invitation éventuel
         const urlParams = new URLSearchParams(window.location.search);
-        const inviteId = urlParams.get("invite");
-        
-        showLoading("Création du compte...");
+        const inviteCode = urlParams.get("code");
+        const mode = inviteCode ? "join" : currentRegMode;
+        const onboarding = {
+          mode,
+          initials,
+          pharmacyName: mode === "create"
+            ? document.getElementById("reg-pharmacy-name").value.trim()
+            : null,
+          pharmacyCode: mode === "join"
+            ? (inviteCode || document.getElementById("reg-pharmacy-code").value).toUpperCase().trim()
+            : null
+        };
+
+        showLoading(onboardingExistingUser ? "Finalisation de l'inscription..." : "Création du compte...");
         document.getElementById("login-error-msg").style.display = "none";
-        
+
+        let authAccountCreated = onboardingExistingUser;
         try {
-          let targetPharmacyId = inviteId;
-          let userRole = "tech";
-          
-          if (!targetPharmacyId) {
-            if (currentRegMode === "join") {
-              // MODE CODE : Rejoindre une pharmacie existante via le code 6 caractères
-              const enteredCode = document.getElementById("reg-pharmacy-code").value.toUpperCase().trim();
-              if (!enteredCode) throw new Error("Veuillez saisir un code de pharmacie.");
-
-              const { data: pharmData, error: pharmError } = await supabaseClient
-                .from("pharmacies")
-                .select("id, name")
-                .ilike("code", enteredCode)
-                .maybeSingle();
-
-              if (pharmError || !pharmData) {
-                throw new Error("Code de pharmacie introuvable. Veuillez vérifier le code à 6 caractères.");
-              }
-
-              targetPharmacyId = pharmData.id;
-              userRole = "tech";
-            } else {
-              // MODE CRÉATION : Créer une nouvelle pharmacie
-              const pharmacyName = document.getElementById("reg-pharmacy-name").value.trim();
-              
-              const { data: pharmData, error: pharmError } = await supabaseClient
-                .from("pharmacies")
-                .insert({ name: pharmacyName })
-                .select()
-                .single();
-                
-              if (pharmError) throw pharmError;
-              targetPharmacyId = pharmData.id;
-              userRole = "owner";
-            }
+          if (!initials) throw new Error("Veuillez saisir vos initiales.");
+          if (mode === "create" && !onboarding.pharmacyName) {
+            throw new Error("Veuillez saisir le nom de la pharmacie.");
+          }
+          if (mode === "join" && !onboarding.pharmacyCode) {
+            throw new Error("Veuillez saisir un code de pharmacie.");
           }
 
-          // Inscription Auth Supabase avec metadata
+          if (onboardingExistingUser) {
+            await completeControlledOnboarding(onboarding);
+            showToast(
+              mode === "create"
+                ? "Pharmacie et compte propriétaire créés avec succès !"
+                : "Vous avez rejoint la pharmacie avec succès !",
+              "success"
+            );
+            return await handleLoginSuccess(sessionUser);
+          }
+
+          const email = document.getElementById("reg-email").value.trim();
+          const password = document.getElementById("reg-password").value;
+          savePendingOnboarding(onboarding);
+
+          // Seules les initiales sont des métadonnées d'affichage. La pharmacie
+          // et le rôle seront attribués par une fonction protégée après Auth.
           const { data: signUpData, error: signUpError } = await supabaseClient.auth.signUp({
             email,
             password,
             options: {
               data: {
-                pharmacy_id: targetPharmacyId,
-                initials: initials,
-                role: userRole
+                initials
               }
             }
           });
-          
+
           if (signUpError) throw signUpError;
           const user = signUpData.user;
           if (!user) throw new Error("Une erreur s'est produite lors de la création de l'utilisateur.");
-
-          // Assurer la présence du profil
-          const { error: profError } = await supabaseClient
-            .from("profiles")
-            .upsert({
-              id: user.id,
-              pharmacy_id: targetPharmacyId,
-              email: email,
-              initials: initials,
-              role: userRole
-            });
-          if (profError) console.warn("Notice profiles upsert:", profError);
+          authAccountCreated = true;
 
           if (signUpData.session) {
             await supabaseClient.auth.setSession(signUpData.session);
-          }
-
-          if (userRole === "owner") {
-            // Créer la configuration par défaut pour la nouvelle pharmacie
-            const { error: configError } = await supabaseClient
-              .from("configurations")
-              .upsert({
-                pharmacy_id: targetPharmacyId,
-                expiry_window_months: 6,
-                sections: defaultSections,
-                sticker_colors: defaultStickerColors
-              });
-            if (configError) console.warn("Notice config upsert:", configError);
-
-            showLoading("Préconfiguration du catalogue...");
-            await preloadDefaultCatalog(targetPharmacyId);
-            showToast("Pharmacie et compte propriétaire créés avec succès !", "success");
-          } else {
-            showToast("Vous avez rejoint la pharmacie avec succès !", "success");
-          }
-
-          if (signUpData.session) {
+            await completeControlledOnboarding(onboarding);
+            showToast(
+              mode === "create"
+                ? "Pharmacie et compte propriétaire créés avec succès !"
+                : "Vous avez rejoint la pharmacie avec succès !",
+              "success"
+            );
             await handleLoginSuccess(user);
           } else {
             hideLoading();
-            showToast("Compte créé ! Veuillez vous connecter.", "info");
+            showToast("Compte créé ! Confirmez votre courriel, puis connectez-vous pour terminer l'inscription.", "info");
           }
 
         } catch (err) {
           console.error("Erreur lors de l'inscription:", err);
           showError("Erreur lors de l'inscription : " + formatErrorMessage(err));
-          await supabaseClient.auth.signOut();
           hideLoading();
+          if (!authAccountCreated) {
+            clearPendingOnboarding();
+          } else {
+            showOnboardingScreen({ initials });
+          }
         }
       });
       
@@ -5914,32 +6002,9 @@
 
     async function preloadDefaultCatalog(newPharmacyId) {
       try {
-        // 1. Chercher d'abord la pharmacie maîtresse "PJC 28" (ou fallback sur la première créée)
-        let masterPharmId = null;
-        
-        const { data: pjc28Pharm } = await supabaseClient
-          .from("pharmacies")
-          .select("id")
-          .ilike("name", "%PJC 28%")
-          .maybeSingle();
-          
-        if (pjc28Pharm && pjc28Pharm.id) {
-          masterPharmId = pjc28Pharm.id;
-        } else {
-          const { data: firstPharm } = await supabaseClient
-            .from("pharmacies")
-            .select("id")
-            .order("created_at", { ascending: true })
-            .limit(1)
-            .maybeSingle();
-            
-          if (firstPharm) masterPharmId = firstPharm.id;
-        }
-        
-        if (!masterPharmId) {
-          console.log("Aucun catalogue maître existant pour la duplication.");
-          return;
-        }
+        // The verified master UUID is not a credential. Using it directly avoids
+        // exposing every pharmacy name and join code merely to locate PJC 28.
+        const masterPharmId = MASTER_CATALOG_PHARMACY_ID;
         
         if (masterPharmId === newPharmacyId) return;
         
@@ -7227,7 +7292,7 @@
       if (inviteInput && sessionPharmacy) {
         const origin = window.location.origin === "null" || !window.location.origin ? "file://" : window.location.origin;
         const path = window.location.pathname;
-        const link = `${origin}${path}?invite=${sessionPharmacy.id}&name=${encodeURIComponent(sessionPharmacy.name)}`;
+        const link = `${origin}${path}?code=${encodeURIComponent(sessionPharmacy.code || "")}&name=${encodeURIComponent(sessionPharmacy.name)}`;
         inviteInput.value = link;
       }
 
@@ -7248,7 +7313,7 @@
       if (inviteInput && sessionPharmacy) {
         const origin = window.location.origin === "null" || !window.location.origin ? "file://" : window.location.origin;
         const path = window.location.pathname;
-        const link = `${origin}${path}?invite=${sessionPharmacy.id}&name=${encodeURIComponent(sessionPharmacy.name)}`;
+        const link = `${origin}${path}?code=${encodeURIComponent(sessionPharmacy.code || "")}&name=${encodeURIComponent(sessionPharmacy.name)}`;
         inviteInput.value = link;
       }
 
@@ -7347,10 +7412,10 @@
             if (confirm(`Voulez-vous modifier le rôle de ${memberEmail} pour : ${roleLabel} ?`)) {
               showLoading("Mise à jour du rôle...");
               try {
-                const { error: roleErr } = await supabaseClient
-                  .from("profiles")
-                  .update({ role: newRole })
-                  .eq("id", memberId);
+                const { error: roleErr } = await supabaseClient.rpc(
+                  "set_pharmacy_member_role",
+                  { p_member_id: memberId, p_new_role: newRole }
+                );
                 if (roleErr) throw roleErr;
                 showToast(`Rôle mis à jour (${roleLabel}).`, "success");
                 await renderTeamMembersUI();
@@ -7371,12 +7436,12 @@
             if (confirm(`Voulez-vous vraiment retirer l'accès de ${memberEmail} à cette pharmacie ?`)) {
               showLoading("Retrait du membre...");
               try {
-                const { error: delError } = await supabaseClient
-                  .from("profiles")
-                  .delete()
-                  .eq("id", memberId);
+                const { error: delError } = await supabaseClient.rpc(
+                  "remove_pharmacy_member",
+                  { p_member_id: memberId }
+                );
                 if (delError) throw delError;
-                showToast("Membre retiré de la pharmacie.", "success");
+                showToast("Accès du membre retiré; son compte est conservé.", "success");
                 await renderTeamMembersUI();
               } catch (err) {
                 showError("Erreur lors du retrait : " + formatErrorMessage(err));
