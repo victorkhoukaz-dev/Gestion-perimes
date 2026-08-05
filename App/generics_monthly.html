@@ -700,6 +700,65 @@
             min-width: 0;
         }
 
+        .market-share-layout {
+            display: grid;
+            grid-template-columns: minmax(140px, 0.75fr) minmax(210px, 1.25fr);
+            align-items: center;
+            gap: 1rem;
+            min-width: 0;
+        }
+
+        .market-share-chart {
+            position: relative;
+            height: 220px;
+            min-width: 0;
+        }
+
+        .market-share-breakdown {
+            display: flex;
+            flex-direction: column;
+            gap: 0.55rem;
+            min-width: 0;
+        }
+
+        .market-share-row {
+            display: grid;
+            grid-template-columns: 10px minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 0.55rem;
+            padding-bottom: 0.45rem;
+            border-bottom: 1px solid var(--surface-border);
+            font-size: 0.75rem;
+        }
+
+        .market-share-row:last-child {
+            border-bottom: 0;
+        }
+
+        .market-share-swatch {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .market-share-name {
+            overflow-wrap: anywhere;
+            line-height: 1.25;
+            font-weight: 600;
+        }
+
+        .market-share-value {
+            text-align: right;
+            white-space: nowrap;
+            color: var(--text-secondary);
+        }
+
+        @media (max-width: 600px) {
+            .market-share-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
         @media (max-width: 480px) {
             .molecule-impact-lists {
                 grid-template-columns: 1fr;
@@ -1321,8 +1380,11 @@
             <div class="card">
                 <h3>Répartition des Achats par Fabricant (2026)</h3>
                 <div class="subtitle" style="margin-bottom: 1.5rem;">Parts de marché cumulées (Top 5 + Autres) sur l'année en cours</div>
-                <div class="chart-container">
-                    <canvas id="supplierMarketShareChart"></canvas>
+                <div class="market-share-layout">
+                    <div class="market-share-chart">
+                        <canvas id="supplierMarketShareChart"></canvas>
+                    </div>
+                    <div id="supplierMarketShareBreakdown" class="market-share-breakdown" aria-label="Détail de la répartition par fabricant"></div>
                 </div>
             </div>
             <div class="card">
@@ -1890,6 +1952,31 @@
             }
 
             const ctx4 = document.getElementById('supplierMarketShareChart').getContext('2d');
+            const marketShareBreakdown = document.getElementById('supplierMarketShareBreakdown');
+            marketShareBreakdown.replaceChildren();
+            donutLabels.forEach((label, index) => {
+                const value = donutData[index] || 0;
+                const percentage = total2026Sales > 0 ? (value / total2026Sales) * 100 : 0;
+                const row = document.createElement('div');
+                row.className = 'market-share-row';
+                row.title = label;
+
+                const swatch = document.createElement('span');
+                swatch.className = 'market-share-swatch';
+                swatch.style.backgroundColor = donutColors[index];
+
+                const name = document.createElement('span');
+                name.className = 'market-share-name';
+                name.textContent = label;
+
+                const formattedValue = document.createElement('span');
+                formattedValue.className = 'market-share-value';
+                formattedValue.textContent = `${percentage.toFixed(1).replace('.', ',')}%`;
+
+                row.append(swatch, name, formattedValue);
+                marketShareBreakdown.appendChild(row);
+            });
+
             supplierMarketShareChartObj = new Chart(ctx4, {
                 type: 'doughnut',
                 data: {
@@ -1906,8 +1993,7 @@
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            position: 'bottom',
-                            labels: { color: '#9ca3af', font: { size: 9 }, padding: 8 }
+                            display: false
                         },
                         tooltip: {
                             callbacks: {
