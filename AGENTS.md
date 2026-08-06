@@ -43,7 +43,7 @@ Ne cassez jamais le comportement de saisie :
 L'application fonctionne en exécutant directement `App/index.html` dans un navigateur ou via un petit serveur local (`python serve.py` / `lancer_local.bat`). **Ne pas ajouter de bundler lourd (Vite, Webpack, React, Next.js) sans demande explicite de l'utilisateur.**
 
 ### 🔴 Règle 5 : Respect du Multi-Tenant et RLS Supabase
-Chaque pharmacie possède son propre `pharmacy_id`. Toutes les requêtes vers Supabase doivent intégrer la sécurité RLS (Row Level Security). Référez-vous aux scripts `supabase_setup_rls_v2.sql`.
+Chaque pharmacie possède son propre `pharmacy_id`. Toutes les requêtes vers Supabase doivent intégrer la sécurité RLS (Row Level Security). Référez-vous à `supabase/README.md` et aux migrations versionnées dans `supabase/migrations/`.
 
 ---
 
@@ -68,7 +68,7 @@ Procédure expirés/
 ├── GUIDE_UTILISATION.md               # Guide opérationnel pour l'équipe en pharmacie
 ├── lancer_local.bat                   # Raccourci de lancement local (PC)
 ├── serve.ps1 / serve.py               # Serveur HTTP local léger (port 8080)
-├── supabase_setup_rls_v2.sql          # Scripts SQL Supabase (tables, RLS & rôles)
+├── supabase/                         # Migrations, audits, rollback et archives Supabase
 └── App/                               # Code source principal de l'application
     ├── index.html                     # Application UI, structure & scripts principaux
     ├── manifest.json                  # Déclaration PWA

@@ -1,18 +1,18 @@
 # PharmaOps Supabase production deployment runbook
 
-Status: prepared and rollback-rehearsed; not yet approved for production execution.
+Status: completed successfully in production on 2026-08-05; post-migration backup validated.
 
-This runbook coordinates the Supabase security migration with the matching application deployment. Do not merge or run the production migration until the deployment-day preflight is complete.
+This runbook records the completed Supabase security migration and matching application deployment. The historical execution instructions remain below as an audit and recovery reference. Do not run the production migration a second time.
 
 ## Release artifacts
 
-- Application branch: `hotfix/supabase-security`
-- Draft pull request: `#2`
+- Application branch used for release: `hotfix/supabase-security` (merged and deleted after verification)
+- Pull request: `#2` (merged)
 - Hotfix base commit from `main`: `ac833fd`
 - Initial hotfix commit: `bdfacda`
-- Production migration: `supabase_security_migration_PRODUCTION_CANDIDATE.sql`
-- Emergency rollback: `supabase_security_PRODUCTION_ROLLBACK_DRAFT.sql`
-- Rehearsal: `supabase_security_PRODUCTION_ROLLBACK_REHEARSAL.sql`
+- Executed migration: `supabase/migrations/20260806010853_pharmaops_security_2a_2f.sql`
+- Emergency rollback: `supabase/rollback/pharmaops_security_2a_2f_emergency_rollback_review_required.sql`
+- Rehearsal archive: `supabase/archive/rehearsals/supabase_security_PRODUCTION_ROLLBACK_REHEARSAL.sql`
 
 The production migration and updated `App/index.html` must be deployed together. Never merge `integration` as part of this release.
 
@@ -121,7 +121,7 @@ Proceed only when:
 
 ### 1. Run the database migration
 
-Open `supabase_security_migration_PRODUCTION_CANDIDATE.sql` in Supabase SQL Editor, verify the target is **Périmés labo / main / Production**, and run the complete file once.
+Open `supabase/migrations/20260806010853_pharmaops_security_2a_2f.sql` in Supabase SQL Editor, verify the target is **Périmés labo / main / Production**, and run the complete file once.
 
 Expected result: successful transaction commit with no failed safeguard.
 
@@ -181,7 +181,7 @@ Do not run the migration a second time after a successful commit.
 ### Migration commits but application deployment fails
 
 - First attempt to complete or repair the application deployment.
-- If that cannot be done promptly, prepare an execution copy of `supabase_security_PRODUCTION_ROLLBACK_DRAFT.sql` by removing only its deliberate `DRAFT ONLY` stop.
+- If that cannot be done promptly, prepare an execution copy of `supabase/rollback/pharmaops_security_2a_2f_emergency_rollback_review_required.sql` by removing only its deliberate `DRAFT ONLY` stop.
 - Review that execution copy before running it.
 - Run the emergency rollback once.
 - Redeploy previous `main` commit `ac833fd`.
@@ -197,16 +197,22 @@ Do not run the migration a second time after a successful commit.
 
 ## Completion record
 
-Record these values during deployment:
+Recorded production result:
 
-- Deployment date and start time:
-- Operator:
-- Fresh backup folder:
-- Pre-deployment counts:
-- Migration result:
-- Merged PR and commit:
-- Application deployment result:
-- Post-deployment counts:
-- Owner smoke-test result:
-- Disposable-account test result:
-- Final go-live decision:
+- Deployment date and start time: 2026-08-05, approximately 21:08 America/Toronto
+- Operator: Victor Khoukaz, assisted by Codex
+- Pre-migration backup: `C:\Users\victo\Documents\PharmaOps_Backups\2026-08-05_210037`
+- Post-migration backup: `C:\Users\victo\Documents\PharmaOps_Backups\2026-08-05_233446_post_migration`
+- Pre-deployment counts: catalog 20,685; configurations 2; flagged products 150; generic purchases 4; pharmacies 2; profiles 2
+- Migration result: successful; Supabase migration `20260806010853_pharmaops_security_2a_2f`
+- Merged PR and commit: PR `#2`; production merge commit `4e4ec773ffa46b7d5c823c0afed988dcdbd64302`
+- Application deployment result: GitHub Pages deployment successful
+- Immediate post-migration counts: unchanged from the pre-deployment baseline
+- Post-test counts: catalog 31,034; configurations 3; flagged products 150; generic purchases 4; pharmacies 3; profiles 3
+- Explanation of post-test additions: the approved disposable-account test created one pharmacy/profile and copied 10,349 catalog rows plus one configuration
+- Owner smoke-test result: passed
+- Disposable-account test result: passed, including signup, join, role changes, removal, isolation, and create-pharmacy
+- Security postflight: protected owner match 1; private schema present; four protected RPCs present; anonymous/public application-table grants 0
+- Accepted advisor notices: four intentional authenticated `SECURITY DEFINER` RPC notices
+- Deferred notices: leaked-password protection until commercial Pro-plan onboarding; performance suggestions until shared-catalog redesign
+- Final go-live decision: GO; production release successful

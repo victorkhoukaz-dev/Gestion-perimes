@@ -68,7 +68,7 @@ Procédure expirés/
 ├── serve.ps1                          # Serveur PowerShell local (Port 8080)
 ├── serve.py                           # Serveur Python alternative
 ├── lancer_mobile.ps1                  # Serveur et QR Code pour réseau mobile
-├── supabase_setup_rls_v2.sql          # Modèle de base de données Supabase RLS
+├── supabase/                         # Migrations, audits, rollback et archives Supabase
 └── App/                               # Application PWA
     ├── index.html                     # Application UI principal
     ├── manifest.json                  # Déclaration PWA Web App
