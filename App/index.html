@@ -2329,6 +2329,83 @@
       display: flex !important;
     }
 
+    /* Menu compact des actions dans la liste des membres */
+    .team-actions-cell {
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .team-actions-menu-wrapper {
+      display: inline-block;
+    }
+
+    .team-actions-trigger {
+      width: 34px;
+      height: 34px;
+      padding: 0;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background: var(--card-bg);
+      color: var(--text-color);
+      font-size: 1.2rem;
+      font-weight: 700;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .team-actions-trigger:hover,
+    .team-actions-trigger[aria-expanded="true"] {
+      border-color: var(--primary-color);
+      background: var(--primary-light);
+      color: var(--primary-color);
+    }
+
+    .team-actions-menu {
+      display: none;
+      position: fixed;
+      z-index: 1200;
+      min-width: 220px;
+      padding: 6px;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      background: var(--card-bg);
+      box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18);
+    }
+
+    .team-actions-menu.open {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .team-action-menu-item {
+      width: 100%;
+      padding: 9px 10px;
+      border: 0;
+      border-radius: 7px;
+      background: transparent;
+      color: var(--text-color);
+      font: inherit;
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .team-action-menu-item:hover {
+      background: var(--primary-light);
+      color: var(--primary-color);
+    }
+
+    .team-action-menu-item.danger {
+      color: var(--danger-color);
+    }
+
+    .team-action-menu-item.danger:hover {
+      background: #fef2f2;
+      color: #b91c1c;
+    }
+
     /* Styles de la Page d'Accueil Hub PharmaOps (V4.1) */
     .hub-card {
       transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
@@ -2925,6 +3002,10 @@
                 <span class="accordion-arrow" style="font-size: 0.8rem; color: var(--text-muted);">▶</span>
               </span>
             </h3>
+
+            <p id="tournee-monthly-guidance" aria-live="polite" style="font-size: 0.78rem; line-height: 1.4; color: var(--text-muted); margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-color);">
+              <!-- Mis à jour automatiquement en JS -->
+            </p>
             
             <div id="card-body-assistant" style="display: none; margin-top: 14px;">
               <div class="form-group">
@@ -3200,7 +3281,7 @@
                   <th style="width: 110px; text-align: center;">Activité</th>
                   <th style="width: 120px;">Rôle</th>
                   <th style="width: 90px; text-align: center;">Statut</th>
-                  <th style="width: 150px; text-align: right;" id="th-team-actions">Actions</th>
+                  <th style="width: 56px; text-align: right;" id="th-team-actions">Actions</th>
                 </tr>
               </thead>
               <tbody id="team-members-list">
@@ -3254,10 +3335,6 @@
             <div style="background: var(--bg-color); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);">
               <strong style="color: var(--primary-color); display: block; margin-bottom: 4px; font-size: 0.85rem;">🛡️ Isolation Cloud RLS</strong>
               <span style="font-size: 0.8rem; color: var(--text-muted);">Chaque pharmacie dispose d'un périmètre hermétique sécurisé par Row Level Security en base de données.</span>
-            </div>
-            <div style="background: var(--bg-color); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);">
-              <strong style="color: var(--primary-color); display: block; margin-bottom: 4px; font-size: 0.85rem;">💻 Traitement Local (Local-First)</strong>
-              <span style="font-size: 0.8rem; color: var(--text-muted);">Les fichiers d'achats génériques et données financières sont analysés localement dans votre navigateur.</span>
             </div>
           </div>
         </div>
@@ -3835,6 +3912,9 @@
           codeInput.value = inviteCode.toUpperCase();
           codeInput.required = true;
         }
+
+        const submitBtn = document.getElementById("btn-submit-register");
+        if (submitBtn) submitBtn.textContent = "Rejoindre la pharmacie";
       } else {
         // Mode normal
         if (inviteAlert) inviteAlert.style.display = "none";
@@ -6458,6 +6538,15 @@
 
       document.getElementById("tournee-target-period").textContent = `${formatMonthYearFrench(startDate)} à ${formatMonthYearFrench(endDate)}`;
 
+      // Expliquer le décalage opérationnel : retrait à M+1, étiquetage à partir de M+2.
+      const monthlyGuidance = document.getElementById("tournee-monthly-guidance");
+      if (monthlyGuidance) {
+        const currentMonthDate = new Date(state.currentDate || new Date());
+        const removalMonthDate = new Date(currentMonthDate);
+        removalMonthDate.setMonth(removalMonthDate.getMonth() + 1);
+        monthlyGuidance.textContent = `${formatMonthYearFrench(currentMonthDate)} : retirer les produits de ${formatMonthYearFrench(removalMonthDate)} • étiqueter ${formatMonthYearFrench(startDate)} → ${formatMonthYearFrench(endDate)}.`;
+      }
+
       // Lister les collants à préparer
       const listDiv = document.getElementById("tournee-stickers-list");
       listDiv.innerHTML = "";
@@ -7301,6 +7390,32 @@
       renderTeamMembersUI();
     }
 
+    function closeTeamActionMenus() {
+      document.querySelectorAll(".team-actions-menu.open").forEach(menu => {
+        menu.classList.remove("open");
+        menu.style.visibility = "";
+        menu.style.left = "";
+        menu.style.top = "";
+      });
+      document.querySelectorAll('.team-actions-trigger[aria-expanded="true"]').forEach(trigger => {
+        trigger.setAttribute("aria-expanded", "false");
+      });
+    }
+
+    let teamActionDismissHandlersBound = false;
+
+    function ensureTeamActionDismissHandlers() {
+      if (teamActionDismissHandlersBound) return;
+      teamActionDismissHandlersBound = true;
+
+      document.addEventListener("click", closeTeamActionMenus);
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") closeTeamActionMenus();
+      });
+      window.addEventListener("resize", closeTeamActionMenus);
+      document.addEventListener("scroll", closeTeamActionMenus, true);
+    }
+
     async function renderTeamMembersUI() {
       const container = document.getElementById("team-members-list");
       if (!container || !sessionPharmacy) return;
@@ -7356,12 +7471,17 @@
               <td>${roleBadge}</td>
               <td style="text-align: center;"><span class="badge success">Actif</span></td>
               ${isOwner ? `
-                <td style="text-align: right;">
-                  <button type="button" class="btn btn-secondary btn-edit-initials" data-id="${m.id}" data-email="${m.email}" data-initials="${m.initials || ''}" style="padding: 4px 6px; font-size: 0.75rem; margin-right: 4px;" title="Modifier les initiales">✏️ Init</button>
-                  ${!isMe ? `
-                    <button type="button" class="btn btn-secondary btn-toggle-role" data-id="${m.id}" data-role="${m.role}" data-email="${m.email}" style="padding: 4px 6px; font-size: 0.75rem; margin-right: 4px;" title="Changer de rôle">${isMemOwner ? '→ Tech' : '→ Owner'}</button>
-                    <button type="button" class="btn btn-danger btn-remove-member" data-id="${m.id}" data-email="${m.email}" style="padding: 4px 6px; font-size: 0.75rem;">Retirer</button>
-                  ` : ''}
+                <td class="team-actions-cell">
+                  <div class="team-actions-menu-wrapper">
+                    <button type="button" class="team-actions-trigger" aria-label="Afficher les actions" aria-expanded="false" title="Actions">⋯</button>
+                    <div class="team-actions-menu" role="menu">
+                      <button type="button" class="team-action-menu-item btn-edit-initials" role="menuitem" data-id="${m.id}" data-email="${m.email}" data-initials="${m.initials || ''}">✏️ Modifier les initiales</button>
+                      ${!isMe ? `
+                        <button type="button" class="team-action-menu-item btn-toggle-role" role="menuitem" data-id="${m.id}" data-role="${m.role}" data-email="${m.email}">${isMemOwner ? 'Changer pour Technicien(ne)' : 'Changer pour Propriétaire'}</button>
+                        <button type="button" class="team-action-menu-item danger btn-remove-member" role="menuitem" data-id="${m.id}" data-email="${m.email}">Retirer l'accès</button>
+                      ` : ''}
+                    </div>
+                  </div>
                 </td>
               ` : ''}
             </tr>
@@ -7369,6 +7489,33 @@
         });
 
         container.innerHTML = html;
+
+        ensureTeamActionDismissHandlers();
+        container.querySelectorAll(".team-actions-trigger").forEach(trigger => {
+          trigger.addEventListener("click", (event) => {
+            event.stopPropagation();
+            const menu = trigger.nextElementSibling;
+            const wasOpen = menu && menu.classList.contains("open");
+            closeTeamActionMenus();
+            if (!menu || wasOpen) return;
+
+            menu.classList.add("open");
+            menu.style.visibility = "hidden";
+            trigger.setAttribute("aria-expanded", "true");
+
+            const triggerRect = trigger.getBoundingClientRect();
+            const menuRect = menu.getBoundingClientRect();
+            const left = Math.max(8, Math.min(triggerRect.right - menuRect.width, window.innerWidth - menuRect.width - 8));
+            let top = triggerRect.bottom + 6;
+            if (top + menuRect.height > window.innerHeight - 8) {
+              top = Math.max(8, triggerRect.top - menuRect.height - 6);
+            }
+
+            menu.style.left = `${left}px`;
+            menu.style.top = `${top}px`;
+            menu.style.visibility = "visible";
+          });
+        });
 
         // Attacher les écouteurs d'édition d'initiales
         container.querySelectorAll(".btn-edit-initials").forEach(btn => {
