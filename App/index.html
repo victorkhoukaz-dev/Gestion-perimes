@@ -1857,6 +1857,26 @@
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
       border-color: rgba(15, 118, 110, 0.25);
     }
+    .tournee-targeted-products-summary {
+      margin: 0 0 12px;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      line-height: 1.4;
+    }
+    .tournee-targeted-products-summary strong {
+      color: var(--text-color);
+      font-weight: 800;
+    }
+    .tournee-section-count {
+      flex-shrink: 0;
+      padding: 1px 6px;
+      border-radius: 999px;
+      background-color: rgba(15, 118, 110, 0.1);
+      color: var(--primary-color);
+      font-size: 0.7rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
     [data-theme="dark"] .section-progress-item {
       background-color: #1e293b;
       border-color: rgba(255, 255, 255, 0.05);
@@ -2327,6 +2347,45 @@
     }
     .modal-overlay.active {
       display: flex !important;
+    }
+
+    /* Repères mensuels de l'assistant tournée */
+    .tournee-guidance-month {
+      font-weight: 800;
+    }
+
+    .tournee-guidance-current {
+      color: var(--primary-color);
+    }
+
+    .tournee-guidance-removal {
+      color: #c2410c;
+    }
+
+    .tournee-guidance-labeling {
+      color: #4f46e5;
+    }
+
+    .tournee-guidance-line {
+      display: block;
+    }
+
+    .tournee-guidance-line + .tournee-guidance-line {
+      margin-top: 4px;
+    }
+
+    .tournee-guidance-warning {
+      color: #b45309;
+      font-weight: 700;
+    }
+
+    .tournee-custom-period-toggle {
+      width: 100%;
+      justify-content: center;
+      border: 1px dashed var(--border-color);
+      background: var(--card-bg);
+      color: var(--text-muted);
+      font-size: 0.8rem;
     }
 
     /* Menu compact des actions dans la liste des membres */
@@ -2993,11 +3052,7 @@
             <h3 class="card-title accordion-header-btn" data-target="card-body-assistant" style="font-size: 1rem; margin-bottom: 0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;" title="Cliquer pour afficher/masquer l'assistant">
               <span style="font-weight: 700; white-space: nowrap;">⚙️ Assistant Tournée</span>
               <span style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                <span style="display: flex; align-items: center; gap: 4px;" onclick="event.stopPropagation();">
-                  <select id="header-assistant-start-month" class="form-control" style="padding: 5px 12px; font-size: 0.9rem; height: auto; width: auto; font-weight: 700; cursor: pointer; background-color: var(--primary-light); color: var(--text-color); border: 1.5px solid var(--primary-color); border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-                    <!-- Rempli en JS -->
-                  </select>
-                </span>
+                <span id="header-assistant-start-month-display" aria-label="Mois de la tournée en cours" style="padding: 5px 12px; font-size: 0.9rem; font-weight: 800; white-space: nowrap; background-color: var(--primary-light); color: var(--primary-color); border: 1.5px solid var(--primary-color); border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">-</span>
                 <span class="accordion-action-badge">➕ Configurer</span>
                 <span class="accordion-arrow" style="font-size: 0.8rem; color: var(--text-muted);">▶</span>
               </span>
@@ -3008,11 +3063,17 @@
             </p>
             
             <div id="card-body-assistant" style="display: none; margin-top: 14px;">
-              <div class="form-group">
-                <label style="font-weight: 600; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 6px; display: block;">Mois de début d'étiquetage :</label>
-                <div id="assistant-start-month-display" style="font-weight: 700; font-size: 0.95rem; color: var(--primary-color); background-color: var(--primary-light); border: 1px solid rgba(16, 185, 129, 0.3); padding: 8px 14px; border-radius: 8px; display: flex; align-items: center;">
-                  <span id="assistant-start-month-display-text" style="display: flex; align-items: center; gap: 6px;">🗓️ -</span>
-                </div>
+              <button type="button" id="btn-toggle-custom-tournee-period" class="btn btn-secondary tournee-custom-period-toggle" aria-expanded="false" aria-controls="assistant-custom-period-controls">
+                Modifier le mois de la tournée (exception)
+              </button>
+
+              <div id="assistant-custom-period-controls" class="form-group" style="display: none; margin-top: 12px; padding: 12px; border: 1px solid var(--border-color); border-radius: 10px; background: var(--background-color);">
+                <p class="tournee-guidance-warning" style="font-size: 0.78rem; margin-bottom: 10px;">⚠️ Ce choix recalcule automatiquement les mois de retrait et d'étiquetage.</p>
+                <label for="assistant-start-month" style="font-weight: 600; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 6px; display: block;">Mois de la tournée :</label>
+                <select id="assistant-start-month" class="form-control" style="font-weight: 700; color: var(--primary-color); background-color: var(--primary-light); border: 1.5px solid var(--primary-color); cursor: pointer;">
+                  <!-- Rempli en JS -->
+                </select>
+                <button type="button" id="btn-reset-tournee-period" class="btn btn-secondary" style="width: 100%; margin-top: 8px; font-size: 0.78rem;">Revenir au mois actuel</button>
               </div>
 
               <div class="form-group">
@@ -3054,6 +3115,8 @@
               <div style="background-color: var(--border-color); height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: 12px;">
                 <div id="tournee-progress-bar" style="background-color: var(--primary-color); width: 0%; height: 100%; transition: width 0.3s ease;"></div>
               </div>
+
+              <p id="tournee-targeted-products-summary" class="tournee-targeted-products-summary"></p>
 
               <!-- List of Sections -->
               <div id="tournee-sections-progress-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto; padding-right: 4px;">
@@ -3770,6 +3833,7 @@
       currentDate: new Date(),
       targetMonthDate: new Date(),
       sessionInitials: "",
+      tourneeMonth: "",
       tourneeStartMonth: "2026-08",
       tourneeDuration: 6,
       sorting: { key: 'expiryDate', direction: 'asc' },
@@ -4722,13 +4786,31 @@
       });
     }
 
-    // Remplir la liste déroulante unique de l'assistant de tournée flexible (V3)
+    function getMonthKey(date) {
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    }
+
+    function getDateFromMonthKey(monthKey) {
+      const [year, month] = monthKey.split('-').map(Number);
+      return new Date(year, month - 1, 1);
+    }
+
+    function getLabelStartDateForTourneeMonth(tourneeMonthKey) {
+      const labelStartDate = getDateFromMonthKey(tourneeMonthKey);
+      labelStartDate.setMonth(labelStartDate.getMonth() + 2);
+      return labelStartDate;
+    }
+
+    // Préparer la période recommandée et les choix d'exception.
     function initializeTourneeSelects() {
-      const selectMonthHeader = document.getElementById("header-assistant-start-month");
+      const selectMonth = document.getElementById("assistant-start-month");
       const selectDuration = document.getElementById("assistant-duration");
 
-      // Remplir le mois de début de la tournée (de M-1 à M+6 pour offrir du choix)
-      if (selectMonthHeader) selectMonthHeader.innerHTML = "";
+      // Remplir les mois de tournée disponibles (de M-1 à M+7).
+      if (selectMonth) selectMonth.innerHTML = "";
+      const defaultTourneeKey = getMonthKey(new Date());
+      state.tourneeMonth = defaultTourneeKey;
+      state.tourneeStartMonth = getMonthKey(getLabelStartDateForTourneeMonth(defaultTourneeKey));
       
       const startSeed = new Date(state.currentDate);
       startSeed.setMonth(startSeed.getMonth() - 1); // Commencer à M-1 pour flexibilité
@@ -4742,22 +4824,14 @@
         const key = `${year}-${monthNum}`;
         const labelText = formatMonthYearFrench(loopDate);
 
-        // Par défaut: sélectionner M+2 (Août 2026 si courant Juin 2026)
-        const defaultTargetDate = new Date(state.currentDate);
-        defaultTargetDate.setMonth(defaultTargetDate.getMonth() + 2);
-        const defaultTargetKey = `${defaultTargetDate.getFullYear()}-${String(defaultTargetDate.getMonth() + 1).padStart(2, '0')}`;
-        const isSelected = (key === defaultTargetKey);
-        
-        if (isSelected) {
-          state.tourneeStartMonth = key;
-        }
+        const isSelected = (key === defaultTourneeKey);
 
-        if (selectMonthHeader) {
-          const optHeader = document.createElement("option");
-          optHeader.value = key;
-          optHeader.textContent = labelText;
-          if (isSelected) optHeader.selected = true;
-          selectMonthHeader.appendChild(optHeader);
+        if (selectMonth) {
+          const option = document.createElement("option");
+          option.value = key;
+          option.textContent = labelText;
+          if (isSelected) option.selected = true;
+          selectMonth.appendChild(option);
         }
       }
 
@@ -4866,15 +4940,48 @@
         updateFormStickerPreview(e.target.value);
       });
 
-      // Changement de paramètres sur l'assistant de tournée flexible (Écouteur unique sur le header)
-      const headerMonthSelect = document.getElementById("header-assistant-start-month");
-      if (headerMonthSelect) {
-        headerMonthSelect.addEventListener("change", (e) => {
-          state.tourneeStartMonth = e.target.value;
+      // Changement du mois de début dans le panneau Configurer
+      const assistantMonthSelect = document.getElementById("assistant-start-month");
+      const customPeriodToggle = document.getElementById("btn-toggle-custom-tournee-period");
+      const customPeriodControls = document.getElementById("assistant-custom-period-controls");
+      const resetTourneePeriod = document.getElementById("btn-reset-tournee-period");
+
+      if (customPeriodToggle && customPeriodControls) {
+        customPeriodToggle.addEventListener("click", () => {
+          const willOpen = customPeriodControls.style.display === "none";
+          customPeriodControls.style.display = willOpen ? "block" : "none";
+          customPeriodToggle.setAttribute("aria-expanded", String(willOpen));
+          customPeriodToggle.textContent = willOpen
+            ? "Masquer les options exceptionnelles"
+            : "Modifier le mois de la tournée (exception)";
+        });
+      }
+
+      if (assistantMonthSelect) {
+        assistantMonthSelect.addEventListener("change", (e) => {
+          state.tourneeMonth = e.target.value;
+          state.tourneeStartMonth = getMonthKey(getLabelStartDateForTourneeMonth(e.target.value));
           // Ajuster l'input d'expiration du formulaire par commodité
-          document.getElementById("form-expiry").value = e.target.value;
-          updateFormStickerPreview(e.target.value);
+          document.getElementById("form-expiry").value = state.tourneeStartMonth;
+          updateFormStickerPreview(state.tourneeStartMonth);
           updateTourneeAssistant();
+        });
+      }
+
+      if (resetTourneePeriod) {
+        resetTourneePeriod.addEventListener("click", () => {
+          const currentTourneeKey = getMonthKey(new Date());
+          state.tourneeMonth = currentTourneeKey;
+          state.tourneeStartMonth = getMonthKey(getLabelStartDateForTourneeMonth(currentTourneeKey));
+          if (assistantMonthSelect) assistantMonthSelect.value = currentTourneeKey;
+          document.getElementById("form-expiry").value = state.tourneeStartMonth;
+          updateFormStickerPreview(state.tourneeStartMonth);
+          updateTourneeAssistant();
+          if (customPeriodControls) customPeriodControls.style.display = "none";
+          if (customPeriodToggle) {
+            customPeriodToggle.setAttribute("aria-expanded", "false");
+            customPeriodToggle.textContent = "Modifier le mois de la tournée (exception)";
+          }
         });
       }
       document.getElementById("assistant-duration").addEventListener("change", (e) => {
@@ -6534,10 +6641,18 @@
       const endDate = new Date(startDate);
       endDate.setMonth(endDate.getMonth() + duration - 1);
 
-      // Mettre à jour l'affichage du mois de début dans le panneau déplié
-      const displayTxt = document.getElementById("assistant-start-month-display-text");
-      if (displayTxt) {
-        displayTxt.textContent = `🗓️ ${formatMonthYearFrench(startDate)}`;
+      const tourneeMonthStr = state.tourneeMonth || getMonthKey(new Date());
+      const tourneeMonthDate = getDateFromMonthKey(tourneeMonthStr);
+      const isCustomPeriod = tourneeMonthStr !== getMonthKey(new Date());
+      const removalMonthDate = new Date(tourneeMonthDate);
+      removalMonthDate.setMonth(removalMonthDate.getMonth() + 1);
+
+      // Le badge principal représente la tournée effectuée ce mois-ci, pas le début de la période d'étiquetage.
+      const headerMonthDisplay = document.getElementById("header-assistant-start-month-display");
+      if (headerMonthDisplay) {
+        const tourneeMonthLabel = formatMonthYearFrench(tourneeMonthDate);
+        const requiresElision = /^[AEIOUYÀÂÄÉÈÊËÎÏÔÖÙÛÜ]/i.test(tourneeMonthLabel);
+        headerMonthDisplay.textContent = `Tournée ${requiresElision ? "d'" : "de "}${tourneeMonthLabel}`;
       }
 
       document.getElementById("tournee-target-period").textContent = `${formatMonthYearFrench(startDate)} à ${formatMonthYearFrench(endDate)}`;
@@ -6545,10 +6660,26 @@
       // Expliquer le décalage opérationnel : retrait à M+1, étiquetage à partir de M+2.
       const monthlyGuidance = document.getElementById("tournee-monthly-guidance");
       if (monthlyGuidance) {
-        const currentMonthDate = new Date(state.currentDate || new Date());
-        const removalMonthDate = new Date(currentMonthDate);
-        removalMonthDate.setMonth(removalMonthDate.getMonth() + 1);
-        monthlyGuidance.textContent = `${formatMonthYearFrench(currentMonthDate)} : retirer les produits de ${formatMonthYearFrench(removalMonthDate)} • étiqueter ${formatMonthYearFrench(startDate)} → ${formatMonthYearFrench(endDate)}.`;
+        const createMonthLabel = (date, className) => {
+          const span = document.createElement("span");
+          span.className = `tournee-guidance-month ${className}`;
+          span.textContent = formatMonthYearFrench(date);
+          return span;
+        };
+
+        const recommendedLine = document.createElement("span");
+        recommendedLine.className = "tournee-guidance-line";
+        recommendedLine.append(
+          document.createTextNode(isCustomPeriod ? "Pour cette tournée : retirez les produits expirant en " : "Ce mois-ci : retirez les produits expirant en "),
+          createMonthLabel(removalMonthDate, "tournee-guidance-removal"),
+          document.createTextNode(", puis étiquetez ceux qui expirent entre "),
+          createMonthLabel(startDate, "tournee-guidance-labeling"),
+          document.createTextNode(" et "),
+          createMonthLabel(endDate, "tournee-guidance-labeling"),
+          document.createTextNode(".")
+        );
+
+        monthlyGuidance.replaceChildren(recommendedLine);
       }
 
       // Lister les collants à préparer
@@ -6651,6 +6782,15 @@
           }
         }
       });
+
+      const totalTourneeProducts = Object.values(sectionCountsTournee).reduce((total, count) => total + count, 0);
+      const targetedProductsSummary = document.getElementById("tournee-targeted-products-summary");
+      if (targetedProductsSummary) {
+        targetedProductsSummary.replaceChildren();
+        const totalLabel = document.createElement("strong");
+        totalLabel.textContent = `${totalTourneeProducts} produits ciblés au total`;
+        targetedProductsSummary.append(totalLabel, ` — ${formatMonthYearFrench(startDate)} à ${formatMonthYearFrench(endDate)}`);
+      }
       
       let completedCount = 0;
       
@@ -6713,7 +6853,7 @@
               <div style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0;">
                 <span class="status-dot-glow" style="color: ${dotColor}; background-color: ${dotColor};"></span>
                 <span style="font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-color);" title="${secName}">${secName}</span>
-                <span style="font-size: 0.75rem; color: var(--text-muted); margin-left: 2px;">(${count})</span>
+                <span class="tournee-section-count" title="Produits ciblés dans cette section">${count} ciblés</span>
               </div>
               <label style="display: flex; align-items: center; cursor: pointer; margin-bottom: 0;">
                 <input type="checkbox" ${isChecked} style="width: 16px; height: 16px; accent-color: var(--primary-color);" class="sec-progress-cb">
