@@ -3242,6 +3242,20 @@
           </div>
         </div>
 
+        <div class="card" id="email-alert-settings-card" style="margin-bottom: 0; display: none;">
+          <h2 class="card-title">Email alerts</h2>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px;">
+            Owners and admins receive a daily email when active flagged products expire during the current month.
+          </p>
+          <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer; margin-bottom: 0;">
+            <input type="checkbox" id="current-month-expiry-email-alert" disabled style="width: 18px; height: 18px; margin-top: 2px; accent-color: var(--primary-color);">
+            <span>
+              <strong>Alert owners about products expiring this month</strong>
+              <span style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Emails are sent once each morning while affected products remain active.</span>
+            </span>
+          </label>
+        </div>
+
         <!-- IMPORTATION CATALOGUE INVENTAIRE (V2) -->
         <div class="card" style="grid-column: 1 / -1; margin-bottom: 0;">
           <h2 class="card-title">Importation du fichier d'inventaire</h2>
@@ -3833,6 +3847,7 @@
       currentDate: new Date(),
       targetMonthDate: new Date(),
       sessionInitials: "",
+      emailAlertSettings: { currentMonthExpiryEnabled: false },
       tourneeMonth: "",
       tourneeStartMonth: "2026-08",
       tourneeDuration: 6,
@@ -4249,6 +4264,7 @@
         }
         
         state.tourneeDuration = state.config.expiryWindowMonths;
+        await loadEmailAlertSettings();
         
         const { data: productsData, error: productsError } = await supabaseClient
           .from("flagged_products")
@@ -4409,6 +4425,50 @@
         console.error("Erreur sauvegarde config cloud", err);
         showToast("Erreur config Cloud : " + err.message, "danger");
       }
+    }
+
+    async function loadEmailAlertSettings() {
+      const card = document.getElementById("email-alert-settings-card");
+      const toggle = document.getElementById("current-month-expiry-email-alert");
+      const isOwner = sessionProfile && (sessionProfile.role === "owner" || sessionProfile.role === "admin");
+
+      if (!card || !toggle) return;
+      card.style.display = isOwner ? "block" : "none";
+      if (!isOwner || !sessionPharmacy) return;
+
+      const { data, error } = await supabaseClient
+        .from("email_alert_settings")
+        .select("current_month_expiry_enabled")
+        .eq("pharmacy_id", sessionPharmacy.id)
+        .maybeSingle();
+
+      if (error) {
+        console.info("Email alert settings are not available yet:", error.message);
+        toggle.disabled = true;
+        return;
+      }
+
+      state.emailAlertSettings = {
+        currentMonthExpiryEnabled: data?.current_month_expiry_enabled === true
+      };
+      toggle.checked = state.emailAlertSettings.currentMonthExpiryEnabled;
+      toggle.disabled = false;
+    }
+
+    async function saveCurrentMonthExpiryEmailAlert(enabled) {
+      if (!sessionPharmacy) return;
+
+      const { error } = await supabaseClient
+        .from("email_alert_settings")
+        .upsert({
+          pharmacy_id: sessionPharmacy.id,
+          current_month_expiry_enabled: enabled,
+          timezone: "America/Toronto",
+          updated_at: new Date().toISOString()
+        });
+
+      if (error) throw error;
+      state.emailAlertSettings.currentMonthExpiryEnabled = enabled;
     }
 
     async function checkAndMigrateLocalData() {
@@ -5043,6 +5103,23 @@
           showToast(`Paramètre par défaut mis à jour : ${state.config.expiryWindowMonths} mois.`, "success");
         });
       });
+
+      const currentMonthExpiryAlertToggle = document.getElementById("current-month-expiry-email-alert");
+      if (currentMonthExpiryAlertToggle) {
+        currentMonthExpiryAlertToggle.addEventListener("change", async (e) => {
+          const enabled = e.target.checked;
+          currentMonthExpiryAlertToggle.disabled = true;
+          try {
+            await saveCurrentMonthExpiryEmailAlert(enabled);
+            showToast(enabled ? "Current-month expiry email alerts enabled." : "Current-month expiry email alerts disabled.", "success");
+          } catch (error) {
+            currentMonthExpiryAlertToggle.checked = !enabled;
+            showToast("Unable to update email alert settings: " + error.message, "danger");
+          } finally {
+            currentMonthExpiryAlertToggle.disabled = false;
+          }
+        });
+      }
 
       // Modaux
       document.getElementById("close-checkout-modal").addEventListener("click", closeCheckoutModal);
