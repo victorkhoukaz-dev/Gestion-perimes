@@ -2329,6 +2329,23 @@
       display: flex !important;
     }
 
+    /* Repères mensuels de l'assistant tournée */
+    .tournee-guidance-month {
+      font-weight: 800;
+    }
+
+    .tournee-guidance-current {
+      color: var(--primary-color);
+    }
+
+    .tournee-guidance-removal {
+      color: #c2410c;
+    }
+
+    .tournee-guidance-labeling {
+      color: #4f46e5;
+    }
+
     /* Menu compact des actions dans la liste des membres */
     .team-actions-cell {
       text-align: right;
@@ -2993,11 +3010,7 @@
             <h3 class="card-title accordion-header-btn" data-target="card-body-assistant" style="font-size: 1rem; margin-bottom: 0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;" title="Cliquer pour afficher/masquer l'assistant">
               <span style="font-weight: 700; white-space: nowrap;">⚙️ Assistant Tournée</span>
               <span style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                <span style="display: flex; align-items: center; gap: 4px;" onclick="event.stopPropagation();">
-                  <select id="header-assistant-start-month" class="form-control" style="padding: 5px 12px; font-size: 0.9rem; height: auto; width: auto; font-weight: 700; cursor: pointer; background-color: var(--primary-light); color: var(--text-color); border: 1.5px solid var(--primary-color); border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-                    <!-- Rempli en JS -->
-                  </select>
-                </span>
+                <span id="header-assistant-start-month-display" aria-label="Mois de début d'étiquetage sélectionné" style="padding: 5px 12px; font-size: 0.9rem; font-weight: 800; white-space: nowrap; background-color: var(--primary-light); color: var(--primary-color); border: 1.5px solid var(--primary-color); border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">-</span>
                 <span class="accordion-action-badge">➕ Configurer</span>
                 <span class="accordion-arrow" style="font-size: 0.8rem; color: var(--text-muted);">▶</span>
               </span>
@@ -3009,10 +3022,10 @@
             
             <div id="card-body-assistant" style="display: none; margin-top: 14px;">
               <div class="form-group">
-                <label style="font-weight: 600; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 6px; display: block;">Mois de début d'étiquetage :</label>
-                <div id="assistant-start-month-display" style="font-weight: 700; font-size: 0.95rem; color: var(--primary-color); background-color: var(--primary-light); border: 1px solid rgba(16, 185, 129, 0.3); padding: 8px 14px; border-radius: 8px; display: flex; align-items: center;">
-                  <span id="assistant-start-month-display-text" style="display: flex; align-items: center; gap: 6px;">🗓️ -</span>
-                </div>
+                <label for="assistant-start-month" style="font-weight: 600; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 6px; display: block;">Mois de début d'étiquetage :</label>
+                <select id="assistant-start-month" class="form-control" style="font-weight: 700; color: var(--primary-color); background-color: var(--primary-light); border: 1.5px solid var(--primary-color); cursor: pointer;">
+                  <!-- Rempli en JS -->
+                </select>
               </div>
 
               <div class="form-group">
@@ -4720,11 +4733,11 @@
 
     // Remplir la liste déroulante unique de l'assistant de tournée flexible (V3)
     function initializeTourneeSelects() {
-      const selectMonthHeader = document.getElementById("header-assistant-start-month");
+      const selectMonth = document.getElementById("assistant-start-month");
       const selectDuration = document.getElementById("assistant-duration");
 
       // Remplir le mois de début de la tournée (de M-1 à M+6 pour offrir du choix)
-      if (selectMonthHeader) selectMonthHeader.innerHTML = "";
+      if (selectMonth) selectMonth.innerHTML = "";
       
       const startSeed = new Date(state.currentDate);
       startSeed.setMonth(startSeed.getMonth() - 1); // Commencer à M-1 pour flexibilité
@@ -4748,12 +4761,12 @@
           state.tourneeStartMonth = key;
         }
 
-        if (selectMonthHeader) {
-          const optHeader = document.createElement("option");
-          optHeader.value = key;
-          optHeader.textContent = labelText;
-          if (isSelected) optHeader.selected = true;
-          selectMonthHeader.appendChild(optHeader);
+        if (selectMonth) {
+          const option = document.createElement("option");
+          option.value = key;
+          option.textContent = labelText;
+          if (isSelected) option.selected = true;
+          selectMonth.appendChild(option);
         }
       }
 
@@ -4862,10 +4875,10 @@
         updateFormStickerPreview(e.target.value);
       });
 
-      // Changement de paramètres sur l'assistant de tournée flexible (Écouteur unique sur le header)
-      const headerMonthSelect = document.getElementById("header-assistant-start-month");
-      if (headerMonthSelect) {
-        headerMonthSelect.addEventListener("change", (e) => {
+      // Changement du mois de début dans le panneau Configurer
+      const assistantMonthSelect = document.getElementById("assistant-start-month");
+      if (assistantMonthSelect) {
+        assistantMonthSelect.addEventListener("change", (e) => {
           state.tourneeStartMonth = e.target.value;
           // Ajuster l'input d'expiration du formulaire par commodité
           document.getElementById("form-expiry").value = e.target.value;
@@ -6530,10 +6543,10 @@
       const endDate = new Date(startDate);
       endDate.setMonth(endDate.getMonth() + duration - 1);
 
-      // Mettre à jour l'affichage du mois de début dans le panneau déplié
-      const displayTxt = document.getElementById("assistant-start-month-display-text");
-      if (displayTxt) {
-        displayTxt.textContent = `🗓️ ${formatMonthYearFrench(startDate)}`;
+      // Le mois affiché dans l'en-tête est un résumé non modifiable.
+      const headerMonthDisplay = document.getElementById("header-assistant-start-month-display");
+      if (headerMonthDisplay) {
+        headerMonthDisplay.textContent = formatMonthYearFrench(startDate);
       }
 
       document.getElementById("tournee-target-period").textContent = `${formatMonthYearFrench(startDate)} à ${formatMonthYearFrench(endDate)}`;
@@ -6541,10 +6554,27 @@
       // Expliquer le décalage opérationnel : retrait à M+1, étiquetage à partir de M+2.
       const monthlyGuidance = document.getElementById("tournee-monthly-guidance");
       if (monthlyGuidance) {
-        const currentMonthDate = new Date(state.currentDate || new Date());
+        const currentMonthDate = new Date();
         const removalMonthDate = new Date(currentMonthDate);
         removalMonthDate.setMonth(removalMonthDate.getMonth() + 1);
-        monthlyGuidance.textContent = `${formatMonthYearFrench(currentMonthDate)} : retirer les produits de ${formatMonthYearFrench(removalMonthDate)} • étiqueter ${formatMonthYearFrench(startDate)} → ${formatMonthYearFrench(endDate)}.`;
+
+        const createMonthLabel = (date, className) => {
+          const span = document.createElement("span");
+          span.className = `tournee-guidance-month ${className}`;
+          span.textContent = formatMonthYearFrench(date);
+          return span;
+        };
+
+        monthlyGuidance.replaceChildren(
+          createMonthLabel(currentMonthDate, "tournee-guidance-current"),
+          document.createTextNode(" : retirer les produits de "),
+          createMonthLabel(removalMonthDate, "tournee-guidance-removal"),
+          document.createTextNode(" • étiqueter "),
+          createMonthLabel(startDate, "tournee-guidance-labeling"),
+          document.createTextNode(" → "),
+          createMonthLabel(endDate, "tournee-guidance-labeling"),
+          document.createTextNode(".")
+        );
       }
 
       // Lister les collants à préparer
