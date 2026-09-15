@@ -1,0 +1,82 @@
+/* Shared paper layout for the annual and monthly reports. */
+@media print {
+    @page { size: landscape; margin: 10mm; }
+    :root, :root[data-theme="dark"] {
+        color-scheme: light;
+        --bg-color: #fff;
+        --card-bg: #fff;
+        --surface-muted: #f1f5f9;
+        --text-color: #172033;
+        --text-muted: #475569;
+        --border-color: #cbd5e1;
+        --border-strong: #94a3b8;
+        --primary-color: #0f766e;
+        --primary-light: #f0fdfa;
+        --navy-header-bg: #fff;
+        --navy-header-text: #172033;
+    }
+    html, body {
+        background: #fff !important;
+        color: #172033 !important;
+        font-size: 11px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        min-height: 0 !important;
+        height: auto !important;
+        overflow: visible !important;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+    }
+    * { box-shadow: none !important; text-shadow: none !important; transition: none !important; }
+    .header-actions, .nav-tabs-bar, .header-logo-icon, .search-box,
+    button, .modal-overlay, #moleculeSearchInput, .badge-interactive, .btn,
+    .generics-account-header a, #generics-user-email { display: none !important; }
+    .generics-account-header {
+        background: #fff !important;
+        color: #172033 !important;
+        padding: 0 0 5px !important;
+        margin: 0 0 6px !important;
+        border-bottom: 1px solid #cbd5e1;
+    }
+    .generics-account-header * { color: #172033 !important; }
+    .container { max-width: none !important; margin: 0 !important; padding: 0 !important; }
+    .app-header-container { position: static !important; margin: 0 0 8px !important; }
+    header { background: #fff !important; color: #172033 !important; padding: 0 !important; border: 0 !important; }
+    .header-title h1 { color: #172033 !important; font-size: 17px !important; }
+    .header-title p { color: #475569 !important; font-size: 10px !important; }
+    .card { background: #fff !important; border: 1px solid #cbd5e1 !important; border-radius: 5px !important; padding: 8px !important; }
+    .kpi-grid { display: grid !important; grid-template-columns: repeat(4, minmax(0, 1fr)) !important; gap: 8px !important; margin-bottom: 8px !important; }
+    .kpi-card { break-inside: avoid; }
+    .kpi-title, .kpi-sub { font-size: 10px !important; }
+    .kpi-value { font-size: 19px !important; }
+    .dashboard-grid { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8px !important; margin-bottom: 0 !important; break-after: page; }
+    .annual-report .dashboard-grid > :last-child { grid-column: span 2; }
+    .dashboard-grid > .card { break-inside: avoid; min-width: 0; }
+    .card h3 { font-size: 12px !important; margin-bottom: 3px !important; }
+    .card .subtitle { font-size: 10px !important; margin-bottom: 5px !important; }
+    .chart-container, .market-share-chart { position: relative !important; height: 165px !important; }
+    .chart-container canvas, .market-share-chart canvas { width: 100% !important; height: 100% !important; }
+    .market-share-layout { grid-template-columns: minmax(100px, 0.75fr) minmax(0, 1.25fr) !important; gap: 8px !important; }
+    .market-share-breakdown { gap: 3px !important; }
+    .market-share-row { font-size: 10px !important; padding: 3px 0 !important; }
+    .insights-section { margin: 0 0 12px !important; }
+    .insights-grid { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+    .insight-box, .insight-list > li, .detail-kpis, .detail-middle-grid { break-inside: avoid; }
+    .explore-grid { display: block !important; margin-top: 12px !important; }
+    .explore-sidebar, .explore-sidebar > .card, .explore-detail,
+    .companies-table-container, .molecules-table-container, .molecule-impact-box {
+        display: block !important; height: auto !important; max-height: none !important; overflow: visible !important;
+    }
+    .explore-sidebar { margin-bottom: 12px !important; }
+    .explore-detail { break-before: page; }
+    .detail-middle-grid { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+    .detail-kpis { margin: 10px 0 !important; }
+    .molecule-impact-box, .insight-box, select { background: #f8fafc !important; color: #172033 !important; }
+    table { width: 100% !important; font-size: 10px !important; }
+    thead { display: table-header-group; }
+    tr { break-inside: avoid; }
+    th { position: static !important; background: #f1f5f9 !important; color: #172033 !important; }
+    th, td { padding: 5px 6px !important; }
+    .molecules-table td { white-space: normal !important; overflow: visible !important; }
+    select { appearance: none; border: 0 !important; padding: 2px !important; }
+}

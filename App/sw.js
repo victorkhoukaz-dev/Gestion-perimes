@@ -1,4 +1,4 @@
-const CACHE_NAME = 'expires-lab-v57';
+const CACHE_NAME = 'expires-lab-v58';
 const ASSETS = [
   './index.html',
   './Application - périmés.html',
@@ -20,7 +20,7 @@ self.addEventListener('activate', (e) => {
       return Promise.all(
         keys.map((key) => {
           if (key !== CACHE_NAME) {
-            console.log('[Service Worker] Suppression de l'ancien cache:', key);
+            console.log("[Service Worker] Suppression de l'ancien cache:", key);
             return caches.delete(key);
           }
         })

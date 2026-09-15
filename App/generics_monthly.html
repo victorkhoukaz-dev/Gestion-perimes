@@ -988,156 +988,9 @@
         }
 
         /* Styles pour l'impression propre sur 2 pages en Paysage */
-        @media print {
-            @page {
-                size: landscape;
-                margin: 8mm;
-            }
-            html, body {
-                background: #0b0f19 !important;
-                color: #ffffff !important;
-                font-size: 10px !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                height: auto !important;
-                overflow: visible !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-            }
-            /* Masquer les commandes et les boutons non pertinents */
-            .header-actions, 
-            .search-box, 
-            button, 
-            #data-manager-btn, 
-            .modal-overlay, 
-            #moleculeSearchInput, 
-            #molecule-table-view-select,
-            .badge-interactive,
-            .btn {
-                display: none !important;
-            }
-            .container {
-                max-width: 100% !important;
-                padding: 0 !important;
-                margin: 0 !important;
-            }
-            .dashboard-header {
-                margin-bottom: 0.8rem !important;
-                padding-bottom: 0.4rem !important;
-            }
-            .dashboard-header h1 {
-                font-size: 1.4rem !important;
-            }
-            /* KPI Grid : 4 colonnes en paysage */
-            .kpi-grid {
-                display: grid !important;
-                grid-template-columns: repeat(4, 1fr) !important;
-                gap: 0.6rem !important;
-                margin-bottom: 0.8rem !important;
-            }
-            .kpi-card {
-                padding: 0.6rem !important;
-                background: rgba(17, 24, 39, 0.7) !important;
-                border: 1px solid rgba(255, 255, 255, 0.1) !important;
-                page-break-inside: avoid;
-                break-inside: avoid;
-            }
-            .kpi-card .kpi-value {
-                font-size: 1.3rem !important;
-            }
-            .kpi-card .kpi-label {
-                font-size: 0.7rem !important;
-            }
-            /* Grille des graphiques généraux : 2 colonnes x 2 lignes */
-            .dashboard-grid {
-                display: grid !important;
-                grid-template-columns: 1fr 1fr !important;
-                gap: 0.8rem !important;
-                margin-bottom: 1rem !important;
-                page-break-after: always; /* Force la coupure de page propre après les 4 graphiques principaux */
-                break-after: page;
-            }
-            .card {
-                background: rgba(17, 24, 39, 0.7) !important;
-                border: 1px solid rgba(255, 255, 255, 0.1) !important;
-                padding: 0.6rem !important;
-                page-break-inside: avoid;
-                break-inside: avoid;
-            }
-            .card h3 {
-                font-size: 0.85rem !important;
-                margin-bottom: 0.2rem !important;
-            }
-            .card .subtitle {
-                font-size: 0.7rem !important;
-                margin-bottom: 0.4rem !important;
-            }
-            .chart-container {
-                height: 180px !important;
-                position: relative !important;
-            }
-            /* Page 2: Insights et Explore Grid */
-            .insights-section {
-                margin-top: 1rem !important;
-                margin-bottom: 1.5rem !important;
-                page-break-inside: avoid;
-                break-inside: avoid;
-            }
-            .insights-grid {
-                display: grid !important;
-                grid-template-columns: 1fr 1fr !important;
-                gap: 0.8rem !important;
-            }
-            .explore-grid {
-                display: grid !important;
-                grid-template-columns: 260px 1fr !important;
-                gap: 0.8rem !important;
-                margin-top: 1rem !important;
-                page-break-inside: avoid;
-                break-inside: avoid;
-            }
-            .companies-list-container {
-                max-height: 380px !important;
-                height: auto !important;
-            }
-            .companies-list {
-                max-height: 340px !important;
-                overflow: hidden !important;
-            }
-            .company-item {
-                padding: 0.25rem 0.4rem !important;
-            }
-            .detail-company-container {
-                height: auto !important;
-            }
-            .detail-middle-grid {
-                display: grid !important;
-                grid-template-columns: 1.2fr 1fr !important;
-                gap: 0.6rem !important;
-                margin-bottom: 0.8rem !important;
-            }
-            .detail-chart-container {
-                height: 160px !important;
-                position: relative !important;
-            }
-            .molecule-impact-box {
-                height: auto !important;
-                padding: 0.6rem !important;
-            }
-            .molecules-table-container {
-                max-height: 220px !important;
-                overflow: hidden !important;
-            }
-            .molecules-table th, .molecules-table td {
-                padding: 0.3rem 0.4rem !important;
-                font-size: 0.75rem !important;
-            }
-            .insight-badge {
-                font-size: 0.65rem !important;
-                padding: 0.1rem 0.25rem !important;
-            }
-        }
     </style>
+    <link rel="stylesheet" href="generics-print.css">
+    <script src="generics-print.js" defer></script>
 <script src="supabase.js"></script>
 <script>
   const SUPABASE_URL = "https://hhmwlzaeipyrowwjlbbj.supabase.co";
@@ -1301,9 +1154,9 @@
   })();
 </script>
 </head>
-<body>
+<body class="monthly-report">
 
-  <div style="background: linear-gradient(135deg, #0f766e 0%, #115e59 100%); padding: 16px 24px; color: white; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; box-shadow: 0 4px 12px rgba(15,118,110,0.15); margin-bottom: 20px;">
+  <div class="generics-account-header" style="background: linear-gradient(135deg, #0f766e 0%, #115e59 100%); padding: 16px 24px; color: white; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; box-shadow: 0 4px 12px rgba(15,118,110,0.15); margin-bottom: 20px;">
     <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
       <a href="index.html" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); color: white; text-decoration: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 8px;">
         <span>🏠</span> Retour à PharmaOps
