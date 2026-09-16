@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Achats par molécule | PharmaOps</title>
+    <link rel="stylesheet" href="generics-molecules.css">
+    <script src="supabase.js" defer></script>
+    <script src="generics-molecule-data.js" defer></script>
+    <script src="generics-connection.js" defer></script>
+    <script src="generics-molecules.js" defer></script>
+</head>
+<body>
+    <div class="account-bar"><a href="index.html">Retour à PharmaOps</a><strong>PharmaOps</strong><span id="pharmacy-name"></span></div>
+    <main>
+        <header class="page-header">
+            <div><p class="eyebrow">ACHATS GÉNÉRIQUES / 2026</p><h1>Achats par molécule</h1><p>Comparez vos achats chez chaque fabricant, mois par mois.</p></div>
+        </header>
+        <nav aria-label="Generic purchase views">
+            <a href="generics_annual.html">Analyse annuelle</a>
+            <a href="generics_monthly.html">Suivi par fabricant</a>
+            <a href="generics_molecules.html" aria-current="page">Par molécule</a>
+        </nav>
+        <div id="load-status" class="notice" role="status">Chargement des achats de votre pharmacie…</div>
+        <button id="retry-load" type="button" hidden>Réessayer</button>
+        <section id="workspace" hidden>
+            <section class="card controls" aria-label="Choisir une molécule et une période">
+                <div class="molecule-control"><label for="molecule-search">Rechercher une molécule</label><div class="autocomplete"><input id="molecule-search" type="search" placeholder="Tapez le nom d'une molécule" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="molecule-results"><ul id="molecule-results" role="listbox" hidden></ul></div><small id="search-count" aria-live="polite"></small></div>
+                <div><label for="start-month">De</label><select id="start-month"></select></div>
+                <div><label for="end-month">À</label><select id="end-month"></select></div>
+            </section>
+            <div class="coverage-section"><div class="section-line"><h2>Couverture des données mensuelles</h2><a href="generics_monthly.html#import">Gérer les importations</a></div><div id="coverage" class="coverage" aria-label="Statut des importations par mois"></div><p id="coverage-note" class="muted"></p></div>
+            <section id="visual-comparison" class="card visual-comparison" hidden aria-labelledby="visual-title">
+                <div class="section-line"><div><p class="eyebrow">APERÇU VISUEL</p><h2 id="visual-title">Répartition mensuelle des achats</h2></div><p id="visual-subtitle" class="muted"></p></div>
+                <div id="chart-legend" class="chart-legend" aria-label="Légende du graphique"></div>
+                <div id="comparison-chart" class="comparison-chart" role="img" aria-label="Graphique de répartition mensuelle des achats par fabricant"></div>
+                <p class="chart-note">Le graphique montre la répartition des montants nets positifs. Les retours et ajustements négatifs restent inclus dans le résumé et le tableau détaillé.</p>
+                <h3 class="summary-title">Résumé mois par mois</h3>
+                <div id="monthly-summary" class="monthly-summary" aria-live="polite"></div>
+            </section>
+            <section class="card results" aria-labelledby="molecule-title">
+                <div class="result-heading"><div><p class="eyebrow">MOLÉCULE SÉLECTIONNÉE</p><h2 id="molecule-title">Choisissez une molécule</h2><p class="muted">Toutes les forces, formulations et tailles de formats sont combinées.</p></div><div class="total"><span id="total-label">Achats nets enregistrés</span><strong id="period-total">—</strong><small id="period-label"></small></div></div>
+                <p id="unnamed-note" class="notice" hidden>Ces enregistrements ne comportent pas de nom de molécule. Ils restent séparés et ne sont attribués à aucune autre molécule.</p>
+                <p id="selection-status" class="muted" role="status"></p>
+                <div class="table-scroll" tabindex="0" role="region" aria-label="Tableau des achats mensuels"><table id="purchase-table"><caption class="sr-only">Achats nets par fabricant et par mois, en dollars canadiens</caption><thead></thead><tbody></tbody><tfoot></tfoot></table></div>
+                <p class="table-note">Les montants sont des achats nets auprès du grossiste Jean Coutu, en dollars canadiens. Les montants négatifs incluent les retours ou ajustements et restent inclus dans les totaux.</p>
+                <p id="unknown-note" class="table-note" hidden>† Un montant est enregistré, mais le statut d’importation du mois est inconnu. « Inconnu » n’est pas un zéro confirmé. Les sous-totaux pourraient être incomplets.</p>
+            </section>
+        </section>
+    </main>
+</body>
+</html>

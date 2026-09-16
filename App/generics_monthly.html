@@ -279,6 +279,17 @@
             font-weight: 700;
         }
 
+        @media (max-width: 650px) {
+            .nav-tab-item {
+                min-width: 0;
+                padding: 8px 5px;
+                gap: 0;
+                font-size: 0.72rem;
+                text-align: center;
+            }
+            .nav-tab-item svg { display: none; }
+        }
+
         /* CARDS & KPI METRICS */
         .card {
             background-color: var(--card-bg);
@@ -991,6 +1002,7 @@
     </style>
     <link rel="stylesheet" href="generics-print.css">
     <script src="generics-print.js" defer></script>
+<script src="generics-molecule-data.js"></script>
 <script src="supabase.js"></script>
 <script>
   const SUPABASE_URL = "https://hhmwlzaeipyrowwjlbbj.supabase.co";
@@ -1005,7 +1017,8 @@
       totals: { "2022": 0, "2023": 0, "2024": 0, "2025": 0, "2026": 0 },
       years: [2022, 2023, 2024, 2025, 2026],
       manufacturers: [],
-      monthly_2026: {}
+      monthly_2026: {},
+      monthlyImportCoverage: { version: 1, year: 2026, baseline: "empty", months: {} }
     };
   };
 
@@ -1209,6 +1222,7 @@
                 <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                 Suivi Mensuel 2026
             </a>
+            <a href="generics_molecules.html" class="nav-tab-item">By molecule</a>
         </div>
 
         <!-- KPI Grid -->
@@ -2680,6 +2694,9 @@
                     }
                 }
             });
+            for (let m = 1; m <= 12; m++) {
+                if (GenericsMoleculeData.coverage(rawData, m) === 'imported') maxMonth = Math.max(maxMonth, m);
+            }
             N_MONTHS = maxMonth;
             monthNames = fullMonthNames.slice(0, N_MONTHS);
             
@@ -2765,6 +2782,7 @@
             Array.from(files).forEach(file => {
                 const reader = new FileReader();
                 reader.onload = function(e) {
+                    let previousRawData = null;
                     try {
                         const data = new Uint8Array(e.target.result);
                         const workbook = XLSX.read(data, {type: 'array'});
@@ -2818,7 +2836,7 @@
                             }
                             if (periodColIdx !== -1 && row[periodColIdx]) {
                                 const pVal = parseInt(row[periodColIdx]);
-                                if (pVal === 12) {
+                                if (pVal === 12 && fileYear && fileYear !== 2026) {
                                     isAnnual = true;
                                 } else if (pVal >= 1 && pVal <= 12) {
                                     fileMonth = pVal;
@@ -2865,6 +2883,16 @@
                         if (valColIdx === -1) {
                             throw new Error("Colonne de montant des ventes introuvable.");
                         }
+
+                        if (!isAnnual) {
+                            if (periodValColIdx === -1) throw new Error('A monthly amount column is required; annual totals cannot verify a month.');
+                            GenericsMoleculeData.validateMonthlyRows(rows, {
+                                company: manColIdx, molecule: molColIdx, amount: valColIdx,
+                                year: yearColIdx, month: periodColIdx
+                            }, fileYear, fileMonth);
+                        }
+                        previousRawData = rawData;
+                        rawData = JSON.parse(JSON.stringify(rawData));
 
                         // Clear existing data for the detected year/month to avoid accumulation if file is re-imported
                         if (isAnnual && fileYear) {
@@ -2944,12 +2972,16 @@
                             rowsParsed++;
                         }
 
+                        if (!isAnnual) {
+                            GenericsMoleculeData.markImported(rawData, fileMonth, file.name, rowsParsed, previousRawData);
+                        }
                         totalRowsParsed += rowsParsed;
                         successCount++;
                         
                         let labelText = isAnnual ? `Annuel ${fileYear || ''}` : `Mensuel ${fullMonthNames[(fileMonth || 1) - 1]} 2026`;
                         importStatus.innerHTML += `<div style="color: var(--accent-success); margin-top: 0.25rem;">✔ ${file.name} traité avec succès (${labelText}, ${rowsParsed} lignes).</div>`;
                     } catch (err) {
+                        if (previousRawData) rawData = previousRawData;
                         console.error(err);
                         importStatus.innerHTML += `<div style="color: var(--accent-danger); margin-top: 0.25rem;">✘ ${file.name} : ${err.message}</div>`;
                     } finally {
@@ -2965,6 +2997,8 @@
                 reader.readAsArrayBuffer(file);
             });
         }
+
+        if (window.location.hash === '#import') document.getElementById('importDataBtn').click();
 
         // Action Buttons Logic
         document.getElementById('resetDataBtn').addEventListener('click', () => {
