@@ -2778,8 +2778,10 @@
             let processedFiles = 0;
             let totalRowsParsed = 0;
             let successCount = 0;
+            const importFiles = Array.from(files);
 
-            Array.from(files).forEach(file => {
+            function processNext(index) {
+                const file = importFiles[index];
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     let previousRawData = null;
@@ -2801,6 +2803,13 @@
                         let annualValColIdx = -1;
                         let yearColIdx = -1;
                         let periodColIdx = -1;
+                        let dinColIdx = -1;
+                        let productColIdx = -1;
+                        let productDescriptionColIdx = -1;
+                        let strengthColIdx = -1;
+                        let formColIdx = -1;
+                        let formatColIdx = -1;
+                        let packagingColIdx = -1;
 
                         for (let c = 0; c < headers.length; c++) {
                             const h = String(headers[c] || '').toLowerCase().trim();
@@ -2808,6 +2817,20 @@
                                 manColIdx = c;
                             } else if (h === "générique" || h === "generique" || h === "molécule" || h === "molecule") {
                                 molColIdx = c;
+                            } else if (h === "no din" || h === "n° din" || h === "din") {
+                                dinColIdx = c;
+                            } else if (h === "no produit" || h === "n° produit" || h === "produit") {
+                                productColIdx = c;
+                            } else if (h === "description") {
+                                productDescriptionColIdx = c;
+                            } else if (h === "force") {
+                                strengthColIdx = c;
+                            } else if (h === "forme") {
+                                formColIdx = c;
+                            } else if (h === "format") {
+                                formatColIdx = c;
+                            } else if (h === "emballage") {
+                                packagingColIdx = c;
                             } else if (h.includes("ventes nets p") || h.includes("ventes nets periode") || h.includes("ventes periode valeur") || h.includes("période valeurs")) {
                                 periodValColIdx = c;
                             } else if (h.includes("ventes nets a") || h.includes("ventes nets annuelle") || h.includes("ventes annuelle valeur") || h.includes("annuelles valeurs")) {
@@ -2917,6 +2940,12 @@
                                         mol.monthlySales[mStr] = 0.0;
                                         mol.monthlySales[fileMonth] = 0.0;
                                     }
+                                    (mol.productDetails || []).forEach(detail => {
+                                        if (detail.monthlySales) {
+                                            detail.monthlySales[mStr] = 0.0;
+                                            detail.monthlySales[fileMonth] = 0.0;
+                                        }
+                                    });
                                 });
                             });
                         }
@@ -2951,7 +2980,8 @@
                                 molObj = {
                                     name: molName,
                                     sales: { "2022": 0.0, "2023": 0.0, "2024": 0.0, "2025": 0.0 },
-                                    monthlySales: { "1": 0.0, "2": 0.0, "3": 0.0, "4": 0.0, "5": 0.0, "6": 0.0, "7": 0.0, "8": 0.0, "9": 0.0, "10": 0.0, "11": 0.0, "12": 0.0 }
+                                    monthlySales: { "1": 0.0, "2": 0.0, "3": 0.0, "4": 0.0, "5": 0.0, "6": 0.0, "7": 0.0, "8": 0.0, "9": 0.0, "10": 0.0, "11": 0.0, "12": 0.0 },
+                                    productDetails: []
                                 };
                                 compObj.molecules.push(molObj);
                             }
@@ -2968,6 +2998,22 @@
                                 const mStr = String(fileMonth);
                                 compObj.monthlySales[mStr] = (compObj.monthlySales[mStr] || 0) + val;
                                 molObj.monthlySales[mStr] = (molObj.monthlySales[mStr] || 0) + val;
+                                if (!Array.isArray(molObj.productDetails)) molObj.productDetails = [];
+                                const detail = GenericsMoleculeData.presentationMetadata({
+                                    din: dinColIdx >= 0 ? row[dinColIdx] : '',
+                                    productCode: productColIdx >= 0 ? row[productColIdx] : '',
+                                    description: productDescriptionColIdx >= 0 ? row[productDescriptionColIdx] : '',
+                                    strength: strengthColIdx >= 0 ? row[strengthColIdx] : '',
+                                    form: formColIdx >= 0 ? row[formColIdx] : '',
+                                    format: formatColIdx >= 0 ? row[formatColIdx] : '',
+                                    packaging: packagingColIdx >= 0 ? row[packagingColIdx] : ''
+                                });
+                                let detailObj = molObj.productDetails.find(item => item.productKey === detail.productKey);
+                                if (!detailObj) {
+                                    detailObj = { ...detail, monthlySales: { "1": 0.0, "2": 0.0, "3": 0.0, "4": 0.0, "5": 0.0, "6": 0.0, "7": 0.0, "8": 0.0, "9": 0.0, "10": 0.0, "11": 0.0, "12": 0.0 } };
+                                    molObj.productDetails.push(detailObj);
+                                }
+                                detailObj.monthlySales[mStr] = (detailObj.monthlySales[mStr] || 0) + val;
                             }
                             rowsParsed++;
                         }
@@ -2991,11 +3037,14 @@
                                 saveAndRefreshDashboard();
                                 importStatus.innerHTML += `<div style="font-weight: 600; color: var(--text-primary); margin-top: 0.5rem;">Importation terminée. ${successCount}/${files.length} fichiers chargés (${totalRowsParsed} lignes de ventes).</div>`;
                             }
+                        } else {
+                            processNext(index + 1);
                         }
                     }
                 };
                 reader.readAsArrayBuffer(file);
-            });
+            }
+            if (importFiles.length) processNext(0);
         }
 
         if (window.location.hash === '#import') document.getElementById('importDataBtn').click();

@@ -8,6 +8,24 @@
         if (!Number.isFinite(amount)) throw new Error('Un montant d’achat est invalide.');
         return Math.round(amount * 100);
     };
+    function presentationMetadata(detail = {}) {
+        const text = value => String(value ?? '').trim().replace(/\s+/g, ' ');
+        const din = text(detail.din);
+        const productCode = text(detail.productCode);
+        const description = text(detail.description);
+        const strength = text(detail.strength);
+        const form = text(detail.form);
+        const format = text(detail.format);
+        const packaging = text(detail.packaging);
+        const presentationKey = `${key(strength) || 'non-precisee'}|${key(form) || 'non-precisee'}`;
+        const presentationLabel = `${strength || 'Force non précisée'} · ${form || 'Forme non précisée'}`;
+        const productKey = din
+            ? `din:${key(din)}`
+            : productCode
+                ? `produit:${key(productCode)}`
+                : `description:${key([description, strength, form, format, packaging].join('|'))}`;
+        return { din, productCode, description, strength, form, format, packaging, presentationKey, presentationLabel, productKey };
+    }
     function coverage(data, month) {
         const record = data.monthlyImportCoverage;
         if (record?.version === 1 && record.year === YEAR) {
@@ -59,7 +77,8 @@
                 if (!molecules.has(moleculeKey)) molecules.set(moleculeKey, {
                     key: moleculeKey,
                     name: String(molecule.name || '').trim() || 'Molécule non attribuée',
-                    companies: new Map()
+                    companies: new Map(),
+                    presentations: new Map()
                 });
                 const item = molecules.get(moleculeKey);
                 if (!item.companies.has(companyKey)) item.companies.set(companyKey, {
@@ -69,6 +88,23 @@
                 const company = item.companies.get(companyKey);
                 for (let month = 1; month <= 12; month++) {
                     company.amounts[month] += cents(molecule.monthlySales?.[month]);
+                }
+                for (const detail of molecule.productDetails || []) {
+                    const metadata = presentationMetadata(detail);
+                    if (!item.presentations.has(metadata.presentationKey)) item.presentations.set(metadata.presentationKey, {
+                        key: metadata.presentationKey,
+                        label: detail.presentationLabel || metadata.presentationLabel,
+                        companies: new Map()
+                    });
+                    const presentation = item.presentations.get(metadata.presentationKey);
+                    if (!presentation.companies.has(companyKey)) presentation.companies.set(companyKey, {
+                        name: String(manufacturer.name || '').trim() || 'Fabricant non attribué',
+                        amounts: Array(13).fill(0)
+                    });
+                    const presentationCompany = presentation.companies.get(companyKey);
+                    for (let month = 1; month <= 12; month++) {
+                        presentationCompany.amounts[month] += cents(detail.monthlySales?.[month]);
+                    }
                 }
             }
         }
@@ -82,7 +118,7 @@
         }
         return latest;
     }
-    const api = { YEAR, key, cents, coverage, markImported, validateMonthlyRows, buildIndex, latestMonth };
+    const api = { YEAR, key, cents, coverage, markImported, validateMonthlyRows, presentationMetadata, buildIndex, latestMonth };
     if (typeof module !== 'undefined' && module.exports) module.exports = api;
     if (typeof window !== 'undefined') window.GenericsMoleculeData = api;
 })();

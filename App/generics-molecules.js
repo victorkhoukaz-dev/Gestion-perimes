@@ -3,7 +3,7 @@
     const months = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
     const money = value => new Intl.NumberFormat('fr-CA', { style: 'currency', currency: 'CAD' }).format(value / 100);
     const $ = id => document.getElementById(id);
-    let data = null, index = [], selected = null, activeSuggestionIndex = -1;
+    let data = null, index = [], selected = null, selectedPresentationKey = 'all', activeSuggestionIndex = -1;
     const client = window.supabase && window.GENERICS_CONNECTION
         ? window.supabase.createClient(window.GENERICS_CONNECTION.url, window.GENERICS_CONNECTION.key)
         : null;
@@ -27,12 +27,39 @@
     });
     function chooseMolecule(item) {
         selected = item;
+        selectedPresentationKey = 'all';
         $('molecule-search').value = item.name;
         $('molecule-results').hidden = true;
         $('molecule-search').setAttribute('aria-expanded', 'false');
         $('search-count').textContent = 'Molécule sélectionnée.';
         render();
     }
+    function populatePresentationControl() {
+        const control = $('presentation-control');
+        const select = $('presentation-select');
+        select.replaceChildren();
+        if (!selected) {
+            control.hidden = true;
+            return;
+        }
+        const presentations = [...selected.presentations.values()].sort((a, b) => a.label.localeCompare(b.label));
+        control.hidden = false;
+        select.add(new Option('Toutes les forces et formulations', 'all'));
+        presentations.forEach(presentation => select.add(new Option(presentation.label, presentation.key)));
+        if (!presentations.length) {
+            select.disabled = true;
+            $('presentation-note').textContent = 'Les détails par force et formulation ne sont pas disponibles dans les données déjà enregistrées. Réimportez les fichiers mensuels pour les ajouter.';
+        } else {
+            select.disabled = false;
+            if (!presentations.some(presentation => presentation.key === selectedPresentationKey)) selectedPresentationKey = 'all';
+            $('presentation-note').textContent = 'Choisissez une présentation pour comparer les fabricants à force et formulation égales.';
+        }
+        select.value = selectedPresentationKey;
+    }
+    $('presentation-select').addEventListener('change', () => {
+        selectedPresentationKey = $('presentation-select').value;
+        render();
+    });
     function filterMolecules() {
         const query = M.key($('molecule-search').value);
         const matches = query ? index.filter(item => M.key(item.name).includes(query)).slice(0, 12) : [];
@@ -55,7 +82,10 @@
         $('search-count').textContent = query
             ? (hasMatches ? `${matches.length}${index.filter(item => M.key(item.name).includes(query)).length > matches.length ? ' premiers résultats affichés' : ' résultat(s)'}.` : 'Aucune molécule trouvée.')
             : `${index.length} molécules disponibles. Commencez à taper un nom.`;
-        if (selected && !matches.some(item => item.key === selected.key) && M.key(selected.name) !== query) selected = null;
+        if (selected && !matches.some(item => item.key === selected.key) && M.key(selected.name) !== query) {
+            selected = null;
+            selectedPresentationKey = 'all';
+        }
         render();
     }
     $('molecule-search').addEventListener('input', filterMolecules);
@@ -102,6 +132,10 @@
                 amounts: Array.from({ length: 13 }, (_, month) => remaining.reduce((sum, company) => sum + Math.max(0, company.amounts[month]), 0))
             });
         }
+        const selectedPresentation = selectedPresentationKey === 'all' ? null : selected.presentations.get(selectedPresentationKey);
+        $('visual-title').textContent = selectedPresentation
+            ? `Répartition mensuelle — ${selectedPresentation.label}`
+            : 'Répartition mensuelle des achats';
         $('visual-subtitle').textContent = remaining.length
             ? 'Les cinq principaux fabricants sont affichés séparément; les autres sont regroupés.'
             : 'Chaque fabricant est affiché séparément.';
@@ -119,7 +153,7 @@
         const maximum = Math.max(1, ...Object.values(positiveByMonth));
         const chart = $('comparison-chart');
         chart.replaceChildren();
-        chart.setAttribute('aria-label', `Répartition mensuelle des achats de ${selected.name} par fabricant`);
+        chart.setAttribute('aria-label', `Répartition mensuelle des achats de ${selected.name}${selectedPresentation ? `, ${selectedPresentation.label}` : ''} par fabricant`);
         for (const month of range) {
             const state = M.coverage(data, month);
             const column = element('div', '', 'chart-column');
@@ -184,7 +218,14 @@
         $('coverage-note').textContent = legacy
             ? 'Les données enregistrées avant cette fonction n’ont pas d’historique d’importation. Réimportez les fichiers mensuels pour confirmer les mois. Les montants existants restent visibles.'
             : 'Un mois importé peut afficher 0,00 $. Les mois sans importation sont identifiés comme « Non importé ». ';
-        $('molecule-title').textContent = selected?.name || 'Choisissez une molécule';
+        populatePresentationControl();
+        const selectedPresentation = selected && selectedPresentationKey !== 'all'
+            ? selected.presentations.get(selectedPresentationKey)
+            : null;
+        $('molecule-title').textContent = selectedPresentation ? `${selected.name} — ${selectedPresentation.label}` : (selected?.name || 'Choisissez une molécule');
+        $('detail-description').textContent = selectedPresentation
+            ? 'Comparaison limitée à cette force et cette formulation. Les différents DIN et formats de cette présentation sont regroupés.'
+            : 'Toutes les forces, formulations et tailles de formats sont combinées.';
         $('unnamed-note').hidden = !selected || selected.key !== '';
         $('unknown-note').hidden = !range.some(m => M.coverage(data, m) === 'unknown');
         $('total-label').textContent = complete ? 'Achats nets' : 'Sous-total enregistré';
@@ -202,7 +243,8 @@
         const columnNames = ['Fabricant', ...range.map(m => months[m - 1]), complete ? 'Total' : 'Sous-total enregistré'];
         columnNames.forEach(name => { const th = element('th', name); th.scope = 'col'; heading.append(th); });
         table.tHead.append(heading);
-        const companies = [...selected.companies.values()].sort((a, b) =>
+        const analysis = selectedPresentation || selected;
+        const companies = [...analysis.companies.values()].sort((a, b) =>
             range.reduce((sum, m) => sum + b.amounts[m] - a.amounts[m], 0) || a.name.localeCompare(b.name));
         const totals = Array(13).fill(0);
         const hasAmount = company => range.some(m => M.coverage(data, m) === 'imported' || (M.coverage(data, m) === 'unknown' && company.amounts[m] !== 0));
@@ -226,7 +268,8 @@
         footer.append(element('td', available ? money(total) : '—', total < 0 ? 'negative' : ''));
         table.tFoot.append(footer);
         $('period-total').textContent = available ? money(total) : '—';
-        $('selection-status').textContent = `${companies.length} ${companies.length === 1 ? 'fabricant avec des données' : 'fabricants avec des données'} pour cette molécule. ${complete ? 'Tous les mois sélectionnés sont importés.' : 'Certains mois sont non confirmés ou non importés; le sous-total ne représente pas toute la période.'}`;
+        const scope = selectedPresentation ? ` pour ${selectedPresentation.label}` : ' pour cette molécule';
+        $('selection-status').textContent = `${companies.length} ${companies.length === 1 ? 'fabricant avec des données' : 'fabricants avec des données'}${scope}. ${complete ? 'Tous les mois sélectionnés sont importés.' : 'Certains mois sont non confirmés ou non importés; le sous-total ne représente pas toute la période.'}`;
         renderVisualComparison(range, companies);
     }
     async function load() {
@@ -234,7 +277,7 @@
         $('load-status').hidden = false;
         $('load-status').textContent = "Chargement des achats de votre pharmacie…";
         $('retry-load').hidden = true;
-        data = null; index = []; selected = null;
+        data = null; index = []; selected = null; selectedPresentationKey = 'all';
         try {
             if (!client) throw new Error('La connexion n’a pas pu être établie. Vérifiez votre connexion et réessayez.');
             const { data: auth, error: authError } = await client.auth.getUser();
@@ -268,7 +311,7 @@
     $('retry-load').addEventListener('click', load);
     client?.auth.onAuthStateChange(event => {
         if (event === 'SIGNED_OUT' || event === 'USER_UPDATED') {
-            data = null; index = []; selected = null;
+            data = null; index = []; selected = null; selectedPresentationKey = 'all';
             $('workspace').hidden = true;
             $('purchase-table').tBodies[0].replaceChildren();
             $('load-status').hidden = false;

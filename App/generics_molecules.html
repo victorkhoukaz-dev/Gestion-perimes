@@ -28,6 +28,7 @@
                 <div class="molecule-control"><label for="molecule-search">Rechercher une molécule</label><div class="autocomplete"><input id="molecule-search" type="search" placeholder="Tapez le nom d'une molécule" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="molecule-results"><ul id="molecule-results" role="listbox" hidden></ul></div><small id="search-count" aria-live="polite"></small></div>
                 <div><label for="start-month">De</label><select id="start-month"></select></div>
                 <div><label for="end-month">À</label><select id="end-month"></select></div>
+                <div id="presentation-control" class="presentation-control" hidden><label for="presentation-select">Présentation à comparer</label><select id="presentation-select"></select><small id="presentation-note"></small></div>
             </section>
             <div class="coverage-section"><div class="section-line"><h2>Couverture des données mensuelles</h2><a href="generics_monthly.html#import">Gérer les importations</a></div><div id="coverage" class="coverage" aria-label="Statut des importations par mois"></div><p id="coverage-note" class="muted"></p></div>
             <section id="visual-comparison" class="card visual-comparison" hidden aria-labelledby="visual-title">
@@ -39,7 +40,7 @@
                 <div id="monthly-summary" class="monthly-summary" aria-live="polite"></div>
             </section>
             <section class="card results" aria-labelledby="molecule-title">
-                <div class="result-heading"><div><p class="eyebrow">MOLÉCULE SÉLECTIONNÉE</p><h2 id="molecule-title">Choisissez une molécule</h2><p class="muted">Toutes les forces, formulations et tailles de formats sont combinées.</p></div><div class="total"><span id="total-label">Achats nets enregistrés</span><strong id="period-total">—</strong><small id="period-label"></small></div></div>
+                <div class="result-heading"><div><p class="eyebrow">MOLÉCULE SÉLECTIONNÉE</p><h2 id="molecule-title">Choisissez une molécule</h2><p id="detail-description" class="muted">Toutes les forces, formulations et tailles de formats sont combinées.</p></div><div class="total"><span id="total-label">Achats nets enregistrés</span><strong id="period-total">—</strong><small id="period-label"></small></div></div>
                 <p id="unnamed-note" class="notice" hidden>Ces enregistrements ne comportent pas de nom de molécule. Ils restent séparés et ne sont attribués à aucune autre molécule.</p>
                 <p id="selection-status" class="muted" role="status"></p>
                 <div class="table-scroll" tabindex="0" role="region" aria-label="Tableau des achats mensuels"><table id="purchase-table"><caption class="sr-only">Achats nets par fabricant et par mois, en dollars canadiens</caption><thead></thead><tbody></tbody><tfoot></tfoot></table></div>
