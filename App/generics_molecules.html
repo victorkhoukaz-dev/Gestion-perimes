@@ -28,7 +28,7 @@
                 <div class="molecule-control"><label for="molecule-search">Rechercher une molécule</label><div class="autocomplete"><input id="molecule-search" type="search" placeholder="Tapez le nom d'une molécule" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="molecule-results"><ul id="molecule-results" role="listbox" hidden></ul></div><small id="search-count" aria-live="polite"></small></div>
                 <div><label for="start-month">De</label><select id="start-month"></select></div>
                 <div><label for="end-month">À</label><select id="end-month"></select></div>
-                <div id="presentation-control" class="presentation-control" hidden><label for="presentation-select">Présentation à comparer</label><select id="presentation-select"></select><small id="presentation-note"></small></div>
+                <div id="presentation-control" class="presentation-control" hidden><div class="presentation-actions"><select id="presentation-select" aria-label="Présentation à consulter"></select><button id="compare-presentations" type="button" hidden aria-pressed="false"><span aria-hidden="true">⇄</span> Comparer les doses</button></div><small id="presentation-note"></small></div>
             </section>
             <div class="coverage-section"><div class="section-line"><h2>Couverture des données mensuelles</h2><a href="generics_monthly.html#import">Gérer les importations</a></div><div id="coverage" class="coverage" aria-label="Statut des importations par mois"></div><p id="coverage-note" class="muted"></p></div>
             <section id="visual-comparison" class="card visual-comparison" hidden aria-labelledby="visual-title">
@@ -39,12 +39,18 @@
                 <h3 class="summary-title">Résumé mois par mois</h3>
                 <div id="monthly-summary" class="monthly-summary" aria-live="polite"></div>
             </section>
+            <section id="presentation-comparison" class="card presentation-comparison" hidden aria-labelledby="presentation-comparison-title">
+                <div class="section-line"><div><p class="eyebrow">COMPARAISON DES DOSES</p><h2 id="presentation-comparison-title">Fabricants par force et formulation</h2></div><p id="presentation-comparison-subtitle" class="muted"></p></div>
+                <div id="presentation-legend" class="chart-legend" aria-label="Légende des fabricants"></div>
+                <div id="presentation-bars" class="presentation-bars" role="img" aria-label="Comparaison des achats par force, formulation et fabricant"></div>
+                <p class="chart-note">La longueur de chaque barre représente le montant net de la présentation. Les couleurs montrent la part de chaque fabricant. Les montants nets négatifs restent inclus dans le total affiché.</p>
+            </section>
             <section class="card results" aria-labelledby="molecule-title">
                 <div class="result-heading"><div><p class="eyebrow">MOLÉCULE SÉLECTIONNÉE</p><h2 id="molecule-title">Choisissez une molécule</h2><p id="detail-description" class="muted">Toutes les forces, formulations et tailles de formats sont combinées.</p></div><div class="total"><span id="total-label">Achats nets enregistrés</span><strong id="period-total">—</strong><small id="period-label"></small></div></div>
                 <p id="unnamed-note" class="notice" hidden>Ces enregistrements ne comportent pas de nom de molécule. Ils restent séparés et ne sont attribués à aucune autre molécule.</p>
                 <p id="selection-status" class="muted" role="status"></p>
-                <div class="table-scroll" tabindex="0" role="region" aria-label="Tableau des achats mensuels"><table id="purchase-table"><caption class="sr-only">Achats nets par fabricant et par mois, en dollars canadiens</caption><thead></thead><tbody></tbody><tfoot></tfoot></table></div>
-                <p class="table-note">Les montants sont des achats nets auprès du grossiste Jean Coutu, en dollars canadiens. Les montants négatifs incluent les retours ou ajustements et restent inclus dans les totaux.</p>
+                <div id="table-region" class="table-scroll" tabindex="0" role="region" aria-label="Tableau des achats mensuels"><table id="purchase-table"><caption class="sr-only">Achats nets par fabricant et par mois, en dollars canadiens</caption><thead></thead><tbody></tbody><tfoot></tfoot></table></div>
+                <p id="table-note" class="table-note">Les montants sont des achats nets auprès du grossiste Jean Coutu, en dollars canadiens. Les montants négatifs incluent les retours ou ajustements et restent inclus dans les totaux.</p>
                 <p id="unknown-note" class="table-note" hidden>† Un montant est enregistré, mais le statut d’importation du mois est inconnu. « Inconnu » n’est pas un zéro confirmé. Les sous-totaux pourraient être incomplets.</p>
             </section>
         </section>
