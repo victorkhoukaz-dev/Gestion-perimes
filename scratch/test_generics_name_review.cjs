@@ -50,7 +50,8 @@ class Element {
 function descendants(node) { return node.children.flatMap(child => [child, ...descendants(child)]); }
 const settle = () => new Promise(resolve => setImmediate(resolve));
 async function openPage(database, options = {}) {
-    const ids = Object.fromEntries(['workspace', 'load-status', 'retry-load', 'pharmacy-name', 'review-summary', 'formatting-candidates', 'near-candidates'].map(id => [id, new Element('div')]));
+    const ids = Object.fromEntries(['workspace', 'load-status', 'retry-load', 'pharmacy-name', 'review-summary', 'formatting-candidates', 'near-candidates', 'show-reviewed', 'save-feedback'].map(id => [id, new Element('div')]));
+    ids['show-reviewed'].checked = false;
     let authCallback, failNext = false, writes = 0, release;
     const client = {
         auth: { getUser: async () => ({ data: { user: { id: 'user-one' } } }), onAuthStateChange: callback => { authCallback = callback; } },
@@ -85,6 +86,7 @@ async function openPage(database, options = {}) {
     return {
         ids, get writes() { return writes; }, failNext() { failNext = true; }, release() { release(); },
         signOut() { authCallback('SIGNED_OUT', null); },
+        showReviewed(value = true) { ids['show-reviewed'].checked = value; ids['show-reviewed'].events.change(); },
         controls(index = 0) { const nodes = descendants(ids['formatting-candidates'].children[index]); return {
             select: nodes.find(node => node.tag === 'select'), button: nodes.find(node => node.tag === 'button'), status: nodes.find(node => node.className?.startsWith('decision-status'))
         }; }
@@ -104,9 +106,11 @@ test('save, reload, keep separate and undo all persist without changing purchase
     await decide(page, 0, 'group:0');
     assert.equal(M.buildIndex(db.row.data).length, 3);
     page = await openPage(db);
+    page.showReviewed();
     assert.equal(page.controls().select.value, 'group:0');
     await decide(page, 0, 'keep');
     page = await openPage(db);
+    page.showReviewed();
     assert.equal(page.controls().select.value, 'keep');
     assert.equal(M.buildIndex(db.row.data).length, 4);
     await decide(page, 0, 'unresolved');
@@ -154,4 +158,53 @@ test('empty purchases produce no save controls', async () => {
     const page = await openPage({ row: null });
     assert.equal(descendants(page.ids['formatting-candidates']).some(node => node.tag === 'button'), false);
     assert.equal(page.writes, 0);
+});
+
+const cards = page => page.ids['formatting-candidates'].children.filter(node => node.className === 'candidate-card');
+const counts = page => page.ids['review-summary'].children.map(node => node.children[0].textContent);
+
+test('saved cards disappear, counts update, and reviewed cards remain accessible after reload', async () => {
+    const db = database();
+    let page = await openPage(db);
+    assert.equal(cards(page).length, 2);
+    assert.deepEqual(counts(page), ['4', '2', '0']);
+    await decide(page, 0, 'group:0');
+    assert.equal(cards(page).length, 1);
+    assert.deepEqual(counts(page), ['4', '1', '1']);
+    assert.equal(page.ids['save-feedback'].textContent, 'Decision saved.');
+    page = await openPage(db);
+    assert.equal(cards(page).length, 1);
+    assert.equal(page.ids['show-reviewed'].checked, false);
+    page.showReviewed();
+    assert.equal(cards(page).length, 2);
+    assert.equal(page.controls(0).select.value, 'group:0');
+    page.showReviewed(false);
+    assert.equal(cards(page).length, 1);
+    assert.equal(page.writes, 0);
+});
+
+test('keeping separate also completes an item; clearing a decision returns it to pending', async () => {
+    const db = database(), page = await openPage(db);
+    await decide(page, 0, 'keep');
+    await decide(page, 0, 'keep');
+    assert.equal(cards(page).length, 0);
+    assert.deepEqual(counts(page), ['4', '0', '2']);
+    assert.match(page.ids['formatting-candidates'].children[0].textContent, /All items.*reviewed/);
+    page.showReviewed();
+    await decide(page, 0, 'unresolved');
+    assert.match(page.ids['save-feedback'].textContent, /awaiting review again/);
+    page.showReviewed(false);
+    assert.equal(cards(page).length, 1);
+    assert.deepEqual(counts(page), ['4', '1', '1']);
+});
+
+test('newly imported name variations remain pending despite an older grouping decision', async () => {
+    const db = database(), page = await openPage(db);
+    await decide(page, 0, 'group:0');
+    db.row.data.manufacturers[0].molecules.push({ name: 'AlphaBeta', monthlySales: { 1: 1 } });
+    const reloaded = await openPage(db);
+    assert.equal(cards(reloaded).length, 2);
+    assert.equal(reloaded.controls(0).select.value, 'unresolved');
+    assert.deepEqual(counts(reloaded), ['5', '2', '0']);
+    assert.equal(M.approvedNameMap(db.row.data).has('AlphaBeta'), false);
 });

@@ -9,6 +9,7 @@
     let loadVersion = 0;
     function setSaving(value) {
         saving = value;
+        $('show-reviewed').disabled = value;
         document.querySelectorAll('#workspace button, #workspace select').forEach(control => { control.disabled = value; });
     }
     function element(tag, text, className) {
@@ -40,6 +41,7 @@
             };
         }
         nextData.moleculeNameReview = { version: 1, decisions };
+        $('save-feedback').textContent = '';
         setSaving(true);
         status.textContent = 'Saving…';
         try {
@@ -58,6 +60,9 @@
             currentData = saved.data;
             context.updatedAt = saved.updated_at;
             render(currentData);
+            $('save-feedback').textContent = action === 'unresolved'
+                ? 'Decision cleared. This item is awaiting review again.'
+                : 'Decision saved.';
         } catch (error) {
             if (currentContext === context) status.textContent = `Decision not saved: ${error.message}`;
         } finally {
@@ -93,13 +98,16 @@
     function renderCandidates(containerId, candidates, type) {
         const container = $(containerId);
         container.replaceChildren();
-        if (!candidates.length) {
-            container.append(element('p', type === 'formatting'
+        const visible = $('show-reviewed').checked ? candidates : candidates.filter(candidate => !isReviewed(candidate));
+        if (!visible.length) {
+            container.append(element('p', candidates.length
+                ? 'All items in this section have been reviewed. Select “Show reviewed items” to see or change your decisions.'
+                : type === 'formatting'
                 ? 'No formatting variations were found in the imported names.'
                 : 'No similar names were found using this review’s conservative criteria.', 'review-empty'));
             return;
         }
-        candidates.forEach(candidate => {
+        visible.forEach(candidate => {
             const card = element('article', '', 'candidate-card');
             const label = type === 'formatting'
                 ? 'Formatting variations to review'
@@ -111,11 +119,17 @@
             container.append(card);
         });
     }
+    function isReviewed(candidate) {
+        const decision = currentData?.moleculeNameReview?.decisions?.[candidate.decisionKey];
+        return decision?.status === 'keep' || decision?.status === 'group';
+    }
     function render(data) {
         const review = M.findNameReviewCandidates(data);
+        const candidates = [...review.formatting, ...review.near];
+        const reviewed = candidates.filter(isReviewed).length;
         const summary = $('review-summary');
         summary.replaceChildren();
-        [[review.sourceNameCount, 'distinct source names'], [review.formatting.length, 'formatting variations'], [review.near.length, 'similar names to verify']].forEach(([count, label]) => {
+        [[review.sourceNameCount, 'distinct source names'], [candidates.length - reviewed, 'remaining to review'], [reviewed, 'already reviewed']].forEach(([count, label]) => {
             const stat = element('div', '', 'review-stat');
             stat.append(element('strong', String(count)), element('span', label));
             summary.append(stat);
@@ -127,6 +141,7 @@
         const version = ++loadVersion;
         currentData = null;
         currentContext = null;
+        $('save-feedback').textContent = '';
         $('workspace').hidden = true;
         $('load-status').hidden = false;
         $('load-status').textContent = 'Loading your pharmacy’s purchases…';
@@ -168,6 +183,9 @@
         }
     }
     $('retry-load').addEventListener('click', load);
+    $('show-reviewed').addEventListener('change', () => {
+        if (currentData) render(currentData);
+    });
     client?.auth.onAuthStateChange((event, session) => {
         if (event === 'SIGNED_OUT' || event === 'USER_UPDATED' ||
             (currentContext && session?.user?.id !== currentContext.userId)) {
@@ -178,6 +196,7 @@
             $('formatting-candidates').replaceChildren();
             $('near-candidates').replaceChildren();
             $('pharmacy-name').textContent = '';
+            $('save-feedback').textContent = '';
             $('load-status').hidden = false;
             $('load-status').textContent = 'Your session changed. Reload this page to review purchases.';
         }
