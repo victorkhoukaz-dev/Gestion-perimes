@@ -5,27 +5,30 @@
     const digits = value => text(value).replace(/^0+/, '');
     const units = ['tablets', 'capsules', 'mL', 'g', 'bottles', 'boxes', 'units'];
     function parseBarcode(value) {
-        const raw = text(value).replace(/^\][a-zA-Z][0-9]/, '');
+        // Scanner libraries can include a GS1 symbology prefix and may represent
+        // the FNC1/group separator as GS, RS, or ETX depending on the device.
+        const raw = text(value).replace(/^\][a-zA-Z][0-9]/, '').replace(/[\x04]/g, '\x1d').replace(/^[\x1d\x1e|]+/, '');
         const result = { code: raw, lot: '', expiry: '', gs1: false };
         const fields = {};
-        if (raw.startsWith('(')) {
+        if (raw.includes('(01)')) {
             const tokens = [...raw.matchAll(/\((\d{2,4})\)([^]*?)(?=\(\d{2,4}\)|$)/g)];
             for (const token of tokens) fields[token[1]] = token[2].replace(/[\x1d\x1e]/g, '').trim();
-        } else if (raw.startsWith('01') && /^01\d{14}/.test(raw)) {
+        } else {
             let cursor = 0;
-            const fixed = { '01': 14, '17': 6, '11': 6, '15': 6, '20': 2 };
-            const variable = ['10', '21', '30', '37', '240', '241'];
+            const fixed = { '00': 18, '01': 14, '02': 14, '11': 6, '12': 6, '13': 6, '15': 6, '16': 6, '17': 6, '20': 2 };
+            const variable = ['10', '21', '22', '30', '37', '240', '241', '250', '251', '400', '401', '420', '421'];
             while (cursor < raw.length) {
                 if (/[\x1d\x1e|]/.test(raw[cursor])) { cursor++; continue; }
                 const ai = [...Object.keys(fixed), ...variable].sort((a, b) => b.length - a.length)
                     .find(key => raw.startsWith(key, cursor));
                 if (!ai) break; // Do not invent fields from an unsupported AI.
                 cursor += ai.length;
-                if (fixed[ai]) {
-                    const value = raw.slice(cursor, cursor + fixed[ai]);
-                    if (!new RegExp('^\\d{' + fixed[ai] + '}$').test(value)) break;
-                    fields[ai] = value;
-                    cursor += fixed[ai];
+                if (fixed[ai] !== undefined) {
+                    const length = fixed[ai];
+                    const fieldValue = raw.slice(cursor, cursor + length);
+                    if (!new RegExp('^\\d{' + length + '}$').test(fieldValue)) break;
+                    fields[ai] = fieldValue;
+                    cursor += length;
                 } else {
                     const end = raw.slice(cursor).search(/[\x1d\x1e|]/);
                     fields[ai] = end < 0 ? raw.slice(cursor) : raw.slice(cursor, cursor + end);
@@ -33,13 +36,30 @@
                 }
             }
         }
+        // Preserve the permissive extraction the expiry tour used before the shared
+        // parser was introduced. This also covers scanner output with nonstandard
+        // separators or a GS1 identifier embedded after a short prefix.
+        if (!fields['01']) {
+            const gtin = raw.match(/(?:^|[\x1d\x1e|])(?:\()?01\)?(\d{14})/);
+            if (gtin) fields['01'] = gtin[1];
+        }
+        if (!fields['17']) {
+            const expiry = raw.match(/(?:^|[\x1d\x1e|])(?:\()?17\)?(\d{6})/)
+                || raw.match(/^01\d{14}17(\d{6})/);
+            if (expiry) fields['17'] = expiry[1] || expiry[2];
+        }
+        if (!fields['10']) {
+            const lot = raw.match(/(?:^|[\x1d\x1e|])(?:\()?10\)?([^\x1d\x1e|()]+?)(?=[\x1d\x1e|()]|$)/);
+            if (lot) fields['10'] = lot[1].trim();
+        }
         if (/^\d{14}$/.test(fields['01'] || '')) {
             result.code = fields['01'];
             result.gs1 = true;
             result.lot = text(fields['10']);
             if (/^\d{6}$/.test(fields['17'] || '')) {
                 const month = fields['17'].slice(2, 4);
-                if (+month >= 1 && +month <= 12) result.expiry = '20' + fields['17'].slice(0, 2) + '-' + month;
+                const year = +fields['17'].slice(0, 2);
+                if (+month >= 1 && +month <= 12) result.expiry = (year > 50 ? '19' : '20') + fields['17'].slice(0, 2) + '-' + month;
             }
         }
         return result;
