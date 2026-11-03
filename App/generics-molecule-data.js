@@ -70,13 +70,16 @@
     }
     function buildIndex(data) {
         const molecules = new Map();
+        const approvedNames = approvedNameMap(data);
         for (const manufacturer of data.manufacturers || []) {
             const companyKey = key(manufacturer.name);
             for (const molecule of manufacturer.molecules || []) {
-                const moleculeKey = key(molecule.name);
+                const sourceName = String(molecule.name || '').trim();
+                const displayName = approvedNames.get(sourceName) || sourceName;
+                const moleculeKey = key(displayName);
                 if (!molecules.has(moleculeKey)) molecules.set(moleculeKey, {
                     key: moleculeKey,
-                    name: String(molecule.name || '').trim() || 'Molécule non attribuée',
+                    name: displayName || 'Molécule non attribuée',
                     companies: new Map(),
                     presentations: new Map()
                 });
@@ -118,7 +121,95 @@
         }
         return latest;
     }
-    const api = { YEAR, key, cents, coverage, markImported, validateMonthlyRows, presentationMetadata, buildIndex, latestMonth };
+    function nameReviewKey(value) {
+        return String(value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .toUpperCase().replace(/[^A-Z0-9]/g, '');
+    }
+    function reviewDecisionKey(type, names) {
+        return `${type}:${[...names].map(name => String(name).trim()).sort((a, b) => a.localeCompare(b, 'fr-CA')).join('|')}`;
+    }
+    function approvedNameMap(data) {
+        const decisions = data.moleculeNameReview?.decisions || {};
+        const parent = new Map();
+        const find = name => {
+            if (!parent.has(name)) parent.set(name, name);
+            if (parent.get(name) !== name) parent.set(name, find(parent.get(name)));
+            return parent.get(name);
+        };
+        const join = (left, right) => {
+            const leftRoot = find(left), rightRoot = find(right);
+            if (leftRoot !== rightRoot) parent.set(rightRoot, leftRoot);
+        };
+        Object.values(decisions).forEach(decision => {
+            if (decision?.status !== 'group' || !Array.isArray(decision.names) || decision.names.length < 2) return;
+            decision.names.slice(1).forEach(name => join(decision.names[0], name));
+        });
+        const canonical = new Map();
+        Object.values(decisions).forEach(decision => {
+            if (decision?.status !== 'group' || !decision.canonicalName || !Array.isArray(decision.names)) return;
+            const root = find(decision.names[0]);
+            if (!canonical.has(root)) canonical.set(root, decision.canonicalName);
+        });
+        const result = new Map();
+        parent.forEach((_, name) => result.set(name, canonical.get(find(name)) || name));
+        return result;
+    }
+    function editDistance(left, right) {
+        let previous = Array.from({ length: right.length + 1 }, (_, index) => index);
+        for (let i = 1; i <= left.length; i++) {
+            const current = [i];
+            for (let j = 1; j <= right.length; j++) {
+                current[j] = Math.min(current[j - 1] + 1, previous[j] + 1, previous[j - 1] + (left[i - 1] === right[j - 1] ? 0 : 1));
+            }
+            previous = current;
+        }
+        return previous[right.length];
+    }
+    function findNameReviewCandidates(data) {
+        const names = new Map();
+        for (const manufacturer of data.manufacturers || []) {
+            for (const molecule of manufacturer.molecules || []) {
+                const name = String(molecule.name || '').trim();
+                if (!name) continue;
+                if (!names.has(name)) names.set(name, { name, total: 0, manufacturers: new Set() });
+                const item = names.get(name);
+                item.manufacturers.add(String(manufacturer.name || '').trim() || 'Fabricant non attribué');
+                for (let month = 1; month <= 12; month++) item.total += cents(molecule.monthlySales?.[month]);
+            }
+        }
+        const items = [...names.values()].map(item => ({ ...item, manufacturers: [...item.manufacturers].sort((a, b) => a.localeCompare(b, 'fr-CA')) }));
+        const formattingGroups = new Map();
+        items.forEach(item => {
+            const reviewKey = nameReviewKey(item.name);
+            if (reviewKey) {
+                if (!formattingGroups.has(reviewKey)) formattingGroups.set(reviewKey, []);
+                formattingGroups.get(reviewKey).push(item);
+            }
+        });
+        const formatting = [...formattingGroups.values()]
+            .filter(group => group.length > 1)
+            .map(group => {
+                const items = group.sort((a, b) => a.name.localeCompare(b.name, 'fr-CA'));
+                return { type: 'formatting', items, decisionKey: reviewDecisionKey('formatting', items.map(item => item.name)) };
+            })
+            .sort((a, b) => a.items[0].name.localeCompare(b.items[0].name, 'fr-CA'));
+        const near = [];
+        for (let leftIndex = 0; leftIndex < items.length; leftIndex++) {
+            const left = items[leftIndex], leftKey = nameReviewKey(left.name);
+            for (let rightIndex = leftIndex + 1; rightIndex < items.length; rightIndex++) {
+                const right = items[rightIndex], rightKey = nameReviewKey(right.name);
+                if (leftKey === rightKey || leftKey.length < 7 || Math.abs(leftKey.length - rightKey.length) > 2 || leftKey.slice(0, 3) !== rightKey.slice(0, 3)) continue;
+                const distance = editDistance(leftKey, rightKey);
+                if (distance <= 2) {
+                    const pair = [left, right];
+                    near.push({ type: 'near', distance, items: pair, decisionKey: reviewDecisionKey('near', pair.map(item => item.name)) });
+                }
+            }
+        }
+        near.sort((a, b) => a.items[0].name.localeCompare(b.items[0].name, 'fr-CA'));
+        return { formatting, near, sourceNameCount: items.length };
+    }
+    const api = { YEAR, key, cents, coverage, markImported, validateMonthlyRows, presentationMetadata, buildIndex, latestMonth, nameReviewKey, reviewDecisionKey, approvedNameMap, findNameReviewCandidates };
     if (typeof module !== 'undefined' && module.exports) module.exports = api;
     if (typeof window !== 'undefined') window.GenericsMoleculeData = api;
 })();

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Molecule name review | PharmaOps</title>
+    <link rel="stylesheet" href="generics-molecules.css">
+    <link rel="stylesheet" href="generics-name-review.css">
+    <script src="supabase.js" defer></script>
+    <script src="generics-molecule-data.js" defer></script>
+    <script src="generics-connection.js" defer></script>
+    <script src="generics-name-review.js" defer></script>
+</head>
+<body>
+    <div class="account-bar"><a href="index.html">Back to PharmaOps</a><strong>PharmaOps</strong><span id="pharmacy-name"></span></div>
+    <main>
+        <header class="page-header"><div><p class="eyebrow">GENERIC PURCHASES / 2026</p><h1>Molecule name review</h1><p>Review similar names while preserving the original purchase records and source names.</p></div></header>
+        <nav aria-label="Generic purchase views">
+            <a href="generics_annual.html">Annual analysis</a>
+            <a href="generics_monthly.html">By manufacturer</a>
+            <a href="generics_molecules.html">By molecule</a>
+            <a href="generics_name_review.html" aria-current="page">Name review</a>
+        </nav>
+        <div id="load-status" class="notice" role="status">Loading your pharmacy’s purchases…</div>
+        <button id="retry-load" type="button" hidden>Try again</button>
+        <section id="workspace" hidden>
+            <section class="card review-intro">
+                <p class="eyebrow">REVIEW AND SAVE DECISIONS</p>
+                <h2>Review names supplied by the wholesaler</h2>
+                <p>This page finds formatting variations and similar names. Saving a grouping only changes the display name in the “By molecule” view; original names and purchase amounts are preserved. Similar names do not necessarily identify the same molecule. Verify each suggestion before grouping it.</p>
+                <div id="review-summary" class="review-summary"></div>
+            </section>
+            <section class="review-section" aria-labelledby="formatting-title">
+                <div class="section-line"><div><p class="eyebrow">FORMATTING VARIATIONS</p><h2 id="formatting-title">Same name after normalization</h2></div><p class="muted">Spaces, accents, punctuation and slashes are ignored when suggesting names for review.</p></div>
+                <div id="formatting-candidates" class="candidate-list"></div>
+            </section>
+            <section class="review-section" aria-labelledby="near-title">
+                <div class="section-line"><div><p class="eyebrow">SIMILAR NAMES TO VERIFY</p><h2 id="near-title">Limited text similarity</h2></div><p class="muted">Always verify these suggestions before saving a decision.</p></div>
+                <div id="near-candidates" class="candidate-list"></div>
+            </section>
+        </section>
+    </main>
+</body>
+</html>

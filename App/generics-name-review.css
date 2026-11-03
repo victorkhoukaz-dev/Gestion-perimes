@@ -1,0 +1,27 @@
+.review-intro { margin-bottom:28px; }
+.review-intro h2 { margin:0; font-size:21px; }
+.review-intro > p:not(.eyebrow) { max-width:780px; margin:9px 0 0; color:var(--muted); }
+.review-summary { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin-top:20px; }
+.review-stat { padding:14px; border:1px solid var(--border); border-radius:10px; background:var(--muted-surface); }
+.review-stat strong { display:block; font-size:24px; font-variant-numeric:tabular-nums; }
+.review-stat span { color:var(--muted); font-size:12px; }
+.review-section { margin:28px 0; }
+.review-section .section-line { align-items:start; }
+.review-section .section-line .muted { max-width:410px; margin:0; text-align:right; }
+.candidate-list { display:grid; gap:12px; margin-top:14px; }
+.candidate-card { padding:18px; border:1px solid var(--border); border-radius:12px; background:var(--surface); }
+.candidate-card h3 { margin:0 0 13px; font-size:15px; }
+.candidate-items { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:10px; }
+.candidate-item { padding:12px; border:1px solid var(--border); border-radius:9px; background:var(--muted-surface); }
+.candidate-item strong { display:block; overflow-wrap:anywhere; }
+.candidate-item span { display:block; margin-top:4px; color:var(--muted); font-size:12px; }
+.decision-controls { display:flex; flex-wrap:wrap; align-items:end; gap:10px; margin-top:15px; padding-top:14px; border-top:1px solid var(--border); }
+.decision-controls label { flex:1 1 270px; margin:0; }
+.decision-controls select { margin-top:6px; }
+.decision-controls button { border-color:var(--accent); background:var(--accent); color:#fff; font-weight:700; }
+.decision-controls button:disabled { cursor:wait; opacity:.7; }
+.decision-status { flex:1 1 100%; margin:0; color:var(--muted); font-size:12px; }
+.decision-status.group { color:var(--accent); font-weight:650; }
+.decision-status.keep { color:#475569; font-weight:650; }
+.review-empty { padding:18px; border:1px dashed var(--border); border-radius:10px; color:var(--muted); background:var(--surface); }
+@media(max-width:800px) { .review-summary { grid-template-columns:1fr; } .review-section .section-line .muted { text-align:left; } }
