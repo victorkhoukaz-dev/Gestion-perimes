@@ -40,7 +40,7 @@
         </div>
         <dialog id="cr-camera-dialog" aria-labelledby="cr-camera-title"><h2 id="cr-camera-title">Scan the package barcode</h2><p>Use the 2D code to capture the lot and expiry automatically.</p><div id="cr-reader"></div><p id="cr-camera-status" role="status">Starting camera…</p><button type="button" id="cr-camera-close">Close camera</button></dialog>
     `;
-    document.body.append(root);
+    (document.getElementById('tab-company-returns') || document.body).append(root);
     D.units.forEach(unit => $('unit').add(new Option(unit, unit)));
     const fields = ['code', 'din', 'product', 'strength', 'format', 'lot', 'expiry', 'quantity', 'unit'];
     const uid = () => crypto.randomUUID();
@@ -259,6 +259,7 @@
         context = options;
         key = 'pharmaops:company-returns:v1:' + options.pharmacyId;
         root.hidden = false; document.body.classList.add('cr-active');
+        $('back').textContent = options.backLabel || '← PharmaOps';
         $('pharmacy').textContent = options.pharmacyName; $('workspace').hidden = true; status('');
         try {
             const saved = D.loadReports(localStorage, key); raw = saved.raw; store = saved.value;
@@ -271,5 +272,5 @@
             render(); $('workspace').hidden = false; $('company').focus();
         } catch (error) { status('Unable to open drafts: ' + error.message, true); }
     }
-    window.CompanyReturns = { open, close };
+    window.CompanyReturns = { open, close, canLeave: () => !context || !active() || saveDraft() };
 })();

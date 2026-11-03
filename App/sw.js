@@ -1,4 +1,5 @@
-const CACHE_NAME = 'expires-lab-v41';
+const CACHE_SCOPE = encodeURIComponent(self.registration.scope);
+const CACHE_NAME = 'expires-lab-v43-' + CACHE_SCOPE;
 const ASSETS = [
   './index.html',
   './Application - périmés.html',
@@ -19,8 +20,8 @@ self.addEventListener('activate', (e) => {
     caches.keys().then((keys) => {
       return Promise.all(
         keys.map((key) => {
-          if (key !== CACHE_NAME) {
-            console.log('[Service Worker] Suppression de l'ancien cache:', key);
+          if (key !== CACHE_NAME && key.startsWith('expires-lab-v') && key.endsWith('-' + CACHE_SCOPE)) {
+            console.log('[Service Worker] Removing old cache:', key);
             return caches.delete(key);
           }
         })

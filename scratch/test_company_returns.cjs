@@ -1,6 +1,9 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const D = require('../App/company-returns-data.js');
+const fs = require('node:fs');
+const path = require('node:path');
+const vm = require('node:vm');
 const gtin = '00012345678905';
 test('GS1 parenthesized data keeps lots separate from serials and uses month/year', () => {
     assert.deepEqual(D.parseBarcode('(01)' + gtin + '(17)261130(10)LOT-A(21)SERIAL'), { code: gtin, lot: 'LOT-A', expiry: '2026-11', gs1: true });
@@ -55,4 +58,64 @@ test('storage failures and corrupt saved data never replace existing records', (
     assert.throws(() => D.loadReports(s, 'reports'));
     assert.equal(s.getItem('reports'), '{invalid');
     assert.throws(() => D.saveReports({ getItem: () => null, setItem: () => { throw new Error('Quota exceeded'); } }, 'reports', null, {}), /Quota/);
+});
+
+test('navigation activates both Returns buttons, opens the embedded tab, and blocks leaving on a failed save', () => {
+    const html = fs.readFileSync(path.join(__dirname, '../App/index.html'), 'utf8');
+    assert.equal((html.match(/data-tab="tab-company-returns"/g) || []).length, 2);
+    assert.ok(!html.includes('onclick="openCompanyReturnsModule()"'));
+    const start = html.indexOf('document.querySelectorAll(".tab-btn, .mobile-nav-item").forEach(btn => {');
+    const end = html.indexOf('// Basculement de thème', start);
+    assert.ok(start > 0 && end > start);
+    const classList = () => {
+        const values = new Set();
+        return { add: value => values.add(value), remove: value => values.delete(value), contains: value => values.has(value) };
+    };
+    const ids = ['tab-retrait', 'tab-company-returns', 'tab-inventaire'];
+    const buttons = [...ids, ...ids].map(id => ({ id, classList: classList(), getAttribute: () => id, addEventListener(event, handler) { this.click = handler; } }));
+    const contents = Object.fromEntries(ids.map(id => [id, { classList: classList() }]));
+    const header = { textContent: '' };
+    let allowed = true, opened = 0, closed = 0;
+    const document = {
+        querySelectorAll(selector) {
+            if (selector === '.tab-btn, .mobile-nav-item') return buttons;
+            if (selector === '.tab-content') return Object.values(contents);
+            const id = selector.match(/data-tab="([^"]+)"/)?.[1];
+            return buttons.filter(button => button.id === id);
+        },
+        getElementById: id => id === 'mobile-section-header' ? header : contents[id]
+    };
+    vm.runInNewContext(html.slice(start, end), {
+        document, window: { CompanyReturns: { canLeave: () => allowed, close: () => { closed++; } } },
+        openCompanyReturnsModule: () => { opened++; }, populateSectionDropdowns() {}
+    });
+    buttons[1].click();
+    assert.equal(opened, 1);
+    assert.equal(header.textContent, 'Company Returns');
+    assert.equal(buttons.filter(button => button.id === 'tab-company-returns' && button.classList.contains('active')).length, 2);
+    assert.ok(contents['tab-company-returns'].classList.contains('active'));
+    allowed = false;
+    buttons[2].click();
+    assert.equal(closed, 0);
+    assert.ok(contents['tab-company-returns'].classList.contains('active'));
+    allowed = true;
+    buttons[2].click();
+    assert.equal(closed, 1);
+    assert.ok(contents['tab-inventaire'].classList.contains('active'));
+});
+
+test('service worker parses and cleans only older caches within its own app scope', async () => {
+    const source = fs.readFileSync(path.join(__dirname, '../App/sw.js'), 'utf8');
+    const scope = 'https://example.test/returns/App/';
+    const suffix = '-' + encodeURIComponent(scope);
+    const listeners = {}, deleted = [];
+    vm.runInNewContext(source, {
+        self: { registration: { scope }, addEventListener: (name, handler) => { listeners[name] = handler; }, clients: { claim: async () => {} } },
+        caches: { keys: async () => ['expires-lab-v42' + suffix, 'expires-lab-v43' + suffix, 'expires-lab-v69', 'unrelated'], delete: async name => { deleted.push(name); } },
+        console
+    });
+    let pending;
+    listeners.activate({ waitUntil: promise => { pending = promise; } });
+    await pending;
+    assert.deepEqual(deleted, ['expires-lab-v42' + suffix]);
 });

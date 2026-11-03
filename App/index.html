@@ -2631,15 +2631,6 @@
           </button>
         </div>
 
-        <div class="hub-card" style="background:white; border-radius:16px; border:2px solid #0f766e; padding:28px; display:flex; flex-direction:column; justify-content:space-between;">
-          <div>
-            <div style="font-size:1.8rem; margin-bottom:16px;" aria-hidden="true">↩</div>
-            <h3 style="font-size:1.3rem; font-weight:800; color:var(--text-color); margin-bottom:8px;">Company Returns</h3>
-            <p style="font-size:0.88rem; color:var(--text-muted); line-height:1.5; margin-bottom:20px;">Scan expired products, record lots and approximate quantities, and print a report for your company representative.</p>
-          </div>
-          <button type="button" class="btn btn-primary" onclick="openCompanyReturnsModule()" style="width:100%; padding:12px; justify-content:center;">Open Company Returns →</button>
-        </div>
-
         <!-- CARTE 2 : NARCAUDIT -->
         <div class="hub-card" id="hub-card-narco" style="background: white; border-radius: 16px; border: 1px solid var(--border-color); padding: 28px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); display: flex; flex-direction: column; justify-content: space-between; cursor: pointer;">
           <div>
@@ -2776,6 +2767,10 @@
           </svg>
           Inventaire & Recherche
         </button>
+        <button class="tab-btn" data-tab="tab-company-returns">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 10H4l5-5M4 10h11a5 5 0 010 10h-3"/></svg>
+          Company Returns
+        </button>
         <button class="tab-btn" data-tab="tab-config">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -2815,6 +2810,10 @@
           </svg>
           <span>Inventaire</span>
         </button>
+        <button class="mobile-nav-item" data-tab="tab-company-returns" aria-label="Company Returns">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 10H4l5-5M4 10h11a5 5 0 010 10h-3"/></svg>
+          <span>Returns</span>
+        </button>
         <button class="mobile-nav-item" data-tab="tab-config">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -2829,6 +2828,8 @@
           <span>Guide</span>
         </button>
       </nav>
+
+    <div class="tab-content" id="tab-company-returns"></div>
 
     <!-- 1. RETRAIT MENSUEL -->
     <div class="tab-content active" id="tab-retrait">
@@ -4034,6 +4035,7 @@
     }
 
     function returnToHub() {
+      if (window.CompanyReturns && !window.CompanyReturns.canLeave()) return;
       window.CompanyReturns?.close();
       document.getElementById("main-app-wrapper").style.display = "none";
       document.getElementById("hub-landing-container").style.display = "block";
@@ -4045,13 +4047,12 @@
         showToast("Company Returns could not load. Refresh the page and try again.", "danger");
         return;
       }
-      document.getElementById("hub-landing-container").style.display = "none";
-      document.getElementById("main-app-wrapper").style.display = "none";
       window.CompanyReturns.open({
         pharmacyId: sessionPharmacy.id,
         pharmacyName: sessionPharmacy.name,
         catalog: () => localCatalog,
-        back: returnToHub
+        backLabel: "← Monthly withdrawals",
+        back: () => document.querySelector('.tab-btn[data-tab="tab-retrait"]').click()
       });
     }
 
@@ -4947,6 +4948,7 @@
         btn.addEventListener("click", () => {
           const tabId = btn.getAttribute("data-tab");
           if (!tabId) return;
+          if (window.CompanyReturns && !window.CompanyReturns.canLeave()) return;
 
           document.querySelectorAll(".tab-btn, .mobile-nav-item").forEach(b => b.classList.remove("active"));
           document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
@@ -4954,12 +4956,15 @@
           document.querySelectorAll(`[data-tab="${tabId}"]`).forEach(b => b.classList.add("active"));
           const targetContent = document.getElementById(tabId);
           if (targetContent) targetContent.classList.add("active");
+          if (tabId === "tab-company-returns") openCompanyReturnsModule();
+          else window.CompanyReturns?.close();
 
           // Mettre à jour le titre de section séparé sur mobile (Option A)
           const tabTitles = {
             "tab-tournee": "📝 Saisie / Tournée",
             "tab-retrait": "📋 Retrait Mensuel",
             "tab-inventaire": "📦 Inventaire & Recherche",
+            "tab-company-returns": "Company Returns",
             "tab-config": "⚙️ Configuration",
             "tab-guide": "📖 Guide & Tutoriel"
           };

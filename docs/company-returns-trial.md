@@ -11,7 +11,36 @@ pharmaops:company-returns:v1:<pharmacy-id>. They stay in that browser on that
 device; they do not sync to a computer or another phone. Use Print / Save PDF
 to keep a report outside the browser. No prices, credits or financial totals.
 
-## Desktop preview
+## Test from the full app
+
+Open the Company Returns - Test Branch folder and double-click
+Test on computer.bat. Keep its window open. It starts only this branch's App
+folder at http://127.0.0.1:8084/index.html and opens the browser.
+
+Sign in normally, open Expires Labo, then select Company Returns. On a phone,
+the bottom navigation button is called Returns. Company Returns is no longer a
+separate card on the PharmaOps hub.
+
+Start with a company named TEST - Apotex. Add a test product manually, with a lot,
+expiry month/year, quantity and unit. Save, edit the line, change tabs, reload,
+and inspect Print / Save PDF. No barcode or camera is required for this check.
+Close the launcher window when done.
+
+For phone testing, first close the computer test window, then double-click
+Test on phone.bat. It starts the same App-only local server and uses SSH through
+localhost.run to display a temporary HTTPS address. Open that address on the
+phone, with /index.html at the end. Sign in and open Expires Labo > Returns.
+Keep the computer awake and the launcher window open. Ctrl+C ends the tunnel.
+
+The temporary address makes this test app reachable over the internet; it does
+not deploy to GitHub Pages or change main. Normal app authentication still applies.
+The launcher does not expose the repository root or operational export folders.
+
+Computer and phone drafts do not sync. Browser storage is also tied to the exact
+test URL, so a different temporary address will not show drafts from an earlier
+address. Save the PDF before ending a trial you want to retain.
+
+## Optional synthetic desktop preview
 
 From this checkout:
 
@@ -28,8 +57,8 @@ Do not test destructive inventory operations against the live pharmacy.
 
 ## Real-package acceptance check before release
 
-1. Use a secure HTTPS test address on the phone; plain LAN HTTP cannot access
-   the camera. Set up temporary phone access separately from the production site.
+1. Start Test on phone.bat and use its HTTPS address on the phone; plain LAN HTTP
+   cannot access the camera.
 2. Sign in, open Company Returns from the hub, and enter Apotex as the company.
 3. Scan 5-10 real packages; compare DIN/name, strength, format, lot and expiry
    month/year with each package. Unknown products must remain manually editable.
@@ -60,10 +89,16 @@ the updated main into integration, retaining the generics work there.
 
 ## Verification at the first local checkpoint
 
-- Eight offline data tests pass, including parsing, decimal totals, pharmacy
+- Ten offline tests pass, including parsing, decimal totals, pharmacy
   separation, stale writes, corrupt storage and failed saves.
 - Chrome synthetic preview: autofill; Enter-to-save and barcode refocus;
   repeated scans add quantities; separate lots; edit and reload; multiple
   reports and switching; drafts persist across reload.
 - Phone-width preview at 390px: no horizontal document overflow.
+- Full signed-in app: desktop Company Returns tab, mobile Returns button, and
+  draft preservation across navigation checked. No cloud inventory edits made.
+- Computer launcher: local App-only server startup, page readiness and shutdown
+  tested. Phone launcher syntax checked; external tunnel not started.
+- A pre-existing main-branch service worker quoting error was corrected.
+  Cache names/cleanup are scoped to the app location to protect sibling previews.
 - Actual phone-camera scanning and native printed/PDF output are still pending.
