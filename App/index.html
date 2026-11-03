@@ -2478,6 +2478,7 @@
       transform: translateY(-2px);
     }
   </style>
+  <link rel="stylesheet" href="company-returns.css">
 </head>
 <body>
 
@@ -2628,6 +2629,15 @@
           <button class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 0.95rem; font-weight: 700; border-radius: 10px; justify-content: center;">
             Accéder au module ➔
           </button>
+        </div>
+
+        <div class="hub-card" style="background:white; border-radius:16px; border:2px solid #0f766e; padding:28px; display:flex; flex-direction:column; justify-content:space-between;">
+          <div>
+            <div style="font-size:1.8rem; margin-bottom:16px;" aria-hidden="true">↩</div>
+            <h3 style="font-size:1.3rem; font-weight:800; color:var(--text-color); margin-bottom:8px;">Company Returns</h3>
+            <p style="font-size:0.88rem; color:var(--text-muted); line-height:1.5; margin-bottom:20px;">Scan expired products, record lots and approximate quantities, and print a report for your company representative.</p>
+          </div>
+          <button type="button" class="btn btn-primary" onclick="openCompanyReturnsModule()" style="width:100%; padding:12px; justify-content:center;">Open Company Returns →</button>
         </div>
 
         <!-- CARTE 2 : NARCAUDIT -->
@@ -3793,6 +3803,8 @@
 
   <!-- LOGIQUE JAVASCRIPT DE L'APPLICATION -->
   <script src="html5-qrcode.min.js"></script>
+  <script src="company-returns-data.js"></script>
+  <script src="company-returns.js"></script>
   <script src="supabase.js?v=2"></script>
   <script>
     // ----------------------------------------------------
@@ -3929,6 +3941,7 @@
     }
 
     function showNewPasswordScreen() {
+      window.CompanyReturns?.close();
       document.getElementById("login-container").style.display = "flex";
       document.getElementById("main-app-wrapper").style.display = "none";
       document.getElementById("login-form").style.display = "none";
@@ -3941,6 +3954,7 @@
     }
 
     function showAuthScreen() {
+      window.CompanyReturns?.close();
       document.getElementById("login-container").style.display = "flex";
       document.getElementById("hub-landing-container").style.display = "none";
       document.getElementById("main-app-wrapper").style.display = "none";
@@ -4009,6 +4023,7 @@
     }
 
     function openExpiresModule() {
+      window.CompanyReturns?.close();
       document.getElementById("hub-landing-container").style.display = "none";
       document.getElementById("main-app-wrapper").style.display = "block";
       
@@ -4019,8 +4034,25 @@
     }
 
     function returnToHub() {
+      window.CompanyReturns?.close();
       document.getElementById("main-app-wrapper").style.display = "none";
       document.getElementById("hub-landing-container").style.display = "block";
+    }
+
+    function openCompanyReturnsModule() {
+      if (!sessionPharmacy || !sessionUser) return;
+      if (!window.CompanyReturns) {
+        showToast("Company Returns could not load. Refresh the page and try again.", "danger");
+        return;
+      }
+      document.getElementById("hub-landing-container").style.display = "none";
+      document.getElementById("main-app-wrapper").style.display = "none";
+      window.CompanyReturns.open({
+        pharmacyId: sessionPharmacy.id,
+        pharmacyName: sessionPharmacy.name,
+        catalog: () => localCatalog,
+        back: returnToHub
+      });
     }
 
     function showLoading(text) {
@@ -4731,6 +4763,12 @@
       });
 
       supabaseClient.auth.onAuthStateChange(async (event, session) => {
+        if (event === 'SIGNED_OUT') {
+          sessionUser = null;
+          sessionProfile = null;
+          sessionPharmacy = null;
+          showAuthScreen();
+        }
         if (event === 'PASSWORD_RECOVERY') {
           hideLoading();
           showNewPasswordScreen();
