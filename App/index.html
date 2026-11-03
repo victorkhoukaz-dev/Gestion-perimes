@@ -2478,6 +2478,7 @@
       transform: translateY(-2px);
     }
   </style>
+  <link rel="stylesheet" href="company-returns.css">
 </head>
 <body>
 
@@ -2766,6 +2767,10 @@
           </svg>
           Inventaire & Recherche
         </button>
+        <button class="tab-btn" data-tab="tab-company-returns">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 10H4l5-5M4 10h11a5 5 0 010 10h-3"/></svg>
+          Company Returns
+        </button>
         <button class="tab-btn" data-tab="tab-config">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -2805,6 +2810,10 @@
           </svg>
           <span>Inventaire</span>
         </button>
+        <button class="mobile-nav-item" data-tab="tab-company-returns" aria-label="Company Returns">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 10H4l5-5M4 10h11a5 5 0 010 10h-3"/></svg>
+          <span>Returns</span>
+        </button>
         <button class="mobile-nav-item" data-tab="tab-config">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -2819,6 +2828,8 @@
           <span>Guide</span>
         </button>
       </nav>
+
+    <div class="tab-content" id="tab-company-returns"></div>
 
     <!-- 1. RETRAIT MENSUEL -->
     <div class="tab-content active" id="tab-retrait">
@@ -3793,6 +3804,8 @@
 
   <!-- LOGIQUE JAVASCRIPT DE L'APPLICATION -->
   <script src="html5-qrcode.min.js"></script>
+  <script src="company-returns-data.js"></script>
+  <script src="company-returns.js"></script>
   <script src="supabase.js?v=2"></script>
   <script>
     // ----------------------------------------------------
@@ -3929,6 +3942,7 @@
     }
 
     function showNewPasswordScreen() {
+      window.CompanyReturns?.close();
       document.getElementById("login-container").style.display = "flex";
       document.getElementById("main-app-wrapper").style.display = "none";
       document.getElementById("login-form").style.display = "none";
@@ -3941,6 +3955,7 @@
     }
 
     function showAuthScreen() {
+      window.CompanyReturns?.close();
       document.getElementById("login-container").style.display = "flex";
       document.getElementById("hub-landing-container").style.display = "none";
       document.getElementById("main-app-wrapper").style.display = "none";
@@ -4013,6 +4028,7 @@
     }
 
     function openExpiresModule() {
+      window.CompanyReturns?.close();
       document.getElementById("hub-landing-container").style.display = "none";
       document.getElementById("main-app-wrapper").style.display = "block";
       
@@ -4023,8 +4039,30 @@
     }
 
     function returnToHub() {
+      if (window.CompanyReturns && !window.CompanyReturns.canLeave()) return;
+      window.CompanyReturns?.close();
       document.getElementById("main-app-wrapper").style.display = "none";
       document.getElementById("hub-landing-container").style.display = "block";
+    }
+
+    function openCompanyReturnsModule() {
+      if (!sessionPharmacy || !sessionUser) return;
+      if (!window.CompanyReturns) {
+        showToast("Company Returns could not load. Refresh the page and try again.", "danger");
+        return;
+      }
+      window.CompanyReturns.open({
+        pharmacyId: sessionPharmacy.id,
+        pharmacyName: sessionPharmacy.name,
+        catalog: () => localCatalog,
+        suggest: (value, field, select) => showSuggestions(value, field, { prefix: "cr", select }),
+        suggestionKeys: (event, field) => handleAutocompleteKeys(event, field, "cr"),
+        closeSuggestions: closeAllSuggestions,
+        scan: callback => startScanner(callback),
+        stopScan: stopScanner,
+        backLabel: "← Monthly withdrawals",
+        back: () => document.querySelector('.tab-btn[data-tab="tab-retrait"]').click()
+      });
     }
 
     function showLoading(text) {
@@ -4735,6 +4773,12 @@
       });
 
       supabaseClient.auth.onAuthStateChange(async (event, session) => {
+        if (event === 'SIGNED_OUT') {
+          sessionUser = null;
+          sessionProfile = null;
+          sessionPharmacy = null;
+          showAuthScreen();
+        }
         if (event === 'PASSWORD_RECOVERY') {
           hideLoading();
           showNewPasswordScreen();
@@ -4913,6 +4957,7 @@
         btn.addEventListener("click", () => {
           const tabId = btn.getAttribute("data-tab");
           if (!tabId) return;
+          if (window.CompanyReturns && !window.CompanyReturns.canLeave()) return;
 
           document.querySelectorAll(".tab-btn, .mobile-nav-item").forEach(b => b.classList.remove("active"));
           document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
@@ -4920,12 +4965,15 @@
           document.querySelectorAll(`[data-tab="${tabId}"]`).forEach(b => b.classList.add("active"));
           const targetContent = document.getElementById(tabId);
           if (targetContent) targetContent.classList.add("active");
+          if (tabId === "tab-company-returns") openCompanyReturnsModule();
+          else window.CompanyReturns?.close();
 
           // Mettre à jour le titre de section séparé sur mobile (Option A)
           const tabTitles = {
             "tab-tournee": "📝 Saisie / Tournée",
             "tab-retrait": "📋 Retrait Mensuel",
             "tab-inventaire": "📦 Inventaire & Recherche",
+            "tab-company-returns": "Company Returns",
             "tab-config": "⚙️ Configuration",
             "tab-guide": "📖 Guide & Tutoriel"
           };
@@ -5586,10 +5634,9 @@
     }
 
     function closeAllSuggestions() {
-      const dinBox = document.getElementById("form-din-suggestions");
-      const prodBox = document.getElementById("form-product-suggestions");
-      if (dinBox) dinBox.style.display = "none";
-      if (prodBox) prodBox.style.display = "none";
+      document.querySelectorAll(".autocomplete-suggestions").forEach(box => {
+        box.style.display = "none";
+      });
       autocompleteHighlightIndex = -1;
     }
 
@@ -5616,7 +5663,7 @@
       return cleaned;
     }
 
-    function showSuggestions(val, fieldType) {
+    function showSuggestions(val, fieldType, entry = null) {
       closeAllSuggestions();
       const query = val.toLowerCase().trim();
       const normUpcQuery = normalizeUPC(query);
@@ -5638,7 +5685,7 @@
 
       if (matches.length === 0) return;
 
-      const suggestionsBox = document.getElementById(`form-${fieldType}-suggestions`);
+      const suggestionsBox = document.getElementById(`${entry?.prefix || 'form'}-${fieldType}-suggestions`);
       suggestionsBox.innerHTML = "";
       suggestionsBox.style.display = "block";
       autocompleteHighlightIndex = -1;
@@ -5659,7 +5706,8 @@
 
         // Clic sur une suggestion
         row.addEventListener("click", () => {
-          selectSuggestion(item);
+          if (entry) entry.select(item);
+          else selectSuggestion(item);
         });
 
         suggestionsBox.appendChild(row);
@@ -5855,8 +5903,8 @@
       showToast(`Produit pré-rempli : ${item.product}`, "info");
     }
 
-    function handleAutocompleteKeys(e, fieldType) {
-      const suggestionsBox = document.getElementById(`form-${fieldType}-suggestions`);
+    function handleAutocompleteKeys(e, fieldType, prefix = "form") {
+      const suggestionsBox = document.getElementById(`${prefix}-${fieldType}-suggestions`);
       if (suggestionsBox.style.display === "none") return;
 
       const rows = suggestionsBox.querySelectorAll(".autocomplete-suggestion");
@@ -8560,8 +8608,14 @@
     // ====================================================
     let html5QrcodeScanner = null;
     let currentCameraFacingMode = "environment"; // "environment" = arrière, "user" = avant
+    let scannerConsumer = null;
+    let scannerResultAccepted = true;
+    let scannerSession = 0;
 
-    function startScanner() {
+    function startScanner(consumer = null) {
+      const session = ++scannerSession;
+      scannerConsumer = typeof consumer === "function" ? consumer : null;
+      scannerResultAccepted = false;
       document.getElementById("camera-modal").style.display = "flex";
       const statusDiv = document.getElementById("camera-status");
       if (statusDiv) statusDiv.textContent = "Démarrage de la caméra...";
@@ -8609,6 +8663,10 @@
         onScanSuccess,
         onScanFailure
       ).then(() => {
+        if (session !== scannerSession) {
+          if (html5QrcodeScanner.isScanning) html5QrcodeScanner.stop().catch(console.error);
+          return;
+        }
         if (statusDiv) statusDiv.textContent = "Scanner actif. Alignez le code-barres.";
       }).catch(err => {
         console.error("Erreur de démarrage du scanner :", err);
@@ -8619,6 +8677,9 @@
     }
     
     function stopScanner() {
+      scannerSession++;
+      scannerConsumer = null;
+      scannerResultAccepted = true;
       document.getElementById("camera-modal").style.display = "none";
       if (html5QrcodeScanner && html5QrcodeScanner.isScanning) {
         html5QrcodeScanner.stop().then(() => {
@@ -8630,17 +8691,19 @@
     }
     
     function switchCamera() {
+      const session = scannerSession;
+      const consumer = scannerConsumer;
       currentCameraFacingMode = (currentCameraFacingMode === "environment") ? "user" : "environment";
       showToast("Changement de caméra...", "info");
       
       if (html5QrcodeScanner && html5QrcodeScanner.isScanning) {
         html5QrcodeScanner.stop().then(() => {
-          startScanner();
+          if (session === scannerSession) startScanner(consumer);
         }).catch(err => {
           console.error("Erreur switch caméra :", err);
         });
       } else {
-        startScanner();
+        startScanner(consumer);
       }
     }
     
@@ -8677,82 +8740,28 @@
     }
     
     function parseGS1DataMatrix(text) {
-      if (!text) return null;
-      
-      let raw = text.trim();
-      let gtin = null;
-      let expiry = null;
-      let lot = null;
-
-      // 1. Format à parenthèses ex: (01)00623456789012(17)260831(10)LOT123
-      if (raw.includes("(01)")) {
-        const gMatch = raw.match(/\(01\)(\d{14})/);
-        if (gMatch) gtin = gMatch[1];
-        
-        const eMatch = raw.match(/\(17\)(\d{6})/);
-        if (eMatch) {
-          const yy = eMatch[1].substring(0, 2);
-          const mm = eMatch[1].substring(2, 4);
-          const yyyy = parseInt(yy, 10) > 50 ? `19${yy}` : `20${yy}`;
-          if (parseInt(mm, 10) >= 1 && parseInt(mm, 10) <= 12) {
-            expiry = `${yyyy}-${mm}`;
-          }
-        }
-        
-        const lMatch = raw.match(/\(10\)([a-zA-Z0-9\-\_\.]+)/);
-        if (lMatch) lot = lMatch[1];
-      } 
-      // 2. Format continu GS1 sans parenthèses ex: 010062345678901217260831...
-      else if (raw.startsWith("01") && raw.length >= 24) {
-        gtin = raw.substring(2, 16);
-        if (raw.substring(16, 18) === "17") {
-          const yy = raw.substring(18, 20);
-          const mm = raw.substring(20, 22);
-          const yyyy = parseInt(yy, 10) > 50 ? `19${yy}` : `20${yy}`;
-          if (parseInt(mm, 10) >= 1 && parseInt(mm, 10) <= 12) {
-            expiry = `${yyyy}-${mm}`;
-          }
-        }
-        if (raw.length >= 26 && raw.substring(24, 26) === "10") {
-          lot = raw.substring(26);
-        }
-      }
-
-      // 3. Fallback Regex général si séparateurs \x1D ou |
-      const cleanText = raw.replace(/[\x1D\x1E\x04]/g, "|");
-
-      if (!gtin) {
-        const gMatch = cleanText.match(/(?:^|\||\()01\)?(\d{14})/);
-        if (gMatch) gtin = gMatch[1];
-      }
-      if (!expiry) {
-        const eMatch = cleanText.match(/(?:17|\(17\))(\d{6})/);
-        if (eMatch) {
-          const yy = eMatch[1].substring(0, 2);
-          const mm = eMatch[1].substring(2, 4);
-          const yyyy = parseInt(yy, 10) > 50 ? `19${yy}` : `20${yy}`;
-          if (parseInt(mm, 10) >= 1 && parseInt(mm, 10) <= 12) {
-            expiry = `${yyyy}-${mm}`;
-          }
-        }
-      }
-      if (!lot) {
-        const lMatch = cleanText.match(/(?:^|\||\()10\)?([a-zA-Z0-9\-\_\.]+)(?:\||\(|$)/);
-        if (lMatch) lot = lMatch[1].trim();
-      }
-
-      if (gtin || expiry || lot) {
-        return { gtin, expiry, lot, raw };
-      }
-      return null;
+      const parsed = window.CompanyReturnsData.parseBarcode(text);
+      return parsed.gs1 ? {
+        gtin: parsed.code,
+        expiry: parsed.expiry || null,
+        lot: parsed.lot || null,
+        raw: String(text).trim()
+      } : null;
     }
 
     function onScanSuccess(decodedText) {
+      if (scannerResultAccepted) return;
+      scannerResultAccepted = true;
+      const consumer = scannerConsumer;
       console.log(`[Scanner] Code détecté : ${decodedText}`);
       
       playScanBeep();
       triggerVisualFlash();
       stopScanner();
+      if (consumer) {
+        consumer(decodedText);
+        return;
+      }
       
       // Vérifier s'il s'agit d'un code 2D GS1 DataMatrix
       const gs1Data = parseGS1DataMatrix(decodedText);

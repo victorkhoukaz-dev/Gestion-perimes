@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Company Returns — local test</title><link rel="stylesheet" href="../App/company-returns.css"></head>
+<body>
+<script src="../App/html5-qrcode.min.js"></script>
+<script src="../App/company-returns-data.js"></script>
+<script src="../App/company-returns.js"></script>
+<script>
+// Isolated synthetic preview; does not connect to Supabase or real inventory.
+CompanyReturns.open({
+    pharmacyId: 'synthetic-company-returns-preview',
+    pharmacyName: 'Test Pharmacy — synthetic data',
+    catalog: () => [{ din: '01234567', product: 'Example medication', dosage: '10 mg', format: '100 tablets', upc: '012345678905' }],
+    back: () => location.reload()
+});
+</script>
+</body>
+</html>
