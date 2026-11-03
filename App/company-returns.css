@@ -25,6 +25,12 @@
 #company-returns button:focus-visible { outline:3px solid #85b9aa; outline-offset:2px; }
 #company-returns .cr-primary, #cr-camera { background:#0f766e; border-color:#0f766e; color:white; }
 .cr-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; }
+.cr-autocomplete { position:relative; min-width:0; }
+#company-returns .autocomplete-suggestions { position:absolute; top:100%; left:0; right:0; z-index:100; max-height:280px; overflow-y:auto; background:white; border:1px solid #cbdad3; border-radius:8px; box-shadow:0 6px 18px #16312f20; }
+#company-returns .autocomplete-suggestion { cursor:pointer; padding:10px 12px; border-bottom:1px solid #e1e9e4; }
+#company-returns .autocomplete-suggestion:hover, #company-returns .autocomplete-suggestion.highlighted { background:#e8f4ee; }
+#company-returns .sugg-name { display:block; font-size:13px; font-weight:700; }
+#company-returns .sugg-details { display:flex; flex-wrap:wrap; gap:8px; font-size:11px; color:var(--cr-muted); margin-top:4px; }
 .cr-code-row { display:flex; gap:10px; align-items:end; }
 .cr-code-row > div { flex:1; min-width:0; }
 .cr-muted { color:var(--cr-muted); font-size:12px; line-height:1.6; }
@@ -44,10 +50,6 @@
 .cr-row-actions { min-width:115px; }
 #company-returns .cr-row-actions button { padding:5px 8px; min-height:32px; margin:0 3px 4px 0; font-size:11px; }
 .cr-report-footer { color:var(--cr-muted); font-size:11px; line-height:1.6; margin:18px 0 0; }
-#cr-camera-dialog { width:min(94vw,500px); border:0; border-radius:18px; padding:22px; color:#16312f; background:white; max-height:95vh; overflow:auto; }
-#cr-camera-dialog::backdrop { background:#102b28b3; }
-#cr-camera-dialog p { font-size:13px; color:#526b68; }
-#cr-reader { min-height:200px; }
 @media(max-width:760px) {
     .cr-shell { padding:0 14px; }
     .cr-workspace { grid-template-columns:1fr; gap:16px; }

@@ -2,7 +2,6 @@
     const D = window.CompanyReturnsData;
     const $ = id => document.getElementById('cr-' + id);
     let context = null, store = null, key = '', raw = null, editing = null;
-    let scanner = null, cameraStarting = false, cameraClosing = false, scanAccepted = false;
     const root = document.createElement('section');
     root.id = 'company-returns';
     root.hidden = true;
@@ -24,7 +23,7 @@
                         <div class="cr-code-row"><div><label for="cr-code">Barcode / 2D scanner input</label><input id="cr-code" autocomplete="off" placeholder="Scan or paste a barcode"></div><button type="button" id="cr-read">Read code</button></div>
                         <p id="cr-lookup" class="cr-muted">Check the package details before adding each line.</p>
                         <form id="cr-entry">
-                            <div class="cr-grid"><div><label for="cr-din">DIN (optional)</label><input id="cr-din" inputmode="numeric" pattern="[0-9]{8}" maxlength="8" placeholder="8-digit DIN"></div><div><label for="cr-product">Product name</label><input id="cr-product" required maxlength="200" autocomplete="off"></div><div><label for="cr-strength">Strength</label><input id="cr-strength" maxlength="100" placeholder="e.g. 10 mg"></div><div><label for="cr-format">Package size / format</label><input id="cr-format" maxlength="100" placeholder="e.g. 100 tablets"></div><div><label for="cr-lot">Lot number</label><input id="cr-lot" required maxlength="100" autocomplete="off"></div><div><label for="cr-expiry">Expiry month / year</label><input id="cr-expiry" type="month" required min="2000-01" max="2099-12"></div><div><label for="cr-quantity">Approximate quantity</label><input id="cr-quantity" type="number" required min="0.000001" max="1000000000" step="any" inputmode="decimal" placeholder="e.g. 75"></div><div><label for="cr-unit">Quantity unit</label><select id="cr-unit"></select></div></div>
+                            <div class="cr-grid"><div class="autocomplete-wrapper cr-autocomplete"><label for="cr-din">DIN (optional)</label><input id="cr-din" inputmode="numeric" pattern="[0-9]{8}" maxlength="8" placeholder="8-digit DIN" autocomplete="off"><div class="autocomplete-suggestions" id="cr-din-suggestions" style="display:none"></div></div><div class="autocomplete-wrapper cr-autocomplete"><label for="cr-product">Product name</label><input id="cr-product" required maxlength="200" autocomplete="off"><div class="autocomplete-suggestions" id="cr-product-suggestions" style="display:none"></div></div><div><label for="cr-strength">Strength</label><input id="cr-strength" maxlength="100" placeholder="e.g. 10 mg"></div><div><label for="cr-format">Package size / format</label><input id="cr-format" maxlength="100" placeholder="e.g. 100 tablets"></div><div><label for="cr-lot">Lot number</label><input id="cr-lot" required maxlength="100" autocomplete="off"></div><div><label for="cr-expiry">Expiry month / year</label><input id="cr-expiry" type="month" required min="2000-01" max="2099-12"></div><div><label for="cr-quantity">Approximate quantity</label><input id="cr-quantity" type="number" required min="0.000001" max="1000000000" step="any" inputmode="decimal" placeholder="e.g. 75"></div><div><label for="cr-unit">Quantity unit</label><select id="cr-unit"></select></div></div>
                             <div class="cr-actions"><button type="submit" id="cr-add" class="cr-primary">Add to report</button><button type="button" id="cr-clear">Clear entry</button><span class="cr-muted" id="cr-entry-note">Same product, lot, expiry and unit: quantities are added together.</span></div>
                         </form>
                     </section>
@@ -38,7 +37,7 @@
                 </div>
             </div>
         </div>
-        <dialog id="cr-camera-dialog" aria-labelledby="cr-camera-title"><h2 id="cr-camera-title">Scan the package barcode</h2><p>Use the 2D code to capture the lot and expiry automatically.</p><div id="cr-reader"></div><p id="cr-camera-status" role="status">Starting camera…</p><button type="button" id="cr-camera-close">Close camera</button></dialog>
+
     `;
     (document.getElementById('tab-company-returns') || document.body).append(root);
     D.units.forEach(unit => $('unit').add(new Option(unit, unit)));
@@ -68,6 +67,7 @@
     }
     function readEntry() { return Object.fromEntries(fields.map(field => [field, $(field).value])); }
     function fillEntry(entry = {}) {
+        context?.closeSuggestions?.();
         fields.forEach(field => { $(field).value = entry[field] ?? (field === 'unit' ? 'tablets' : ''); });
     }
     function saveDraft() {
@@ -156,14 +156,47 @@
     }
     $('read').addEventListener('click', () => resolveCode($('code').value));
     $('code').addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); resolveCode($('code').value); } });
+    function selectMedication(item) {
+        const clean = value => !value || value === 'N/A' ? '' : String(value);
+        const din = clean(item.din);
+        $('din').value = /^\d{1,8}$/.test(din) ? din.padStart(8, '0') : din;
+        $('product').value = clean(item.product);
+        $('strength').value = clean(item.dosage);
+        $('format').value = clean(item.format);
+        context?.closeSuggestions?.();
+        $('lookup').textContent = 'Product found in your catalogue. Verify all details against the package.';
+        saveDraft();
+        $('quantity').focus();
+    }
+    for (const field of ['din', 'product']) {
+        $(field).addEventListener('input', () => {
+            if (!context) return;
+            const value = $(field).value.trim();
+            const match = field === 'din' && D.findProduct(context.catalog(), value, 'din');
+            if (match) selectMedication({ ...match, dosage: match.strength });
+            else context.suggest?.(value, field, selectMedication);
+        });
+        $(field).addEventListener('keydown', event => {
+            const box = $(field + '-suggestions');
+            const rows = box.querySelectorAll('.autocomplete-suggestion');
+            if (event.key === 'Enter' && box.style.display !== 'none' && rows.length) {
+                event.preventDefault();
+                (box.querySelector('.highlighted') || rows[0]).click();
+                return;
+            }
+            context?.suggestionKeys?.(event, field);
+        });
+    }
     $('din').addEventListener('change', () => {
-        const din = $('din').value.trim();
-        const product = D.findProduct(context.catalog(), din, 'din');
-        if (product) {
-            ['din', 'product', 'strength', 'format'].forEach(field => { $(field).value = product[field]; });
-            $('lookup').textContent = 'DIN found in your catalogue. Verify all details against the package.';
-            saveDraft(); $('quantity').focus();
-        }
+        if (!context) return;
+        const match = D.findProduct(context.catalog(), $('din').value.trim(), 'din');
+        if (match) selectMedication({ ...match, dosage: match.strength });
+    });
+    $('code').addEventListener('input', () => {
+        if (context && D.findProduct(context.catalog(), $('code').value, 'barcode')) resolveCode($('code').value);
+    });
+    $('code').addEventListener('change', () => {
+        if (context && $('code').value.trim()) resolveCode($('code').value);
     });
     $('entry').addEventListener('input', saveDraft);
     $('entry').addEventListener('change', saveDraft);
@@ -205,44 +238,16 @@
         if (fields.some(field => field !== 'unit' && $(field).value) && !confirm('The current entry has not been added to the report. Print the saved lines only?')) return;
         window.print();
     });
-    async function stopCamera() {
-        cameraClosing = true;
-        if (scanner?.isScanning) {
-            try { await scanner.stop(); } catch (error) { status('Unable to stop the camera: ' + error.message, true); }
+    function stopCamera() { context?.stopScan?.(); }
+    function startCamera() {
+        if (!context?.scan) {
+            status('Open Company Returns inside Expires Labo to use the shared camera scanner.', true);
+            return;
         }
-        if (!cameraStarting) {
-            try { scanner?.clear(); } catch (_) {}
-            if ($('camera-dialog').open) $('camera-dialog').close();
-        }
-    }
-    async function startCamera() {
-        if (cameraStarting || scanner?.isScanning) return;
-        if (!window.isSecureContext) { status('The phone camera needs a secure HTTPS address. You can enter barcode details manually here.', true); return; }
-        if (!window.Html5Qrcode) { status('The scanner could not load. Refresh and try again, or enter the details manually.', true); return; }
-        cameraClosing = false; cameraStarting = true; scanAccepted = false;
-        $('camera-dialog').showModal(); $('camera-status').textContent = 'Starting camera…';
-        $('camera').disabled = true;
-        try {
-            const F = window.Html5QrcodeSupportedFormats;
-            scanner = new Html5Qrcode('cr-reader', { formatsToSupport: [F.DATA_MATRIX, F.UPC_A, F.UPC_E, F.EAN_13, F.EAN_8, F.CODE_128], verbose: false });
-            await scanner.start({ facingMode: 'environment' }, { fps: 15, qrbox: (w, h) => ({ width: Math.floor(Math.min(w, h) * 0.8), height: Math.floor(Math.min(w, h) * 0.8) }) },
-                decoded => {
-                    if (scanAccepted || cameraClosing || !context) return;
-                    scanAccepted = true;
-                    stopCamera().then(() => { if (context) resolveCode(decoded); });
-                }, () => {});
-            $('camera-status').textContent = 'Align the 2D code inside the frame.';
-        } catch (error) {
-            cameraClosing = true;
-            status('Unable to open the camera. Check camera permission, or enter the package details manually.', true);
-        } finally {
-            cameraStarting = false; $('camera').disabled = false;
-            if (cameraClosing) await stopCamera();
-        }
+        const owner = context;
+        context.scan(decoded => { if (context === owner) resolveCode(decoded); });
     }
     $('camera').addEventListener('click', startCamera);
-    $('camera-close').addEventListener('click', stopCamera);
-    $('camera-dialog').addEventListener('cancel', event => { event.preventDefault(); stopCamera(); });
     $('back').addEventListener('click', () => { if (!active() || saveDraft()) { const back = context.back; close(); back(); } });
     window.addEventListener('storage', event => {
         if (context && (event.key === key || event.key === null)) status('Reports changed in another tab. Reload this page before continuing.', true);
@@ -250,8 +255,10 @@
     document.addEventListener('visibilitychange', () => { if (document.hidden) stopCamera(); });
     window.addEventListener('pagehide', stopCamera);
     function close() {
+        stopCamera();
+        context?.closeSuggestions?.();
         context = null; store = null; key = ''; raw = null; editing = null;
-        stopCamera(); root.hidden = true; document.body.classList.remove('cr-active');
+        root.hidden = true; document.body.classList.remove('cr-active');
         $('lines').replaceChildren(); $('reports').replaceChildren(); $('pharmacy').textContent = ''; fillEntry(); $('company').value = '';
     }
     function open(options) {

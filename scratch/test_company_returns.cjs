@@ -111,7 +111,7 @@ test('service worker parses and cleans only older caches within its own app scop
     const listeners = {}, deleted = [];
     vm.runInNewContext(source, {
         self: { registration: { scope }, addEventListener: (name, handler) => { listeners[name] = handler; }, clients: { claim: async () => {} } },
-        caches: { keys: async () => ['expires-lab-v42' + suffix, 'expires-lab-v43' + suffix, 'expires-lab-v69', 'unrelated'], delete: async name => { deleted.push(name); } },
+        caches: { keys: async () => ['expires-lab-v42' + suffix, source.match(/const CACHE_NAME = '([^']+)'/)[1] + encodeURIComponent(scope), 'expires-lab-v69', 'unrelated'], delete: async name => { deleted.push(name); } },
         console
     });
     let pending;
