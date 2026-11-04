@@ -1516,6 +1516,32 @@
       to { opacity: 0; }
     }
 
+    .withdrawal-controls { margin-bottom: 20px; padding: 16px; border: 1px solid var(--border-color); border-radius: 12px; }
+    .withdrawal-control-fields { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 12px; }
+    .withdrawal-control-fields label { display: block; margin-bottom: 6px; font-weight: 600; }
+    .withdrawal-control-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-top: 12px; }
+    .withdrawal-control-actions label { display: flex; align-items: center; gap: 6px; margin: 0; }
+    .withdrawal-control-actions input[type="checkbox"], #withdrawal-print-options input { width: 18px; height: 18px; flex: 0 0 18px; margin: 0; }
+    .withdrawal-controls small, #withdrawal-result-count { color: var(--text-muted); }
+    .withdrawal-section-toggle { width: 100%; border: 0; text-align: left; cursor: pointer; font: inherit; gap: 12px; }
+    .withdrawal-section-toggle:focus-visible { outline: 3px solid var(--primary-color); outline-offset: -3px; }
+    .withdrawal-section-body[hidden] { display: none; }
+    #withdrawal-print-dialog { width: min(480px, calc(100% - 32px)); max-height: 85vh; overflow: auto; border: 1px solid var(--border-color); border-radius: 16px; padding: 24px; color: var(--text-color); background: var(--card-bg); }
+    #withdrawal-print-dialog::backdrop { background: rgba(15, 23, 42, .6); }
+    #withdrawal-print-options { display: grid; gap: 12px; margin: 20px 0; }
+    #withdrawal-print-options label { display: flex; align-items: center; gap: 8px; }
+    @media (max-width: 600px) { .withdrawal-control-fields { grid-template-columns: 1fr; } }
+    @media print {
+      .withdrawal-controls, #withdrawal-print-dialog, #tab-retrait > .stats-container,
+      #tab-retrait > .card, #tab-retrait .grid-dashboard > div:last-child,
+      #past-due-alert-container, .mobile-bottom-nav, .mobile-nav, #mobile-section-header,
+      #batch-action-bar, .batch-select-cb { display: none !important; }
+      #tab-retrait .grid-dashboard { display: block !important; }
+      #checklist-container .withdrawal-section-body[hidden] { display: block !important; }
+      #checklist-container .withdrawal-print-excluded { display: none !important; }
+      .withdrawal-section-arrow { display: none; }
+    }
+
     /* PRINT LAYOUT (Pour imprimer la feuille de retrait V3.9.5) */
     .print-checkboxes {
       display: none;
@@ -2895,14 +2921,33 @@
               <button class="btn-circle" id="next-target-month" title="Mois suivant">&gt;</button>
             </div>
             <div style="display: flex; gap: 8px;">
-              <button class="btn btn-secondary" onclick="window.print()" style="padding: 8px 16px; font-size: 0.9rem;">
+              <button class="btn btn-secondary" id="withdrawal-print-open" style="padding: 8px 16px; font-size: 0.9rem;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="margin-right: 4px;"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
-                Imprimer la fiche
+                Imprimer des sections
               </button>
               <button class="btn" id="btn-export-csv-month" style="padding: 8px 16px; font-size: 0.9rem;">
                 Exporter CSV
               </button>
             </div>
+          </div>
+
+          <div class="withdrawal-controls">
+            <div class="withdrawal-control-fields">
+              <div><label for="withdrawal-search">Rechercher un médicament</label>
+                <input id="withdrawal-search" type="search" class="form-control" placeholder="Nom, DIN, teneur ou format" autocomplete="off">
+              </div>
+              <div><label for="withdrawal-section">Accéder à une section</label>
+                <select id="withdrawal-section" class="form-control"><option value="">Choisir une section</option></select>
+              </div>
+            </div>
+            <div class="withdrawal-control-actions">
+              <label><input type="checkbox" id="withdrawal-show-removed" checked> Afficher les produits retirés</label>
+              <label><input type="checkbox" id="withdrawal-show-sold" checked> Afficher les produits vendus</label>
+              <button type="button" class="btn btn-secondary" id="withdrawal-expand">Tout déplier</button>
+              <button type="button" class="btn btn-secondary" id="withdrawal-collapse">Tout replier</button>
+            </div>
+            <p id="withdrawal-result-count" role="status" aria-live="polite"></p>
+            <small>Les filtres s’appliquent au mois sélectionné. Les totaux mensuels et les alertes urgentes ne sont pas filtrés.</small>
           </div>
 
           <div id="past-due-alert-container"></div>
@@ -3527,6 +3572,21 @@
   </div>
 
   <!-- MODAL DE CHECKOUT (RENSEIGNER LES INITIALES LORS DU RETRAIT/VENTE) (V2/V3) -->
+  <dialog id="withdrawal-print-dialog" aria-labelledby="withdrawal-print-title">
+    <h2 id="withdrawal-print-title">Imprimer les sections de retrait</h2>
+    <p id="withdrawal-print-scope"></p>
+    <p>Seuls les produits correspondant à la recherche et aux filtres de statut actuels seront imprimés. Les sections sélectionnées seront imprimées même si elles sont repliées.</p>
+    <div class="withdrawal-control-actions">
+      <button type="button" class="btn btn-secondary" id="withdrawal-print-all">Tout sélectionner</button>
+      <button type="button" class="btn btn-secondary" id="withdrawal-print-none">Effacer la sélection</button>
+    </div>
+    <div id="withdrawal-print-options"></div>
+    <div class="withdrawal-control-actions">
+      <button type="button" class="btn btn-secondary" id="withdrawal-print-cancel">Annuler</button>
+      <button type="button" class="btn" id="withdrawal-print-confirm">Imprimer les sections sélectionnées</button>
+    </div>
+  </dialog>
+
   <div class="modal-overlay" id="checkout-modal-overlay">
     <div class="modal">
       <div class="modal-header">
@@ -3867,6 +3927,8 @@
       sorting: { key: 'expiryDate', direction: 'asc' },
       sectionsProgress: {}
     };
+
+    const collapsedWithdrawalSections = new Set();
 
     let localCatalog = [];
     let tempScannedUPC = "";
@@ -5027,6 +5089,8 @@
           }
         }
       });
+
+      setupWithdrawalControls();
 
       // Navigation des mois de retrait
       document.getElementById("prev-target-month").addEventListener("click", () => {
@@ -6388,6 +6452,99 @@
     // ----------------------------------------------------
     // RETRAIT MENSUEL - VUE ET ACTIONS (V2 / V3)
     // ----------------------------------------------------
+    function normalizeWithdrawalSearch(value) {
+      return String(value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+    }
+
+    function filterWithdrawalProducts(products) {
+      const terms = normalizeWithdrawalSearch(document.getElementById('withdrawal-search').value).split(/\s+/).filter(Boolean);
+      const showRemoved = document.getElementById('withdrawal-show-removed').checked;
+      const showSold = document.getElementById('withdrawal-show-sold').checked;
+      return products.filter(product => {
+        if (product.status === 'removed' && !showRemoved) return false;
+        if (product.status === 'sold' && !showSold) return false;
+        const text = normalizeWithdrawalSearch([product.product, product.din, product.dosage, product.format].join(' '));
+        return terms.every(term => text.includes(term));
+      });
+    }
+
+    function setWithdrawalSectionExpanded(group, expanded) {
+      const name = group.dataset.section;
+      if (expanded) collapsedWithdrawalSections.delete(name);
+      else collapsedWithdrawalSections.add(name);
+      group.querySelector('.withdrawal-section-body').hidden = !expanded;
+      group.querySelector('button').setAttribute('aria-expanded', String(expanded));
+      group.querySelector('.withdrawal-section-arrow').textContent = expanded ? '▼ ' : '▶ ';
+    }
+
+    function setupWithdrawalControls() {
+      // Clear bulk selections when filters change so hidden products cannot be acted on.
+      const refresh = () => {
+        selectedBatchIds.clear();
+        updateBatchActionBar();
+        renderChecklist();
+      };
+      document.getElementById('withdrawal-search').addEventListener('input', refresh);
+      for (const id of ['withdrawal-show-removed', 'withdrawal-show-sold']) {
+        document.getElementById(id).addEventListener('change', refresh);
+      }
+      document.getElementById('withdrawal-section').addEventListener('change', event => {
+        const group = Array.from(document.querySelectorAll('#checklist-container .section-group'))
+          .find(item => item.dataset.section === event.target.value);
+        if (!group) return;
+        setWithdrawalSectionExpanded(group, true);
+        group.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        group.querySelector('button').focus({ preventScroll: true });
+        event.target.value = '';
+      });
+      for (const [id, expanded] of [['withdrawal-expand', true], ['withdrawal-collapse', false]]) {
+        document.getElementById(id).addEventListener('click', () => {
+          document.querySelectorAll('#checklist-container .section-group').forEach(group => setWithdrawalSectionExpanded(group, expanded));
+        });
+      }
+      const dialog = document.getElementById('withdrawal-print-dialog');
+      const options = document.getElementById('withdrawal-print-options');
+      const confirm = document.getElementById('withdrawal-print-confirm');
+      const updatePrintButton = () => { confirm.disabled = !options.querySelector('input:checked'); };
+      document.getElementById('withdrawal-print-open').addEventListener('click', () => {
+        resetPrint();
+        options.replaceChildren();
+        document.getElementById('withdrawal-print-scope').textContent =
+          document.getElementById('target-month-label').textContent + ' — ' + document.getElementById('withdrawal-result-count').textContent;
+        document.querySelectorAll('#checklist-container .section-group').forEach(group => {
+          const label = document.createElement('label');
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.value = group.dataset.section;
+          checkbox.checked = true;
+          label.append(checkbox, document.createTextNode(group.dataset.section + ' (' + group.querySelectorAll('.product-row').length + ')'));
+          options.appendChild(label);
+        });
+        if (!options.children.length) options.textContent = 'Aucune section à imprimer. Modifiez le mois ou les filtres.';
+        updatePrintButton();
+        dialog.showModal();
+      });
+      options.addEventListener('change', updatePrintButton);
+      for (const [id, checked] of [['withdrawal-print-all', true], ['withdrawal-print-none', false]]) {
+        document.getElementById(id).addEventListener('click', () => {
+          options.querySelectorAll('input').forEach(input => { input.checked = checked; });
+          updatePrintButton();
+        });
+      }
+      document.getElementById('withdrawal-print-cancel').addEventListener('click', () => dialog.close());
+      const resetPrint = () => document.querySelectorAll('.withdrawal-print-excluded').forEach(group => group.classList.remove('withdrawal-print-excluded'));
+      window.addEventListener('afterprint', resetPrint);
+      confirm.addEventListener('click', () => {
+        const selected = new Set(Array.from(options.querySelectorAll('input:checked'), input => input.value));
+        if (!selected.size) return;
+        document.querySelectorAll('#checklist-container .section-group').forEach(group => {
+          group.classList.toggle('withdrawal-print-excluded', !selected.has(group.dataset.section));
+        });
+        dialog.close();
+        try { window.print(); } catch (error) { resetPrint(); throw error; }
+      });
+    }
+
     function renderChecklist() {
       const container = document.getElementById("checklist-container");
       const pastDueContainer = document.getElementById("past-due-alert-container");
@@ -6505,6 +6662,10 @@
       document.getElementById("stat-remaining-count").textContent = remainingCount;
 
       if (totalCount === 0) {
+        selectedBatchIds.clear();
+        updateBatchActionBar();
+        document.getElementById('withdrawal-result-count').textContent = '0 produit affiché sur 0';
+        document.getElementById('withdrawal-section').replaceChildren(new Option('Choisir une section', ''));
         container.innerHTML = `
           <div style="text-align: center; padding: 40px; color: var(--text-muted);">
             <svg xmlns="http://www.w3.org/2000/svg" style="width: 48px; height: 48px; margin: 0 auto 12px; opacity: 0.5;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -6517,29 +6678,60 @@
         return;
       }
 
+      // Filter the checklist only; monthly totals and urgent alerts keep their full scope.
+      const visibleTarget = filterWithdrawalProducts(allTarget);
+      const visibleIds = new Set(visibleTarget.filter(p => p.status === 'active').map(p => p.id));
+      for (const id of selectedBatchIds) if (!visibleIds.has(id)) selectedBatchIds.delete(id);
+      updateBatchActionBar();
+      document.getElementById('withdrawal-result-count').textContent = `${visibleTarget.length} produit(s) affiché(s) sur ${totalCount}`;
+      const sectionSelect = document.getElementById('withdrawal-section');
+      sectionSelect.replaceChildren(new Option('Choisir une section', ''));
+
       // Grouper par section
-      const grouped = {};
-      allTarget.forEach(p => {
+      const grouped = Object.create(null);
+      visibleTarget.forEach(p => {
         if (!grouped[p.section]) grouped[p.section] = [];
         grouped[p.section].push(p);
       });
 
       const sortedSections = Object.keys(grouped).sort();
 
-      sortedSections.forEach(secName => {
+      if (!visibleTarget.length) {
+        const message = document.createElement('p');
+        message.textContent = 'Aucun produit ne correspond à ces filtres. Effacez la recherche ou affichez les produits retirés et vendus.';
+        container.appendChild(message);
+      }
+      sortedSections.forEach((secName, index) => {
+        sectionSelect.add(new Option(secName, secName));
         const secGroup = document.createElement("div");
         secGroup.className = "section-group";
 
-        const secHead = document.createElement("div");
-        secHead.className = "section-header";
+        secGroup.dataset.section = secName;
+        const secHead = document.createElement("button");
+        secHead.type = 'button';
+        secHead.className = "section-header withdrawal-section-toggle";
         const totalInSec = grouped[secName].length;
         const activeInSec = grouped[secName].filter(p => p.status === 'active').length;
 
-        secHead.innerHTML = `
-          <span>${secName}</span>
-          <span class="section-badge">${totalInSec - activeInSec} / ${totalInSec} résolus</span>
-        `;
+        const sectionTitle = document.createElement('span');
+        const arrow = document.createElement('span');
+        arrow.className = 'withdrawal-section-arrow';
+        arrow.setAttribute('aria-hidden', 'true');
+        sectionTitle.append(arrow, document.createTextNode(secName));
+        const badge = document.createElement('span');
+        badge.className = 'section-badge';
+        badge.textContent = `${totalInSec - activeInSec} / ${totalInSec} résolus`;
+        secHead.append(sectionTitle, badge);
         secGroup.appendChild(secHead);
+        const sectionBody = document.createElement('div');
+        sectionBody.className = 'withdrawal-section-body';
+        sectionBody.id = `withdrawal-section-body-${index}`;
+        secHead.setAttribute('aria-controls', sectionBody.id);
+        secGroup.appendChild(sectionBody);
+        setWithdrawalSectionExpanded(secGroup, !collapsedWithdrawalSections.has(secName));
+        secHead.addEventListener('click', () => {
+          setWithdrawalSectionExpanded(secGroup, sectionBody.hidden);
+        });
 
         grouped[secName].forEach(prod => {
           const row = document.createElement("div");
@@ -6636,7 +6828,7 @@
             });
           }
 
-          secGroup.appendChild(row);
+          sectionBody.appendChild(row);
         });
 
         container.appendChild(secGroup);
