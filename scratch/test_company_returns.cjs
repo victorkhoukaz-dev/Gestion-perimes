@@ -91,7 +91,7 @@ test('navigation activates both Returns buttons, opens the embedded tab, and blo
     });
     buttons[1].click();
     assert.equal(opened, 1);
-    assert.equal(header.textContent, 'Company Returns');
+    assert.equal(header.textContent, 'Retours fabricants');
     assert.equal(buttons.filter(button => button.id === 'tab-company-returns' && button.classList.contains('active')).length, 2);
     assert.ok(contents['tab-company-returns'].classList.contains('active'));
     allowed = false;

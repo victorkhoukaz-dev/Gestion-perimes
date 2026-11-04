@@ -2765,11 +2765,11 @@
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
-          Inventaire & Recherche
+          Inventaire
         </button>
         <button class="tab-btn" data-tab="tab-company-returns">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 10H4l5-5M4 10h11a5 5 0 010 10h-3"/></svg>
-          Company Returns
+          Retours fabricants
         </button>
         <button class="tab-btn" data-tab="tab-config">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -2810,9 +2810,9 @@
           </svg>
           <span>Inventaire</span>
         </button>
-        <button class="mobile-nav-item" data-tab="tab-company-returns" aria-label="Company Returns">
+        <button class="mobile-nav-item" data-tab="tab-company-returns" aria-label="Retours fabricants">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 10H4l5-5M4 10h11a5 5 0 010 10h-3"/></svg>
-          <span>Returns</span>
+          <span>Retours</span>
         </button>
         <button class="mobile-nav-item" data-tab="tab-config">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -4036,11 +4036,13 @@
       const defaultTabId = (window.innerWidth <= 768) ? "tab-tournee" : "tab-retrait";
       const defaultBtn = document.querySelector(`.tab-btn[data-tab="${defaultTabId}"], .mobile-nav-item[data-tab="${defaultTabId}"]`);
       if (defaultBtn) defaultBtn.click();
+      checkAndShowTutorial();
     }
 
     function returnToHub() {
       if (window.CompanyReturns && !window.CompanyReturns.canLeave()) return;
       window.CompanyReturns?.close();
+      document.getElementById("tutorial-modal-overlay")?.classList.remove("active");
       document.getElementById("main-app-wrapper").style.display = "none";
       document.getElementById("hub-landing-container").style.display = "block";
     }
@@ -4266,7 +4268,6 @@
         hideAuthScreen();
         await loadDataFromSupabase();
         await checkAndMigrateLocalData();
-        checkAndShowTutorial();
       } catch (err) {
         console.error("Erreur de profil", err);
         showError("Erreur d'authentification : " + formatErrorMessage(err));
@@ -4972,8 +4973,8 @@
           const tabTitles = {
             "tab-tournee": "📝 Saisie / Tournée",
             "tab-retrait": "📋 Retrait Mensuel",
-            "tab-inventaire": "📦 Inventaire & Recherche",
-            "tab-company-returns": "Company Returns",
+            "tab-inventaire": "📦 Inventaire",
+            "tab-company-returns": "Retours fabricants",
             "tab-config": "⚙️ Configuration",
             "tab-guide": "📖 Guide & Tutoriel"
           };
@@ -8504,6 +8505,7 @@
     // COMPOSANT: TUTORIEL ET GUIDE INTERACTIF (V3.5)
     // ----------------------------------------------------
     function checkAndShowTutorial() {
+      if (document.getElementById("main-app-wrapper").style.display !== "block") return;
       const skip = localStorage.getItem("exp_skip_tutorial");
       if (skip !== "true") {
         const overlay = document.getElementById("tutorial-modal-overlay");
@@ -8555,6 +8557,7 @@
     // COMPOSANT: TUTORIEL ET GUIDE INTERACTIF (V3.5)
     // ----------------------------------------------------
     function checkAndShowTutorial() {
+      if (document.getElementById("main-app-wrapper").style.display !== "block") return;
       const skip = localStorage.getItem("exp_skip_tutorial");
       if (skip !== "true") {
         const overlay = document.getElementById("tutorial-modal-overlay");

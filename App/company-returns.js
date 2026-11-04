@@ -8,11 +8,11 @@
     root.innerHTML = `
         <div class="cr-shell">
             <div class="cr-toolbar"><button type="button" id="cr-back">← PharmaOps</button><span id="cr-pharmacy"></span><span class="cr-badge">Saved on this device</span></div>
-            <div class="cr-heading"><p class="cr-eyebrow">EXPIRED PRODUCTS</p><h1>Company Returns</h1><p>One company. Scan each package, add an approximate quantity, and prepare a report for your representative.</p></div>
+            <div class="cr-heading"><p class="cr-eyebrow">EXPIRED PRODUCTS</p><h1>Retours fabricants</h1><p>One company. Scan each package, add an approximate quantity, and prepare a report for your representative.</p></div>
             <p class="cr-local-note">Drafts stay in this browser on this device. Print or save a PDF before clearing browser data. Reports are separate from the expiry inventory.</p>
             <p id="cr-status" role="status" aria-live="polite"></p>
             <div class="cr-workspace" id="cr-workspace">
-                <aside class="cr-panel cr-report-picker"><div class="cr-section-heading"><h2>Your reports</h2><button id="cr-new" type="button">+ New report</button></div><label for="cr-reports">Open a saved report</label><select id="cr-reports"></select><p id="cr-saved" class="cr-muted"></p></aside>
+                <aside class="cr-panel cr-report-picker"><div class="cr-section-heading"><h2>Your reports</h2><button id="cr-new" type="button">+ New report</button></div><label for="cr-reports">Open a saved report</label><select id="cr-reports"></select><div class="cr-report-actions"><button id="cr-save" type="button" class="cr-primary">Save draft</button><button id="cr-delete" type="button" class="cr-danger">Delete report</button></div><p id="cr-saved" class="cr-muted"></p></aside>
                 <div class="cr-main">
                     <section class="cr-panel">
                         <div class="cr-section-heading"><h2>1. Choose the company</h2><span class="cr-step">REPORT DETAILS</span></div>
@@ -102,6 +102,10 @@
         const report = active();
         $('reports').replaceChildren(...store.reports.map(item => new Option(item.company || 'Untitled report', item.id)));
         $('reports').value = store.activeId;
+        $('reports').disabled = !store.reports.length;
+        $('save').disabled = !report;
+        $('delete').disabled = !report;
+        for (const id of ['company', 'code', 'camera', 'read', 'din', 'product', 'strength', 'format', 'lot', 'expiry', 'quantity', 'unit', 'add', 'clear']) $(id).disabled = !report;
         $('company').value = report?.company || '';
         fillEntry(report?.entry);
         resetEdit();
@@ -123,7 +127,7 @@
             row.append(actions); $('lines').append(row);
         }
         $('empty').hidden = !!report?.lines.length;
-        $('saved').textContent = report ? 'Saved on this device · ' + stamp(report.updatedAt) : '';
+        $('saved').textContent = report ? 'Saved on this device · ' + stamp(report.updatedAt) : 'No reports yet. Click “New report” to begin.';
         updateHeading();
     }
     function editLine(line) {
@@ -222,9 +226,23 @@
         fillEntry(); resetEdit(); saveDraft(); $('code').focus();
     });
     $('new').addEventListener('click', () => {
-        if (!saveDraft()) return;
+        if (active() && !saveDraft()) return;
         const next = copy(store); newReport(next);
         if (commit(next)) { render(); status('New report created. Your earlier reports are kept.'); $('company').focus(); }
+    });
+    $('save').addEventListener('click', () => {
+        if (!active()) { status('Create a report first.'); return; }
+        if (saveDraft()) status('Draft saved on this device. You can add products later.');
+    });
+    $('delete').addEventListener('click', () => {
+        const report = active();
+        if (!report) return;
+        const name = report.company || 'Untitled report';
+        if (!confirm('Delete "' + name + '" and all of its saved product lines? This cannot be undone.')) return;
+        const next = copy(store);
+        next.reports = next.reports.filter(item => item.id !== report.id);
+        next.activeId = next.reports[0]?.id || null;
+        if (commit(next)) { render(); status('Report deleted.'); }
     });
     $('reports').addEventListener('change', () => {
         const selected = $('reports').value;
