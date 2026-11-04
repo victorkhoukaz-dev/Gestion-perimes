@@ -1516,6 +1516,19 @@
       to { opacity: 0; }
     }
 
+    .withdrawal-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 12px; }
+    .withdrawal-controls label { display: flex; align-items: center; gap: 6px; margin: 0; }
+    .withdrawal-controls input[type="checkbox"] { width: 18px; height: 18px; flex: 0 0 18px; margin: 0; }
+    .withdrawal-section-navigation { margin-top: 12px; }
+    .withdrawal-section-navigation select { width: 100%; }
+    .withdrawal-section-toggle { width: 100%; border: 0; text-align: left; cursor: pointer; font: inherit; font-weight: 700; gap: 12px; }
+    .withdrawal-section-toggle:focus-visible { outline: 3px solid var(--primary-color); outline-offset: -3px; }
+    .withdrawal-section-body[hidden] { display: none; }
+    @media print {
+      #checklist-container .withdrawal-section-body[hidden] { display: block !important; }
+      .withdrawal-section-arrow { display: none; }
+    }
+
     /* PRINT LAYOUT (Pour imprimer la feuille de retrait V3.9.5) */
     .print-checkboxes {
       display: none;
@@ -2909,6 +2922,18 @@
             <label for="withdrawal-search">Rechercher un médicament</label>
             <input type="search" id="withdrawal-search" class="form-control" placeholder="Nom, DIN, teneur ou format" autocomplete="off" aria-describedby="withdrawal-search-help withdrawal-search-count">
             <small id="withdrawal-search-help">Recherche dans le mois sélectionné. Les totaux mensuels et les alertes urgentes ne sont pas filtrés. L’impression suit les résultats affichés.</small>
+            <div class="withdrawal-controls">
+              <label><input type="checkbox" id="withdrawal-show-removed" checked> Afficher les produits retirés</label>
+              <label><input type="checkbox" id="withdrawal-show-sold" checked> Afficher les produits vendus</label>
+            </div>
+            <div class="withdrawal-section-navigation">
+              <label for="withdrawal-section">Accéder à une section</label>
+              <select id="withdrawal-section" class="form-control"><option value="">Choisir une section</option></select>
+              <div class="withdrawal-controls">
+                <button type="button" class="btn btn-secondary" id="withdrawal-expand">Tout déplier</button>
+                <button type="button" class="btn btn-secondary" id="withdrawal-collapse">Tout replier</button>
+              </div>
+            </div>
             <p id="withdrawal-search-count" role="status" aria-live="polite" style="margin: 8px 0 0;"></p>
           </div>
 
@@ -3874,6 +3899,8 @@
       sorting: { key: 'expiryDate', direction: 'asc' },
       sectionsProgress: {}
     };
+
+    const collapsedWithdrawalSections = new Set();
 
     let localCatalog = [];
     let tempScannedUPC = "";
@@ -5041,6 +5068,28 @@
         updateBatchActionBar();
         renderChecklist();
       });
+
+      for (const id of ['withdrawal-show-removed', 'withdrawal-show-sold']) {
+        document.getElementById(id).addEventListener('change', () => {
+          selectedBatchIds.clear();
+          updateBatchActionBar();
+          renderChecklist();
+        });
+      }
+      document.getElementById('withdrawal-section').addEventListener('change', event => {
+        const group = Array.from(document.querySelectorAll('#checklist-container .section-group'))
+          .find(item => item.dataset.section === event.target.value);
+        if (!group) return;
+        setWithdrawalSectionExpanded(group, true);
+        group.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        group.querySelector('.withdrawal-section-toggle').focus({ preventScroll: true });
+        event.target.value = '';
+      });
+      for (const [id, expanded] of [['withdrawal-expand', true], ['withdrawal-collapse', false]]) {
+        document.getElementById(id).addEventListener('click', () => {
+          document.querySelectorAll('#checklist-container .section-group').forEach(group => setWithdrawalSectionExpanded(group, expanded));
+        });
+      }
 
       // Navigation des mois de retrait
       document.getElementById("prev-target-month").addEventListener("click", () => {
@@ -6409,6 +6458,14 @@
       return terms.every(term => text.includes(term));
     }
 
+    function setWithdrawalSectionExpanded(group, expanded) {
+      if (expanded) collapsedWithdrawalSections.delete(group.dataset.section);
+      else collapsedWithdrawalSections.add(group.dataset.section);
+      group.querySelector('.withdrawal-section-body').hidden = !expanded;
+      group.querySelector('.withdrawal-section-toggle').setAttribute('aria-expanded', String(expanded));
+      group.querySelector('.withdrawal-section-arrow').textContent = expanded ? '▼ ' : '▶ ';
+    }
+
     function renderChecklist() {
       const container = document.getElementById("checklist-container");
       const pastDueContainer = document.getElementById("past-due-alert-container");
@@ -6526,7 +6583,13 @@
       document.getElementById("stat-remaining-count").textContent = remainingCount;
 
       const query = document.getElementById('withdrawal-search').value;
-      const visibleTarget = allTarget.filter(product => matchesWithdrawalSearch(product, query));
+      const showRemoved = document.getElementById('withdrawal-show-removed').checked;
+      const showSold = document.getElementById('withdrawal-show-sold').checked;
+      const visibleTarget = allTarget.filter(product => matchesWithdrawalSearch(product, query)
+        && (product.status !== 'removed' || showRemoved)
+        && (product.status !== 'sold' || showSold));
+      const sectionSelect = document.getElementById('withdrawal-section');
+      sectionSelect.replaceChildren(new Option('Choisir une section', ''));
       document.getElementById('withdrawal-search-count').textContent = `${visibleTarget.length} produit(s) affiché(s) sur ${totalCount}`;
       const visibleActiveIds = new Set(visibleTarget.filter(product => product.status === 'active').map(product => product.id));
       for (const id of selectedBatchIds) if (!visibleActiveIds.has(id)) selectedBatchIds.delete(id);
@@ -6547,13 +6610,13 @@
 
       if (visibleTarget.length === 0) {
         const message = document.createElement('p');
-        message.textContent = 'Aucun produit ne correspond à cette recherche. Effacez la recherche pour afficher tous les produits du mois.';
+        message.textContent = 'Aucun produit ne correspond aux filtres. Effacez la recherche ou affichez les produits retirés et vendus.';
         container.appendChild(message);
         return;
       }
 
       // Grouper par section
-      const grouped = {};
+      const grouped = Object.create(null);
       visibleTarget.forEach(p => {
         if (!grouped[p.section]) grouped[p.section] = [];
         grouped[p.section].push(p);
@@ -6561,20 +6624,35 @@
 
       const sortedSections = Object.keys(grouped).sort();
 
-      sortedSections.forEach(secName => {
+      sortedSections.forEach((secName, index) => {
+        sectionSelect.add(new Option(secName, secName));
         const secGroup = document.createElement("div");
         secGroup.className = "section-group";
 
-        const secHead = document.createElement("div");
-        secHead.className = "section-header";
+        secGroup.dataset.section = secName;
+        const secHead = document.createElement("button");
+        secHead.type = 'button';
+        secHead.className = "section-header withdrawal-section-toggle";
         const totalInSec = grouped[secName].length;
         const activeInSec = grouped[secName].filter(p => p.status === 'active').length;
 
-        secHead.innerHTML = `
-          <span>${secName}</span>
-          <span class="section-badge">${totalInSec - activeInSec} / ${totalInSec} résolus</span>
-        `;
+        const title = document.createElement('span');
+        const arrow = document.createElement('span');
+        arrow.className = 'withdrawal-section-arrow';
+        arrow.setAttribute('aria-hidden', 'true');
+        title.append(arrow, document.createTextNode(secName));
+        const badge = document.createElement('span');
+        badge.className = 'section-badge';
+        badge.textContent = `${totalInSec - activeInSec} / ${totalInSec} résolus`;
+        secHead.append(title, badge);
         secGroup.appendChild(secHead);
+        const sectionBody = document.createElement('div');
+        sectionBody.className = 'withdrawal-section-body';
+        sectionBody.id = `withdrawal-section-body-${index}`;
+        secHead.setAttribute('aria-controls', sectionBody.id);
+        secGroup.appendChild(sectionBody);
+        setWithdrawalSectionExpanded(secGroup, !collapsedWithdrawalSections.has(secName));
+        secHead.addEventListener('click', () => setWithdrawalSectionExpanded(secGroup, sectionBody.hidden));
 
         grouped[secName].forEach(prod => {
           const row = document.createElement("div");
@@ -6671,7 +6749,7 @@
             });
           }
 
-          secGroup.appendChild(row);
+          sectionBody.appendChild(row);
         });
 
         container.appendChild(secGroup);
