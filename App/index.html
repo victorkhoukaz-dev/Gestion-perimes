@@ -2905,6 +2905,13 @@
             </div>
           </div>
 
+          <div class="filter-bar" style="display: block; margin-bottom: 20px;">
+            <label for="withdrawal-search">Rechercher un médicament</label>
+            <input type="search" id="withdrawal-search" class="form-control" placeholder="Nom, DIN, teneur ou format" autocomplete="off" aria-describedby="withdrawal-search-help withdrawal-search-count">
+            <small id="withdrawal-search-help">Recherche dans le mois sélectionné. Les totaux mensuels et les alertes urgentes ne sont pas filtrés. L’impression suit les résultats affichés.</small>
+            <p id="withdrawal-search-count" role="status" aria-live="polite" style="margin: 8px 0 0;"></p>
+          </div>
+
           <div id="past-due-alert-container"></div>
 
           <div id="checklist-container">
@@ -5032,6 +5039,13 @@
         }
       });
 
+      // Medication search changes only the checklist view.
+      document.getElementById('withdrawal-search').addEventListener('input', () => {
+        selectedBatchIds.clear();
+        updateBatchActionBar();
+        renderChecklist();
+      });
+
       // Navigation des mois de retrait
       document.getElementById("prev-target-month").addEventListener("click", () => {
         state.targetMonthDate.setMonth(state.targetMonthDate.getMonth() - 1);
@@ -6392,6 +6406,13 @@
     // ----------------------------------------------------
     // RETRAIT MENSUEL - VUE ET ACTIONS (V2 / V3)
     // ----------------------------------------------------
+    function matchesWithdrawalSearch(product, query) {
+      const normalize = value => String(value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+      const terms = normalize(query).split(/\s+/).filter(Boolean);
+      const text = normalize([product.product, product.din, product.dosage, product.format].join(' '));
+      return terms.every(term => text.includes(term));
+    }
+
     function renderChecklist() {
       const container = document.getElementById("checklist-container");
       const pastDueContainer = document.getElementById("past-due-alert-container");
@@ -6508,6 +6529,13 @@
       document.getElementById("stat-removed-count").textContent = resolvedCount;
       document.getElementById("stat-remaining-count").textContent = remainingCount;
 
+      const query = document.getElementById('withdrawal-search').value;
+      const visibleTarget = allTarget.filter(product => matchesWithdrawalSearch(product, query));
+      document.getElementById('withdrawal-search-count').textContent = `${visibleTarget.length} produit(s) affiché(s) sur ${totalCount}`;
+      const visibleActiveIds = new Set(visibleTarget.filter(product => product.status === 'active').map(product => product.id));
+      for (const id of selectedBatchIds) if (!visibleActiveIds.has(id)) selectedBatchIds.delete(id);
+      updateBatchActionBar();
+
       if (totalCount === 0) {
         container.innerHTML = `
           <div style="text-align: center; padding: 40px; color: var(--text-muted);">
@@ -6521,9 +6549,16 @@
         return;
       }
 
+      if (visibleTarget.length === 0) {
+        const message = document.createElement('p');
+        message.textContent = 'Aucun produit ne correspond à cette recherche. Effacez la recherche pour afficher tous les produits du mois.';
+        container.appendChild(message);
+        return;
+      }
+
       // Grouper par section
       const grouped = {};
-      allTarget.forEach(p => {
+      visibleTarget.forEach(p => {
         if (!grouped[p.section]) grouped[p.section] = [];
         grouped[p.section].push(p);
       });
