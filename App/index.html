@@ -3861,6 +3861,7 @@
   <!-- LOGIQUE JAVASCRIPT DE L'APPLICATION -->
   <script src="html5-qrcode.min.js"></script>
   <script src="company-returns-data.js"></script>
+  <script src="company-returns-cloud.js"></script>
   <script src="company-returns.js"></script>
   <script src="supabase.js?v=2"></script>
   <script>
@@ -4108,6 +4109,8 @@
         return;
       }
       window.CompanyReturns.open({
+        client: supabaseClient,
+        userId: sessionUser.id,
         pharmacyId: sessionPharmacy.id,
         pharmacyName: sessionPharmacy.name,
         catalog: () => localCatalog,
