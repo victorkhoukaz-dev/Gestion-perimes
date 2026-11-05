@@ -5559,6 +5559,7 @@
             analyzeLabelWithGemini(evt.target.result);
           };
           reader.readAsDataURL(file);
+          e.target.value = ""; // Allow retrying the same photo after an error.
         });
       }
 
@@ -9109,155 +9110,155 @@
     // ====================================================
     // ANALYSE PHOTO ÉTIQUETTE GEMINI VISION (Étape 2b)
     // ====================================================
-    const DEFAULT_GEMINI_API_KEY = atob("QVEuQWI8Uk42TEIyNjRuME02LVh6TUtFcVZaakVXQ0lZUmNBcHBSM1hxbGV2RTBhTTZuMGc=");
+    const geminiSessionKeys = new Map();
+    let geminiAnalysisInProgress = false;
+
+    function getGeminiStorageKey() {
+      return `gemini_api_key:${sessionPharmacy?.id || 'local'}`;
+    }
 
     async function getEffectiveGeminiKey() {
-      // Purger automatiquement les anciennes clés bloquées en cache
-      const cached = localStorage.getItem("gemini_api_key");
-      if (cached && (cached.includes("AQ.Ab8RN6JPI") || cached.length < 20)) {
-        localStorage.removeItem("gemini_api_key");
-      }
+      const storageKey = getGeminiStorageKey();
+      const sessionKey = geminiSessionKeys.get(storageKey);
+      if (sessionKey) return sessionKey;
+      try {
+        const saved = localStorage.getItem(storageKey);
+        if (saved?.trim()) return saved.trim();
+      } catch (_) {}
+      // Keep existing pharmacy and browser settings readable; never overwrite them silently.
+      if (sessionPharmacy?.gemini_api_key?.trim()) return sessionPharmacy.gemini_api_key.trim();
+      try { return localStorage.getItem('gemini_api_key')?.trim() || ''; }
+      catch (_) { return ''; }
+    }
 
-      if (sessionPharmacy && sessionPharmacy.gemini_api_key && sessionPharmacy.gemini_api_key.trim() !== "" && !sessionPharmacy.gemini_api_key.includes("AQ.Ab8RN6JPI")) {
-        return sessionPharmacy.gemini_api_key.trim();
-      }
-      const localKey = localStorage.getItem("gemini_api_key");
-      if (localKey && localKey.trim() !== "") {
-        return localKey.trim();
-      }
-      return DEFAULT_GEMINI_API_KEY;
+    function rememberGeminiKey(key) {
+      const storageKey = getGeminiStorageKey();
+      geminiSessionKeys.set(storageKey, key);
+      try { localStorage.setItem(storageKey, key); }
+      catch (_) { showToast('Clé utilisée pour cette session seulement : le navigateur ne peut pas l’enregistrer.', 'warning'); }
+    }
+
+    function describeGeminiError(httpStatus, error) {
+      const reason = error?.details?.find(detail => detail.reason)?.reason || error?.status || '';
+      const code = String(reason).replace(/[^A-Za-z0-9_]/g, '').slice(0, 80);
+      const detail = ` (HTTP ${httpStatus}${code ? ' / ' + code : ''})`;
+      const invalidKey = httpStatus === 401 || /API_KEY_INVALID|API_KEY_EXPIRED|API_KEY_NOT_FOUND/.test(code)
+        || /api key (?:not valid|is invalid|expired|was reported as leaked)/i.test(error?.message || '');
+      if (invalidKey) return { invalidKey: true, message: 'Google refuse cette clé API. Vérifiez-la dans Google AI Studio.' + detail };
+      const messages = {
+        400: 'Google refuse la requête ou la configuration du projet. La clé n’est pas nécessairement invalide.',
+        402: 'Google indique un problème de crédit ou de facturation. Aucune nouvelle tentative automatique.',
+        403: 'Accès refusé par Google. Vérifiez les autorisations, les restrictions de la clé et l’accès du projet dans AI Studio.',
+        404: 'Le modèle Gemini demandé est indisponible ou introuvable.',
+        429: 'Quota ou limite Google atteint. Consultez les limites dans AI Studio et réessayez plus tard. Votre clé est conservée.',
+        500: 'Erreur temporaire de Google. Réessayez plus tard.',
+        503: 'Le service Gemini est temporairement indisponible. Réessayez plus tard.'
+      };
+      return { invalidKey: false, message: (messages[httpStatus] || 'La requête Gemini a échoué.') + detail };
     }
 
     async function analyzeLabelWithGemini(base64Image) {
-      let apiKey = await getEffectiveGeminiKey();
-
-      if (!apiKey) {
-        const key = prompt("🔑 Saisissez votre clé API Google AI Studio (obtention gratuite sur https://aistudio.google.com/app/apikey) :", "");
-        if (key && key.trim() !== "") {
-          apiKey = key.trim();
-          localStorage.setItem("gemini_api_key", apiKey);
-          if (sessionPharmacy) {
-            try {
-              await supabaseClient.from("pharmacies").update({ gemini_api_key: apiKey }).eq("id", sessionPharmacy.id);
-              sessionPharmacy.gemini_api_key = apiKey;
-            } catch (e) {}
-          }
-        } else {
-          showToast("Clé API Gemini requise pour l'analyse IA d'étiquette.", "warning");
-          return;
-        }
+      if (geminiAnalysisInProgress) return;
+      const image = /^data:(image\/(?:jpeg|jpg|png|webp|heic|heif));base64,([A-Za-z0-9+/=\s]+)$/i.exec(String(base64Image));
+      if (!image) {
+        showToast('Format de photo non pris en charge. Utilisez une image JPEG, PNG, WEBP, HEIC ou HEIF.', 'warning');
+        return;
       }
-
-      showToast("🤖 Analyse de l'étiquette par l'IA Gemini Flash...", "info");
-
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`;
-      const rawBase64 = base64Image.replace(/^data:image\/(png|jpeg|jpg|webp);base64,/, "");
-
-      const promptText = "Analyse cette étiquette de médicament canadien. Extrais les informations suivantes et réponds STRICTEMENT sous la forme d'un objet JSON valide sans aucun texte additionnel: {\"din\": \"Numéro DIN à 8 chiffres ou N/A\", \"product\": \"Nom commercial du produit\", \"dosage\": \"Concentration/Dosage ou N/A\", \"format\": \"Format ou N/A\", \"expiry\": \"Date d'expiration AAAA-MM si visible sinon N/A\"}";
-
-      const payload = {
-        contents: [
-          {
-            parts: [
-              { text: promptText },
-              {
-                inline_data: {
-                  mime_type: "image/jpeg",
-                  data: rawBase64
-                }
-              }
-            ]
-          }
-        ]
-      };
-
+      const pharmacyId = sessionPharmacy?.id;
+      geminiAnalysisInProgress = true;
+      const buttons = document.querySelectorAll('#btn-ai-photo-trigger, #btn-trigger-ai-photo-card');
+      buttons.forEach(button => { button.disabled = true; });
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 45000);
       try {
-        const res = await fetch(endpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
-
-        if (!res.ok) {
-          const errText = await res.text();
-          console.error("Erreur Gemini API:", res.status, errText);
-          
-          if (res.status === 429) {
-            localStorage.removeItem("gemini_api_key");
-            const newKey = prompt("⚠️ Le quota de cette clé API Google est épuisé (Erreur 429 : Limit 0).\n\nVeuillez créer une nouvelle clé API gratuite sur https://aistudio.google.com/app/apikey en cliquant sur 'Create API key in NEW project' puis collez-la ici :", "");
-            if (newKey && newKey.trim() !== "") {
-              const cleanKey = newKey.trim();
-              localStorage.setItem("gemini_api_key", cleanKey);
-              if (sessionPharmacy) {
-                try {
-                  await supabaseClient.from("pharmacies").update({ gemini_api_key: cleanKey }).eq("id", sessionPharmacy.id);
-                  sessionPharmacy.gemini_api_key = cleanKey;
-                } catch(e) {}
-              }
-              showToast("Nouvelle clé enregistrée. Tentative...", "info");
-              return analyzeLabelWithGemini(base64Image);
-            }
-          } else if (res.status === 400 || res.status === 403 || res.status === 401) {
-            localStorage.removeItem("gemini_api_key");
-            const newKey = prompt("⚠️ Clé API non valide (Erreur Google API).\n\nSaisissez votre clé API Google AI Studio créée sur https://aistudio.google.com/app/apikey :", "");
-            if (newKey && newKey.trim() !== "") {
-              const cleanKey = newKey.trim();
-              localStorage.setItem("gemini_api_key", cleanKey);
-              if (sessionPharmacy) {
-                try {
-                  await supabaseClient.from("pharmacies").update({ gemini_api_key: cleanKey }).eq("id", sessionPharmacy.id);
-                  sessionPharmacy.gemini_api_key = cleanKey;
-                } catch(e) {}
-              }
-              showToast("Clé enregistrée. Tentative...", "info");
-              return analyzeLabelWithGemini(base64Image);
-            }
+        let apiKey = await getEffectiveGeminiKey();
+        if (!apiKey) {
+          const entered = prompt('Saisissez votre clé API Google AI Studio. Elle sera conservée dans ce navigateur pour cette pharmacie :', '');
+          if (!entered?.trim()) return;
+          apiKey = entered.trim();
+          rememberGeminiKey(apiKey);
+        }
+        const mimeType = image[1].toLowerCase().replace('image/jpg', 'image/jpeg');
+        const promptText = 'Analyse cette étiquette de médicament canadien. Extrais uniquement les informations lisibles, sans les deviner. Réponds STRICTEMENT avec un objet JSON valide sans texte additionnel : {"din":"DIN à 8 chiffres ou N/A","product":"Nom commercial ou N/A","dosage":"Concentration ou N/A","format":"Format ou N/A","expiry":"Expiration AAAA-MM si visible sinon N/A"}';
+        const payload = { contents: [{ parts: [{ text: promptText }, { inline_data: { mime_type: mimeType, data: image[2].replace(/\s/g, '') } }] }] };
+        showToast('Analyse de l’étiquette par Gemini…', 'info');
+        let res;
+        // At most one retry, and only after the user supplies a different key.
+        for (let attempt = 0; attempt < 2; attempt++) {
+          res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
+            body: JSON.stringify(payload),
+            signal: controller.signal
+          });
+          if (sessionPharmacy?.id !== pharmacyId) return;
+          if (res.ok) break;
+          const response = await res.json().catch(() => ({}));
+          const problem = describeGeminiError(res.status, response.error);
+          if (!problem.invalidKey || attempt === 1) {
+            showToast(problem.message, 'danger');
+            return;
           }
-
-          showToast("Erreur API Gemini (" + res.status + ") : Vérifiez votre clé sur AI Studio.", "danger");
+          const replacement = prompt(problem.message + '\n\nSaisissez une autre clé Google AI Studio, ou Annuler. La nouvelle clé sera conservée dans ce navigateur :', '');
+          if (!replacement?.trim() || replacement.trim() === apiKey) {
+            showToast(problem.message, 'danger');
+            return;
+          }
+          apiKey = replacement.trim();
+          rememberGeminiKey(apiKey);
+        }
+        const data = await res.json();
+        if (sessionPharmacy?.id !== pharmacyId) return;
+        const replyText = (data.candidates?.[0]?.content?.parts || []).map(part => part.text || '').join('');
+        if (!replyText.trim()) {
+          showToast('Gemini n’a renvoyé aucune information exploitable. Essayez une photo plus nette de l’étiquette.', 'warning');
           return;
         }
-
-        const data = await res.json();
-        const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-        
-        const cleanJsonStr = replyText.replace(/```json/gi, "").replace(/```/g, "").trim();
-        const parsed = JSON.parse(cleanJsonStr);
-
-        console.log("[IA Gemini] Données étiquette extraites :", parsed);
-
-        if (parsed.din && parsed.din !== "N/A") {
+        const parsed = JSON.parse(replyText.replace(/```json/gi, '').replace(/```/g, '').trim());
+        if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)
+          || !['din', 'product', 'dosage', 'format', 'expiry'].some(field => typeof parsed[field] === 'string' && parsed[field].trim() && parsed[field] !== 'N/A')) {
+          showToast('Aucune information lisible n’a été reconnue sur cette photo.', 'warning');
+          return;
+        }
+        if (typeof parsed.din === "string" && parsed.din && parsed.din !== "N/A") {
           const dinInput = document.getElementById("form-din");
           if (dinInput) dinInput.value = parsed.din;
         }
-        if (parsed.product && parsed.product !== "N/A") {
+        if (typeof parsed.product === "string" && parsed.product && parsed.product !== "N/A") {
           const prodInput = document.getElementById("form-product");
           if (prodInput) prodInput.value = parsed.product;
         }
-        if (parsed.dosage && parsed.dosage !== "N/A") {
+        if (typeof parsed.dosage === "string" && parsed.dosage && parsed.dosage !== "N/A") {
           const dosageInput = document.getElementById("form-dosage");
           if (dosageInput) dosageInput.value = parsed.dosage;
         }
-        if (parsed.format && parsed.format !== "N/A") {
+        if (typeof parsed.format === "string" && parsed.format && parsed.format !== "N/A") {
           const formatInput = document.getElementById("form-format");
           if (formatInput) formatInput.value = parsed.format;
         }
-        if (parsed.expiry && parsed.expiry !== "N/A" && /^\d{4}-\d{2}$/.test(parsed.expiry)) {
+        if (typeof parsed.expiry === "string" && parsed.expiry && parsed.expiry !== "N/A" && /^\d{4}-(0[1-9]|1[0-2])$/.test(parsed.expiry)) {
           const expInput = document.getElementById("form-expiry");
           if (expInput) {
             expInput.value = parsed.expiry;
-            expInput.dispatchEvent(new Event('change', { bubbles: true }));
+            expInput.dispatchEvent(new Event('input', { bubbles: true }));
           }
         }
 
-        showToast("✨ Étiquette analysée avec succès par l'IA Gemini !", "success");
-
-      } catch (err) {
-        console.error("Erreur lors de l'analyse IA :", err);
-        showToast("Erreur lors de l'analyse par l'IA : " + err.message, "danger");
+        showToast('Étiquette analysée. Vérifiez les champs avant d’enregistrer le produit.', 'success');
+      } catch (error) {
+        const message = error.name === 'AbortError'
+          ? 'Gemini a mis trop de temps à répondre. Réessayez plus tard.'
+          : error instanceof SyntaxError
+            ? 'La réponse de Gemini n’a pas pu être lue. Réessayez avec une photo plus nette.'
+            : 'Impossible de joindre Gemini. Vérifiez votre connexion et réessayez.';
+        showToast(message, 'danger');
+      } finally {
+        clearTimeout(timeout);
+        geminiAnalysisInProgress = false;
+        buttons.forEach(button => { button.disabled = false; });
       }
     }
-    
+
     function onScanFailure() {
       // Ignorer
     }
