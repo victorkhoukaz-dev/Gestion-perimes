@@ -12,7 +12,7 @@
             <p class="cr-local-note">Save draft to make your reports available on other devices in your pharmacy. Typing keeps a recovery copy on this device. Internet is required to save online.</p>
             <p id="cr-status" role="status" aria-live="polite"></p>
             <div class="cr-workspace" id="cr-workspace">
-                <aside class="cr-panel cr-report-picker"><div class="cr-section-heading"><h2>Your reports</h2><button id="cr-new" type="button">+ New report</button></div><label for="cr-reports">Open a saved report</label><select id="cr-reports"></select><div class="cr-report-actions"><button id="cr-save" type="button" class="cr-primary">Save draft</button><button id="cr-delete" type="button" class="cr-danger">Delete report</button></div><div class="cr-actions"><button id="cr-reload" type="button">Reload online</button><button id="cr-import" type="button">Copy old browser reports</button><button id="cr-download" type="button">Download recovery</button></div><p id="cr-saved" class="cr-muted"></p></aside>
+                <aside class="cr-panel cr-report-picker"><div class="cr-section-heading"><h2>Your reports</h2><button id="cr-new" type="button">+ New report</button></div><label for="cr-reports">Open a saved report</label><select id="cr-reports"></select><div class="cr-report-actions"><button id="cr-save" type="button" class="cr-primary">Save draft</button><button id="cr-delete" type="button" class="cr-danger">Delete report</button></div><p id="cr-saved" class="cr-muted"></p></aside>
                 <div class="cr-main">
                     <section class="cr-panel">
                         <div class="cr-section-heading"><h2>1. Choose the company</h2><span class="cr-step">REPORT DETAILS</span></div>
@@ -242,45 +242,12 @@
         if (remoteBusy || !store || (active() && !saveDraft())) return;
         if (!cloud) { status('Draft saved on this device.'); return; }
         const owner = context, session = cloud, snapshot = copy(store);
-        remoteBusy = true; $('save').disabled = true; $('reload').disabled = true;
+        remoteBusy = true; $('save').disabled = true;
         try {
             const result = await session.save(snapshot);
             if (context === owner) { updateSync(); status(result.dirty ? 'Earlier changes saved online. Newer edits still need saving.' : 'Draft saved to your pharmacy. You can open it on another device.'); }
         } catch (error) { if (context === owner) status('Not saved online: ' + error.message + ' Your recovery copy is kept.', true); }
-        finally { if (context === owner) { remoteBusy = false; $('save').disabled = false; $('reload').disabled = false; } }
-    });
-    $('download').addEventListener('click', () => {
-        if (!store) return;
-        if (active() && !saveDraft()) return;
-        const url = URL.createObjectURL(new Blob([JSON.stringify(store, null, 2)], { type: 'application/json' }));
-        const link = document.createElement('a'); link.href = url; link.download = 'returns-recovery.json'; link.click();
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
-    });
-    $('reload').addEventListener('click', async () => {
-        if (!cloud || remoteBusy) return;
-        if (active() && !saveDraft()) return;
-        if (cloud.isDirty() && !confirm('Load the online reports? Your unsaved draft will be archived on this device. Download recovery first if you want a separate copy.')) return;
-        const owner = context; remoteBusy = true; $('reload').disabled = true; $('workspace').inert = true;
-        try { const loaded = await cloud.load(true); if (context === owner) { store = loaded.value; render(); status('Online reports loaded.'); } }
-        catch (error) { if (context === owner) status('Unable to reload: ' + error.message, true); }
-        finally { if (context === owner) { remoteBusy = false; $('reload').disabled = false; $('workspace').inert = false; } }
-    });
-    $('import').addEventListener('click', async () => {
-        if (!cloud || remoteBusy || !store || (active() && !saveDraft())) return;
-        const owner = context;
-        try {
-            const legacy = D.loadReports(localStorage, key);
-            if (!legacy.value.reports.length) { status('No old browser reports found on this device.'); return; }
-            const hash = [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(legacy.raw)))].map(b => b.toString(16).padStart(2, '0')).join('');
-            if (context !== owner) return;
-            if ((store.importedLocal || []).includes(hash)) { status('These browser reports have already been copied into this collection.'); return; }
-            if (!confirm('Copy ' + legacy.value.reports.length + ' old browser report(s)? The originals will be kept. Press Save draft afterwards to save them online.')) return;
-            const next = copy(store), reports = copy(legacy.value.reports);
-            reports.forEach(report => { report.id = uid(); });
-            next.reports.push(...reports); next.activeId = reports[0].id;
-            next.importedLocal = [...(next.importedLocal || []), hash];
-            if (commit(next)) { render(); status('Browser reports copied. Press Save draft to save them online. Originals are kept.'); }
-        } catch (error) { status('Unable to copy browser reports: ' + error.message, true); }
+        finally { if (context === owner) { remoteBusy = false; $('save').disabled = false; } }
     });
     $('delete').addEventListener('click', () => {
         const report = active();
@@ -335,15 +302,19 @@
         $('back').textContent = options.backLabel || '← PharmaOps';
         $('pharmacy').textContent = options.pharmacyName; $('workspace').hidden = true; status('');
         const owner = context;
-        $('workspace').inert = false; $('reload').disabled = false;
+        $('workspace').inert = false;
         try {
             let warning = '';
             if (options.client) {
                 cloud = window.CompanyReturnsCloud.create(options.client, options.pharmacyId, options.userId, localStorage);
-                const loaded = await cloud.load();
+                let loaded = await cloud.load();
                 if (context !== owner) return;
+                if (loaded.conflict && confirm('Another device saved newer reports. Open the latest online version? Your unsaved recovery copy will be archived on this device.')) {
+                    loaded = await cloud.load(true);
+                    if (context !== owner) return;
+                }
                 store = loaded.value;
-                if (loaded.dirty) warning = loaded.conflict ? 'A newer online version exists. Your local recovery is shown. Download recovery, then reload online reports before saving.' : 'Recovered changes that are not saved online. Press Save draft when ready.';
+                if (loaded.dirty) warning = loaded.conflict ? 'A newer online version exists. Your local recovery is shown. Reopen Returns and choose the latest online version before saving.' : 'Recovered changes that are not saved online. Press Save draft when ready.';
             } else {
                 const saved = D.loadReports(localStorage, key); raw = saved.raw; store = saved.value;
             }

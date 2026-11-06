@@ -30,10 +30,10 @@
             persist({ revision, dirty: false, data: online });
             return { value: clone(online), dirty: false, conflict: false };
         }
-        function stage(value) { validate(value); persist({ revision, dirty: true, data: value }); }
+        function stage(value) { validate(value); persist({ revision: conflict ? recovery.revision : revision, dirty: true, data: value }); }
         async function save(value) {
             if (busy) throw new Error('A save is already running.');
-            if (conflict) throw new Error('Another device saved a newer version. Download your recovery copy, then reload online reports.');
+            if (conflict) throw new Error('Another device saved a newer version. Reopen Returns to load the latest online reports. Your recovery copy is kept.');
             busy = true;
             try {
                 const snapshot = clone(validate(value)), expected = revision;
