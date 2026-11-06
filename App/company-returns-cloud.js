@@ -1,5 +1,6 @@
 /* Cloud collection with optimistic concurrency and a device recovery copy. */
 (() => {
+    const userError = window.CompanyReturnsData.userError;
     const clone = value => JSON.parse(JSON.stringify(value));
     const empty = () => ({ version: 1, activeId: null, reports: [], importedLocal: [] });
     function validate(value) {
@@ -10,7 +11,7 @@
         let revision = 0, raw = storage.getItem(key), recovery = raw ? JSON.parse(raw) : null, conflict = false, busy = false;
         if (recovery) validate(recovery.data);
         const persist = value => {
-            if (storage.getItem(key) !== raw) throw new Error('Recovery changed in another tab. Reopen Returns before continuing.');
+            if (storage.getItem(key) !== raw) throw userError('La copie de récupération a été modifiée dans un autre onglet. Rouvrez Retours fabricants avant de continuer.');
             const next = JSON.stringify(value);
             storage.setItem(key, next); raw = next; recovery = clone(value);
         };
@@ -32,8 +33,8 @@
         }
         function stage(value) { validate(value); persist({ revision: conflict ? recovery.revision : revision, dirty: true, data: value }); }
         async function save(value) {
-            if (busy) throw new Error('A save is already running.');
-            if (conflict) throw new Error('Another device saved a newer version. Reopen Returns to load the latest online reports. Your recovery copy is kept.');
+            if (busy) throw userError('Un enregistrement est déjà en cours.');
+            if (conflict) throw userError('Une version plus récente a été enregistrée sur un autre appareil. Rouvrez Retours fabricants pour charger les derniers rapports en ligne. Votre copie de récupération est conservée.');
             busy = true;
             try {
                 const snapshot = clone(validate(value)), expected = revision;
@@ -42,7 +43,7 @@
                 const { data, error } = await request.select('revision').maybeSingle();
                 if (error || !data) {
                     if (!error || error.code === '23505') conflict = true;
-                    throw error || new Error('Another device changed these reports. Reload online reports before saving.');
+                    throw error || userError('Les rapports ont été modifiés sur un autre appareil. Rouvrez Retours fabricants avant d’enregistrer.');
                 }
                 revision = data.revision;
                 const latest = recovery?.data || snapshot;

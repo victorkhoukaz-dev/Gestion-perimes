@@ -3295,15 +3295,15 @@
         </div>
 
         <div class="card" id="email-alert-settings-card" style="margin-bottom: 0; display: none;">
-          <h2 class="card-title">Email alerts</h2>
+          <h2 class="card-title">Alertes par courriel</h2>
           <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px;">
-            Owners and admins receive a daily email when active flagged products expire during the current month.
+            Les propriétaires et les administrateurs reçoivent un courriel quotidien lorsque des produits signalés et encore actifs arrivent à péremption pendant le mois en cours.
           </p>
           <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer; margin-bottom: 0;">
             <input type="checkbox" id="current-month-expiry-email-alert" disabled style="width: 18px; height: 18px; margin-top: 2px; accent-color: var(--primary-color);">
             <span>
-              <strong>Alert owners about products expiring this month</strong>
-              <span style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Emails are sent once each morning while affected products remain active.</span>
+              <strong>Avertir les responsables des produits qui périment ce mois-ci</strong>
+              <span style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Un courriel est envoyé chaque matin tant que les produits concernés restent actifs.</span>
             </span>
           </label>
         </div>
@@ -4105,7 +4105,7 @@
     function openCompanyReturnsModule() {
       if (!sessionPharmacy || !sessionUser) return;
       if (!window.CompanyReturns) {
-        showToast("Company Returns could not load. Refresh the page and try again.", "danger");
+        showToast("Impossible de charger Retours fabricants. Actualisez la page et réessayez.", "danger");
         return;
       }
       window.CompanyReturns.open({
@@ -4119,7 +4119,7 @@
         closeSuggestions: closeAllSuggestions,
         scan: callback => startScanner(callback),
         stopScan: stopScanner,
-        backLabel: "← Monthly withdrawals",
+        backLabel: "← Retrait mensuel",
         back: () => document.querySelector('.tab-btn[data-tab="tab-retrait"]').click()
       });
     }
@@ -5252,10 +5252,10 @@
           currentMonthExpiryAlertToggle.disabled = true;
           try {
             await saveCurrentMonthExpiryEmailAlert(enabled);
-            showToast(enabled ? "Current-month expiry email alerts enabled." : "Current-month expiry email alerts disabled.", "success");
+            showToast(enabled ? "Les alertes par courriel pour les péremptions du mois sont activées." : "Les alertes par courriel pour les péremptions du mois sont désactivées.", "success");
           } catch (error) {
             currentMonthExpiryAlertToggle.checked = !enabled;
-            showToast("Unable to update email alert settings: " + error.message, "danger");
+            showToast("Impossible de modifier les alertes par courriel. Vérifiez votre connexion et réessayez.", "danger");
           } finally {
             currentMonthExpiryAlertToggle.disabled = false;
           }

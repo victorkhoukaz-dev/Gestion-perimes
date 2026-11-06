@@ -50,7 +50,7 @@ test('reports reload, pharmacy keys remain separate and stale writes are rejecte
     const raw = D.saveReports(s, 'pharmacy-a', null, value);
     assert.deepEqual(D.loadReports(s, 'pharmacy-a').value, value);
     assert.equal(D.loadReports(s, 'pharmacy-b').value.reports.length, 0);
-    assert.throws(() => D.saveReports(s, 'pharmacy-a', null, { reports: [] }), /another tab/);
+    assert.throws(() => D.saveReports(s, 'pharmacy-a', null, { reports: [] }), /autre onglet/);
     assert.equal(s.getItem('pharmacy-a'), raw);
 });
 test('storage failures and corrupt saved data never replace existing records', () => {

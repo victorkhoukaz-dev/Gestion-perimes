@@ -16,12 +16,12 @@ test('save, reopen on another device, and pharmacy filters',async()=>{
 });
 test('two devices cannot overwrite a newer collection; local recovery survives conflict',async()=>{
  const db=server(),sa=storage(),sb=storage(),a=C.create(db.client,'p','a',sa),b=C.create(db.client,'p','b',sb);await a.load();await b.load();const x=empty();a.stage(x);await a.save(x);const y={...empty(),importedLocal:['local']};b.stage(y);await assert.rejects(b.save(y));assert.equal(b.isDirty(),true);
- const reopened=C.create(db.client,'p','b',sb),loaded=await reopened.load();assert.equal(loaded.conflict,true);assert.deepEqual(loaded.value,y);await assert.rejects(reopened.save(y),/newer/);reopened.stage({...y,importedLocal:['edited after conflict']});const again=C.create(db.client,'p','b',sb);assert.equal((await again.load()).conflict,true);await assert.rejects(again.save(y),/newer/);await reopened.load(true);assert.equal(reopened.isDirty(),false);assert.deepEqual(db.rows.get('p').data,x);
+ const reopened=C.create(db.client,'p','b',sb),loaded=await reopened.load();assert.equal(loaded.conflict,true);assert.deepEqual(loaded.value,y);await assert.rejects(reopened.save(y),/récente/);reopened.stage({...y,importedLocal:['edited after conflict']});const again=C.create(db.client,'p','b',sb);assert.equal((await again.load()).conflict,true);await assert.rejects(again.save(y),/récente/);await reopened.load(true);assert.equal(reopened.isDirty(),false);assert.deepEqual(db.rows.get('p').data,x);
 });
 test('network failure preserves recovery; newer typing during save remains dirty',async()=>{
  const db=server(),s=storage(),a=C.create(db.client,'p','u',s);await a.load();const x=empty();a.stage(x);db.fail=true;await assert.rejects(a.save(x));assert.equal(a.isDirty(),true);db.fail=false;
  let release;db.gate=new Promise(resolve=>release=resolve);const saving=a.save(x);const y={...empty(),importedLocal:['new typing']};a.stage(y);release();assert.equal((await saving).dirty,true);db.gate=null;await a.save(y);assert.equal(a.isDirty(),false);assert.deepEqual(db.rows.get('p').data,y);
 });
 test('stale local tabs cannot replace recovery; empty report collection can be saved',async()=>{
- const db=server(),s=storage(),a=C.create(db.client,'p','u',s);await a.load();const b=C.create(db.client,'p','u',s);await b.load();a.stage({...empty(),importedLocal:['edit']});assert.throws(()=>b.stage(empty()),/another tab/);await a.save(empty());assert.equal(db.rows.get('p').data.reports.length,0);
+ const db=server(),s=storage(),a=C.create(db.client,'p','u',s);await a.load();const b=C.create(db.client,'p','u',s);await b.load();a.stage({...empty(),importedLocal:['edit']});assert.throws(()=>b.stage(empty()),/autre onglet/);await a.save(empty());assert.equal(db.rows.get('p').data.reports.length,0);
 });
