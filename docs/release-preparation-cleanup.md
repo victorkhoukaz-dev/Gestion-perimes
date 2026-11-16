@@ -14,7 +14,7 @@ French is exclusively for the published website and user-facing features, includ
 
 - All 49 historical `App/scratch/` repair scripts are preserved unchanged under `Archive/generics-repair-scripts/`. Active app code does not reference them.
 - Local cost analysis, withdrawal previews and Python caches remain on disk and are ignored by Git. Developer test scripts remain tracked.
-- The ten tracked files under `Bases de données csv/` and `Fichiers de sauvegarde JSON/` are being preserved with SHA-256 verification before removal from Git tracking. The source directories and an additional ignored recovery copy remain local.
+- The ten tracked files under `Bases de données csv/` and `Fichiers de sauvegarde JSON/` were preserved with SHA-256 verification and removed from Git tracking in `44a5f92`. Original files remain local, with an additional ignored recovery copy and hash manifest under `scratch/private-export-preservation/20261116T192948Z/`.
 - `_config.yml` excludes archives, source data, backups, tests, local scripts and internal documentation from future Pages builds, preserving `/App/` URLs.
 
 ## Hosting and historical exposure
@@ -34,3 +34,18 @@ After an authorized deployment, verify the app URLs and confirm excluded files a
 ## Merge validation
 
 Preserve `main`'s newer Returns cloud persistence, revision-conflict handling and French UI. Resolve agent-instruction and service-worker conflicts explicitly, retain generics entry points, and use a new cache version. Run the inline JavaScript syntax check and relevant generics, Returns, scanner, withdrawal and photo regression tests. Browser tests must use synthetic data and stubbed services, with no production writes.
+
+
+## Combined-version validation
+
+The candidate combines `main` at `91a56cc` with the generics/session/cleanup work on `integration`.
+
+- The two expected conflicts were resolved: keep the updated English development instructions and use PWA cache `v84`.
+- Returns source files match `main` exactly, preserving cloud persistence, conflict recovery and French UI. The index retains the direct generics links in addition to main's Returns integration.
+- All 94 Node regression tests pass (generics, scanner/medication entry, photo-key handling, Returns storage and Returns UI).
+- All four synthetic Chrome generics page checks pass.
+- The existing withdrawal browser regression passes using the bundled Playwright runtime and installed Chrome; it checks search, status/section filters, print selection, mobile layout and unchanged records. No new dependency was installed.
+- Index inline JavaScript and changed module syntax checks pass.
+- All ten original private files and their recovery copies match the recorded SHA-256 hashes. They are absent from the merged tracked tree and covered by ignore/deployment rules.
+
+These are local checks, not verification of a deployed Jekyll build or a real two-device production workflow. No Supabase migration was executed, no production data was changed, and no remote publication or history rewrite was performed.
