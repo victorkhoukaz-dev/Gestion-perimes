@@ -78,3 +78,8 @@ Procédure expirés/
         ├── core/db.js / logger.js     # Logger et couche de base de données
         └── modules/generics.js        # Module d'analyse des achats génériques (Chart.js)
 ```
+
+
+## Product language
+
+All user-facing app text must always be in French (Canadian French where applicable), including loading screens, buttons, confirmations, errors, accessibility labels, printed reports and generated documents. Preserve technical identifiers and imported/user-entered data. Agent explanations and conversation remain in English. Do not introduce English app text unless the user explicitly requests it.

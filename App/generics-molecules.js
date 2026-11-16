@@ -363,7 +363,10 @@
         renderVisualComparison(range, companies);
         renderPresentationComparison(range);
     }
+    let loadVersion = 0, sessionUserId = null, sessionStopped = false;
     async function load() {
+        if (sessionStopped) return;
+        const version = ++loadVersion;
         $('workspace').hidden = true;
         $('load-status').hidden = false;
         $('load-status').textContent = "Chargement des achats de votre pharmacie…";
@@ -372,16 +375,21 @@
         try {
             if (!client) throw new Error('La connexion n’a pas pu être établie. Vérifiez votre connexion et réessayez.');
             const { data: auth, error: authError } = await client.auth.getUser();
+            if (version !== loadVersion) return;
+            if (sessionUserId && sessionUserId !== auth?.user?.id) { invalidateSession(); return; }
+            sessionUserId = auth?.user?.id || null;
             if (authError || !auth.user) {
                 $('load-status').textContent = 'Votre session a expiré. Connectez-vous dans PharmaOps pour consulter les achats.';
                 return;
             }
             const { data: profile, error: profileError } = await client.from('profiles').select('pharmacy_id').eq('id', auth.user.id).maybeSingle();
+            if (version !== loadVersion) return;
             if (profileError || !profile?.pharmacy_id) throw new Error('Votre pharmacie n’a pas pu être identifiée. Vérifiez votre compte dans PharmaOps.');
             const pharmacyId = profile.pharmacy_id;
             const { data: records, error } = await client.from('generics_purchases').select('data,updated_at')
                 .eq('pharmacy_id', pharmacyId).eq('period_type', 'monthly').eq('year', M.YEAR)
                 .order('updated_at', { ascending: false }).limit(1);
+            if (version !== loadVersion) return;
             if (error) throw new Error('Les achats n’ont pas pu être chargés. Vérifiez votre connexion et réessayez.');
             data = records?.[0]?.data || { manufacturers: [] };
             if (!Array.isArray(data.manufacturers)) throw new Error('Les achats enregistrés ne sont pas dans le format attendu.');
@@ -391,8 +399,10 @@
             filterMolecules();
             $('workspace').hidden = false; $('load-status').hidden = true;
             const { data: pharmacy } = await client.from('pharmacies').select('name').eq('id', pharmacyId).maybeSingle();
+            if (version !== loadVersion) return;
             $('pharmacy-name').textContent = pharmacy?.name || '';
         } catch (error) {
+            if (version !== loadVersion) return;
             $('workspace').hidden = true;
             $('load-status').hidden = false;
             $('load-status').textContent = error.message;
@@ -400,14 +410,20 @@
         }
     }
     $('retry-load').addEventListener('click', load);
-    client?.auth.onAuthStateChange(event => {
-        if (event === 'SIGNED_OUT' || event === 'USER_UPDATED') {
-            data = null; index = []; selected = null; selectedPresentationKey = 'all';
-            $('workspace').hidden = true;
-            $('purchase-table').tBodies[0].replaceChildren();
-            $('load-status').hidden = false;
-            $('load-status').textContent = 'Votre session a changé. Rechargez la page pour consulter les achats.';
-        }
+    function invalidateSession() {
+        sessionStopped = true; loadVersion++;
+        data = null; index = []; selected = null; selectedPresentationKey = 'all';
+        $('workspace').hidden = true;
+        $('purchase-table').tBodies[0].replaceChildren();
+        $('pharmacy-name').textContent = '';
+        $('load-status').hidden = false;
+        $('retry-load').hidden = true;
+        $('load-status').textContent = 'Votre session a changé. Rechargez cette page pour consulter les achats.';
+    }
+    client?.auth.onAuthStateChange((event, session) => {
+        if (event === 'SIGNED_OUT' || event === 'USER_UPDATED' ||
+            (sessionUserId && session?.user?.id !== sessionUserId)) invalidateSession();
+        else if (session?.user) sessionUserId = session.user.id;
     });
     load();
 })();

@@ -1038,6 +1038,7 @@
     <link rel="stylesheet" href="generics-print.css">
     <script src="generics-print.js" defer></script>
 <script src="supabase.js"></script>
+<script src="generics-session.js"></script>
 <script>
   const SUPABASE_URL = "https://hhmwlzaeipyrowwjlbbj.supabase.co";
   const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhobXdsemFlaXB5cm93d2psYmJqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2MDM5NjYsImV4cCI6MjA5OTE3OTk2Nn0.vv1Zw3oFDilKSxh7FEocWi8Y2pzu7uX1rf_L0Jhf1m4";
@@ -1055,149 +1056,24 @@
     };
   };
 
-  (function() {
-    async function fetchPharmacyId() {
-      if (!window.supabaseClient) return null;
-      try {
-        const userRes = await window.supabaseClient.auth.getUser();
-        const user = userRes?.data?.user;
-        if (!user) return null;
-        const { data: profile } = await window.supabaseClient
-          .from('profiles')
-          .select('pharmacy_id')
-          .eq('id', user.id)
-          .maybeSingle();
-        return profile?.pharmacy_id || user.id;
-      } catch(e) {
-        return null;
-      }
-    }
-
-    window.syncGenericsDataToCloud = async function(dataObj) {
-      try {
-        if (!window.supabaseClient) return;
-        const userRes = await window.supabaseClient.auth.getUser();
-        const user = userRes?.data?.user;
-        if (!user) {
-          alert("Session expirée. Veuillez vous reconnecter sur PharmaOps.");
-          window.location.href = "index.html";
-          return;
-        }
-
-        const pharmacyId = await fetchPharmacyId();
-        if (!pharmacyId) return;
-
-        const payload = {
-          pharmacy_id: pharmacyId,
-          user_id: user.id,
-          period_type: 'annual',
-          year: 2026,
-          month: null,
-          data: dataObj,
-          updated_at: new Date().toISOString()
-        };
-
-        const { error } = await window.supabaseClient
-          .from('generics_purchases')
-          .upsert(payload, { onConflict: 'pharmacy_id,period_type,year' });
-
-        if (error) {
-          console.warn('[Supabase Sync annual] Note sauvegarde:', error.message);
-        } else {
-          console.log('[Supabase Sync annual] Sauvegarde réussie sur Supabase Cloud pour pharmacie:', pharmacyId);
-        }
-      } catch(err) {
-        console.error('[Supabase Sync annual] Erreur:', err);
-      }
-    };
-
-    window.loadGenericsDataFromCloud = async function() {
-      try {
-        if (!window.supabaseClient) return;
-        const userRes = await window.supabaseClient.auth.getUser();
-        const user = userRes?.data?.user;
-        if (!user) {
-          console.log('[Supabase Sync annual] Aucun utilisateur connecté. Redirection vers login.');
-          window.location.href = "index.html";
-          return;
-        }
-
-        const pharmacyId = await fetchPharmacyId();
-        if (!pharmacyId) {
-          rawData = getEmptyRawData();
-          if (typeof saveAndRefreshDashboard === 'function') saveAndRefreshDashboard({ persist: false });
-          return;
-        }
-
-        const { data, error } = await window.supabaseClient
-          .from('generics_purchases')
-          .select('data')
-          .eq('pharmacy_id', pharmacyId)
-          .eq('period_type', 'annual')
-          .order('updated_at', { ascending: false })
-          .limit(1);
-
-        if (!error && data && data.length > 0 && data[0].data && Object.keys(data[0].data).length > 0) {
-          rawData = data[0].data;
-          console.log('[Supabase Sync annual] Données cloud chargées depuis Supabase pour:', pharmacyId);
-        } else {
-          // Aucun enregistrement -> État vierge 0,00$ (0% LocalStorage)
-          rawData = getEmptyRawData();
-          console.log('[Supabase Sync annual] Aucune donnée sur Supabase. Démarrage vierge à $0,00 pour:', pharmacyId);
-        }
-
-        if (typeof saveAndRefreshDashboard === 'function') saveAndRefreshDashboard({ persist: false });
-      } catch(err) {
-        console.error('[Supabase Sync annual] Erreur chargement:', err);
-      }
-    };
-
-    async function initializeGenericsHeader() {
-      if (!window.supabaseClient) return;
-      const userRes = await window.supabaseClient.auth.getUser();
-      const user = userRes?.data?.user;
-      if (!user) {
-        window.location.href = "index.html";
-        return;
-      }
-
-      const emailElement = document.getElementById('generics-user-email');
-      if (emailElement) emailElement.textContent = user.email || '';
-
-      const { data: profile } = await window.supabaseClient
-        .from('profiles')
-        .select('pharmacy_id')
-        .eq('id', user.id)
-        .maybeSingle();
-
-      if (profile?.pharmacy_id) {
-        const { data: pharmacy } = await window.supabaseClient
-          .from('pharmacies')
-          .select('name')
-          .eq('id', profile.pharmacy_id)
-          .maybeSingle();
-        const pharmacyElement = document.getElementById('generics-pharmacy-name');
-        if (pharmacyElement) pharmacyElement.textContent = pharmacy?.name || 'Pharmacie';
-      }
-    }
-
-    async function logoutFromGenerics() {
-      if (!confirm("Voulez-vous vous déconnecter ?")) return;
-      const logoutButton = document.getElementById('btn-generics-logout');
-      if (logoutButton) {
-        logoutButton.disabled = true;
-        logoutButton.textContent = 'Déconnexion...';
-      }
+  const genericsSession = window.initializeGenericsSession({
+    client: window.supabaseClient,
+    period: 'annual',
+    empty: () => getEmptyRawData(),
+    read: () => rawData,
+    replace: data => { rawData = data; },
+    refresh: () => saveAndRefreshDashboard({ persist: false })
+  });
+  window.syncGenericsDataToCloud = data => genericsSession.save(data);
+  window.loadGenericsDataFromCloud = () => genericsSession.load();
+  window.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('btn-generics-logout')?.addEventListener('click', async () => {
+      if (!confirm('Voulez-vous vous déconnecter ?')) return;
+      genericsSession.stop();
       await window.supabaseClient?.auth.signOut();
       window.location.replace('index.html');
-    }
-
-    window.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('btn-generics-logout')?.addEventListener('click', logoutFromGenerics);
-      initializeGenericsHeader();
-      setTimeout(window.loadGenericsDataFromCloud, 100);
     });
-  })();
+  });
 </script>
 </head>
 <body class="annual-report">
@@ -1255,8 +1131,8 @@
                 <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                 Suivi Mensuel 2026
             </a>
-            <a href="generics_molecules.html" class="nav-tab-item">By molecule</a>
-            <a href="generics_name_review.html" class="nav-tab-item">Name review</a>
+            <a href="generics_molecules.html" class="nav-tab-item">Par molécule</a>
+            <a href="generics_name_review.html" class="nav-tab-item">Révision des noms</a>
         </div>
 
         <!-- KPI Grid -->

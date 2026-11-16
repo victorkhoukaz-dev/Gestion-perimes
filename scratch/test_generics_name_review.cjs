@@ -123,7 +123,7 @@ test('failed saves do not leak into a later successful decision', async () => {
     const db = database(), page = await openPage(db);
     page.failNext();
     const controls = await decide(page, 0, 'group:0');
-    assert.match(controls.status.textContent, /Decision not saved/);
+    assert.match(controls.status.textContent, /Décision non enregistrée/);
     assert.equal(controls.button.disabled, false);
     assert.equal(db.row.data.moleculeNameReview, undefined);
     await decide(page, 1, 'keep');
@@ -136,7 +136,7 @@ test('a stale page cannot overwrite a newer import or another page’s decision'
     await decide(first, 0, 'group:0');
     const saved = clone(db.row);
     const controls = await decide(stale, 1, 'keep');
-    assert.match(controls.status.textContent, /Reload this page/);
+    assert.match(controls.status.textContent, /Rechargez cette page/);
     assert.deepEqual(db.row, saved);
 });
 
@@ -151,7 +151,7 @@ test('double saves are blocked and signing out cannot redisplay an in-flight sav
     await pending;
     assert.equal(page.ids.workspace.hidden, true);
     assert.equal(page.ids['formatting-candidates'].children.length, 0);
-    assert.match(page.ids['load-status'].textContent, /session changed/);
+    assert.match(page.ids['load-status'].textContent, /session a changé/);
 });
 
 test('empty purchases produce no save controls', async () => {
@@ -171,7 +171,7 @@ test('saved cards disappear, counts update, and reviewed cards remain accessible
     await decide(page, 0, 'group:0');
     assert.equal(cards(page).length, 1);
     assert.deepEqual(counts(page), ['4', '1', '1']);
-    assert.equal(page.ids['save-feedback'].textContent, 'Decision saved.');
+    assert.equal(page.ids['save-feedback'].textContent, 'Décision enregistrée.');
     page = await openPage(db);
     assert.equal(cards(page).length, 1);
     assert.equal(page.ids['show-reviewed'].checked, false);
@@ -189,10 +189,10 @@ test('keeping separate also completes an item; clearing a decision returns it to
     await decide(page, 0, 'keep');
     assert.equal(cards(page).length, 0);
     assert.deepEqual(counts(page), ['4', '0', '2']);
-    assert.match(page.ids['formatting-candidates'].children[0].textContent, /All items.*reviewed/);
+    assert.match(page.ids['formatting-candidates'].children[0].textContent, /Tous les éléments.*révisés/);
     page.showReviewed();
     await decide(page, 0, 'unresolved');
-    assert.match(page.ids['save-feedback'].textContent, /awaiting review again/);
+    assert.match(page.ids['save-feedback'].textContent, /de nouveau à réviser/);
     page.showReviewed(false);
     assert.equal(cards(page).length, 1);
     assert.deepEqual(counts(page), ['4', '1', '1']);
