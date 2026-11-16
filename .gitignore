@@ -6,3 +6,8 @@ Mensuel 2026/
 /scratch/withdrawal-print-preview.pdf
 __pycache__/
 *.py[cod]
+
+# Pharmacy source exports and backups are local-only.
+/Bases de données csv/
+/Fichiers de sauvegarde JSON/
+/scratch/private-export-preservation/

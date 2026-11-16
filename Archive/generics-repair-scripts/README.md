@@ -1,12 +1,10 @@
-# Archives des scripts de réparation des génériques
+# Archived generics repair scripts
 
-Ces 49 scripts historiques ont été déplacés de `App/scratch/` pendant la préparation de la fusion d’`integration` vers `main`. Ils sont conservés pour référence, à l’extérieur du dossier de l’application.
+These 49 historical scripts were moved from `App/scratch/` during preparation for merging `integration` into `main`. Their contents are unchanged. No references from the active application were found; the dashboards do not require them.
 
-Aucune référence à ces scripts n’a été trouvée dans le code actif de l’application. Ils ne sont pas nécessaires au fonctionnement des tableaux de bord.
+**Do not run them against the current application.** Many rewrite HTML files and reference absolute paths or obsolete app versions. They are retained for historical reference, not maintained repair tools.
 
-**Ne pas les exécuter pour réparer la version actuelle.** Plusieurs réécrivent des fichiers HTML et utilisent des chemins absolus ou des versions anciennes de l’application. Le déplacement préserve leur contenu et ne les adapte pas au projet actuel.
-
-Les tests actuels restent dans `scratch/`, à la racine du projet :
+Current tests remain in the repository-level `scratch/` directory:
 
 ```powershell
 node scratch/check_generics_name_review.cjs
@@ -14,6 +12,6 @@ node --test scratch/test_generics_session.cjs scratch/test_generics_name_review.
 python scratch/test_generics_session_browser.py
 ```
 
-Le test de navigateur utilise Chrome installé sur le poste, des comptes fictifs et des services simulés. Il ne se connecte pas à la base de production.
+The browser test uses installed Chrome with synthetic accounts and stubbed services. It does not connect to the production database.
 
-Cette archive reste dans le dépôt. GitHub Pages publie actuellement la racine de `main`. Le fichier `_config.yml` préparé pendant le nettoyage exclut `Archive/` et les autres dossiers internes de la prochaine publication, tout en préservant les URL sous `/App/`. Vérifier ces exclusions après une publication autorisée. Elles ne rendent pas privée l’archive dans le dépôt GitHub public.
+GitHub Pages currently publishes the root of `main`. The cleanup's `_config.yml` excludes this archive and other internal directories from the next authorized build while preserving `/App/` URLs. Verify the deployed exclusions after publication. They do not make files private in a public Git repository or its history.

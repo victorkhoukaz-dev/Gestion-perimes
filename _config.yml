@@ -1,6 +1,6 @@
-# GitHub Pages publie main depuis la racine du dépôt.
-# Préserver les URL /App/ tout en excluant les données et outils internes.
-# Ces exclusions ne rendent pas privés les fichiers du dépôt GitHub public.
+# GitHub Pages builds main from the repository root.
+# Preserve /App/ URLs while excluding private data and development files.
+# These exclusions do not remove files from public Git repository history.
 exclude:
   - "Archive"
   - "Bases de données csv"

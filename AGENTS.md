@@ -1,85 +1,43 @@
-# 🤖 AI AGENT INSTRUCTIONS (AGENTS.md)
+# Agent instructions — PharmaOps
 
-> **IMPORTANT FOR ALL AI AGENTS (Antigravity, ChatGPT Codex, Claude, Cursor, etc.)**: 
-> Read this document before making any changes to this codebase. It contains critical instructions, syntax validation scripts, architecture rules, and conventions for the **Gestion des Expirés (PharmaOps)** project.
+Read these instructions before changing the project.
 
----
+## Language
 
-## 📌 1. ESSENCE DU PROJET
+- The published website and its user-facing features must be in French, using Canadian French conventions where appropriate. This includes navigation, buttons, loading states, errors, confirmations, accessibility labels, printed reports and documents generated for app users.
+- Agent conversations, plans, explanations, source-code comments, configuration comments, README files, internal Markdown documents and other development/construction files must be in English.
+- Preserve technical identifiers, storage keys, database values, medication names and imported/user-entered data when translating UI text. Do not add an English UI or a language selector unless requested.
 
-**Gestion des Expirés (PharmaOps)** est une application Web & Mobile Progressive (PWA) de gestion des péremptions et retraits mensuels de médicaments pour pharmacies d'officine (laboratoires, réserves et tablettes).
-* **Architecture** : HTML5 / Vanilla JS / Material Design 3 CSS + Cloud Supabase (RLS multi-tenant) + Local-First / PWA.
-* **Fonctionnalités clés** :
-  1. Tournée de saisie par scan de code-barres (UPC / Datamatrix 2D) et DIN.
-  2. Auto-remplissage et association intelligente UPC ↔ DIN au vol.
-  3. Suivi collaboratif en temps réel de l'avancement par section (checklists & pastilles 12 mois).
-  4. Tableau de bord de retrait mensuel & impression de fiches de retrait officielles.
-  5. Module d'analyse des achats de médicaments génériques (`App/js/modules/generics.js`).
+## Collaboration and authorization
 
----
+- The user is learning programming. Work in small, testable steps; explain major architectural choices in plain language before implementing them.
+- After each step, explain what changed, how to test it and what to learn from it.
+- Do not delete data, publish, or spend money without authorization. Authorization already given for the current action remains valid.
+- Check the branch and working tree before Git operations. Do not publish integration features prematurely. Follow the user's current merge and release instructions.
 
-## ⚠️ 2. RÈGLES D'OR & RÈGLES DU CODEBASE
+## Architecture and data protection
 
-### 🔴 Règle 1 : Validation Syntaxe JS Obligatoire (Avant tout commit / modification)
-Le fichier `App/index.html` contient une grande partie de la logique JavaScript en ligne. **Une seule erreur de syntaxe JS (accolade ou virgule manquante) casse TOUS les event listeners et fige l'application sur la page de connexion.**
+- PharmaOps is a PWA in `App/`, built with HTML, vanilla JavaScript and CSS, with Supabase and pharmacy isolation through `pharmacy_id` and Row Level Security.
+- Keep the lightweight architecture. Do not add a heavy bundler or framework without an explicit request; avoid unnecessary dependencies.
+- Follow `supabase/README.md` and versioned migrations in `supabase/migrations/`. Record schema changes as new migrations; never rerun a historical production migration.
+- Never expose secret or service-role keys in browser code.
+- Preserve existing reports, recovery copies and UPC/DIN associations. Keep exports and backups out of Git tracking and deployment; Git ignore rules do not remove historical commits.
+- Preserve the entry workflow: UPC or 2D scan fills the product and available lot/expiry, immediately focuses Quantity, then Enter saves and returns to barcode entry. Support multiple UPCs per DIN.
 
-👉 **Avant de valider une modification sur `App/index.html`, vous DEVEZ exécuter cette commande Node.js pour vérifier la syntaxe :**
+## Required validation
+
+A syntax error in an inline script in `App/index.html` can disable all listeners and block login. After editing it and before committing, run:
 
 ```powershell
-node -e "const fs = require('fs'); const html = fs.readFileSync('./App/index.html', 'utf8'); const scripts = html.match(/<script[\s\S]*?<\/script>/gi) || []; scripts.forEach((s, i) => { const code = s.replace(/<\/?script[^>]*>/gi, ''); try { new Function(code); } catch(e) { console.error('Erreur syntaxe JS:', e.message); process.exit(1); } }); console.log('Syntaxe 100% OK');"
+node -e "const fs = require('fs'); const html = fs.readFileSync('./App/index.html', 'utf8'); const scripts = html.match(/<script[\s\S]*?<\/script>/gi) || []; scripts.forEach(s => { const code = s.replace(/<\/?script[^>]*>/gi, ''); new Function(code); }); console.log('JavaScript syntax OK');"
 ```
 
-### 🔴 Règle 2 : Invalidation du Cache PWA (`App/sw.js`)
-L'application est une PWA avec un Service Worker. Dès que vous modifiez du code HTML, CSS ou JS statique dans `App/`, **vous devez incrémenter la version de `CACHE_NAME`** dans `App/sw.js` (ex: passer de `v3.8` à `v3.9`) afin que les appareils mobiles et tablettes téléchargent la nouvelle version.
+- Check changed JavaScript modules and run relevant tests.
+- Any static HTML, CSS or JavaScript change under `App/` requires incrementing `CACHE_NAME` in `App/sw.js`, so mobile and desktop devices receive updates.
+- When translating UI, check confirmations, errors, unit lists, printing and compatibility with saved reports.
 
-### 🔴 Règle 3 : Respect du Multi-UPC et du Flux de Saisie
-Ne cassez jamais le comportement de saisie :
-- Scan d'un code UPC ➔ auto-remplissage du DIN, nom, dosage et format.
-- Focus automatique immédiatement transféré sur le champ **Quantité**.
-- Touche `Entrée` dans le champ Quantité ➔ enregistrement direct et retour au champ code-barres sans clic de souris.
-- Support du multi-UPC par DIN (plusieurs emballages pour un même médicament).
+## Local development
 
-### 🔴 Règle 4 : Architecture Sans Build Heavy
-L'application fonctionne en exécutant directement `App/index.html` dans un navigateur ou via un petit serveur local (`python serve.py` / `lancer_local.bat`). **Ne pas ajouter de bundler lourd (Vite, Webpack, React, Next.js) sans demande explicite de l'utilisateur.**
-
-### 🔴 Règle 5 : Respect du Multi-Tenant et RLS Supabase
-Chaque pharmacie possède son propre `pharmacy_id`. Toutes les requêtes vers Supabase doivent intégrer la sécurité RLS (Row Level Security). Référez-vous à `supabase/README.md` et aux migrations versionnées dans `supabase/migrations/`.
-
----
-
-## 🛠️ 3. COMMANDES UTILES DU PROJET
-
-* **Lancer le serveur local** : `powershell ./serve.ps1` ou exécuter `lancer_local.bat` (Port 8080).
-* **Accès réseau local / mobile** : `powershell ./lancer_mobile.ps1`.
-* **Vérification de la syntaxe JS** :
-  ```powershell
-  node -e "const fs = require('fs'); const html = fs.readFileSync('./App/index.html', 'utf8'); const scripts = html.match(/<script[\s\S]*?<\/script>/gi) || []; scripts.forEach((s, i) => { const code = s.replace(/<\/?script[^>]*>/gi, ''); try { new Function(code); } catch(e) { console.error('Erreur syntaxe JS:', e.message); process.exit(1); } }); console.log('Syntaxe 100% OK');"
-  ```
-
----
-
-## 📂 4. STRUCTURE DES FICHIERS CLÉS
-
-```text
-Procédure expirés/
-├── AGENTS.md                          # Ce fichier d'instructions pour les agents IA
-├── PROJECT.md                         # Spécification technique complète & schéma du projet
-├── README.md                          # Guide de démarrage et documentation utilisateur
-├── GUIDE_UTILISATION.md               # Guide opérationnel pour l'équipe en pharmacie
-├── lancer_local.bat                   # Raccourci de lancement local (PC)
-├── serve.ps1 / serve.py               # Serveur HTTP local léger (port 8080)
-├── supabase/                         # Migrations, audits, rollback et archives Supabase
-└── App/                               # Code source principal de l'application
-    ├── index.html                     # Application UI, structure & scripts principaux
-    ├── manifest.json                  # Déclaration PWA
-    ├── sw.js                          # Service Worker (gestion du cache hors-ligne)
-    ├── globals.css / dashboard.css    # Styles Material Design 3
-    └── js/
-        ├── core/db.js / logger.js     # Logger et couche de base de données
-        └── modules/generics.js        # Module d'analyse des achats génériques (Chart.js)
-```
-
-
-## Product language
-
-All user-facing app text must always be in French (Canadian French where applicable), including loading screens, buttons, confirmations, errors, accessibility labels, printed reports and generated documents. Preserve technical identifiers and imported/user-entered data. Agent explanations and conversation remain in English. Do not introduce English app text unless the user explicitly requests it.
+- Start the local server with `powershell ./serve.ps1` or `lancer_local.bat`; inspect the script for the configured port.
+- For local mobile access, use `powershell ./lancer_mobile.ps1`.
+- Main UI and inline logic: `App/index.html`; PWA cache: `App/sw.js`; database artifacts: `supabase/`; developer tests: `scratch/`.
