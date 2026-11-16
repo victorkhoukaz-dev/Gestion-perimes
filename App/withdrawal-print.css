@@ -1,0 +1,45 @@
+/* Paper worksheet only. Keep interactive dashboard styles unchanged. */
+@page withdrawal-sheet { size: auto; margin: 12mm 10mm; }
+@media print {
+  html, body { background: #fff !important; color: #111 !important; height: auto !important; min-height: 0 !important; }
+  body { margin: 0 !important; }
+  body:not(.cr-active) { page: withdrawal-sheet; font: 9pt/1.2 Arial, sans-serif; }
+  .container { width: 100% !important; max-width: none !important; margin: 0 !important; padding: 0 !important; }
+  header, .app-header-container, .nav-tabs, .month-selector-bar, .theme-toggle, .btn,
+  .btn-circle, .action-btn-group, .filter-bar, .toast-container, .modal-overlay,
+  .checklist-actions, .btn-undo, .due-alert { display: none !important; }
+  .card { border: 0 !important; border-radius: 0 !important; box-shadow: none !important; padding: 0 !important; margin: 0 !important; overflow: visible !important; }
+  #tab-retrait { animation: none !important; }
+  #tab-retrait .grid-dashboard { display: block !important; }
+  #checklist-container .section-group { break-inside: auto; page-break-inside: auto; border: 0; border-radius: 0; overflow: visible; margin: 0 0 3mm; background: #fff; }
+  #checklist-container .withdrawal-section-toggle,
+  #checklist-container .withdrawal-section-body,
+  #checklist-container .withdrawal-section-body[hidden] { display: none !important; }
+  #checklist-container .withdrawal-print-excluded { display: none !important; }
+
+  .print-header { display: block !important; border-bottom: 1pt solid #222; padding-bottom: 2mm; margin-bottom: 3mm; break-inside: avoid; }
+  .withdrawal-print-heading, .withdrawal-print-meta { display: flex; justify-content: space-between; align-items: baseline; gap: 5mm; }
+  .withdrawal-print-heading h1 { font-size: 13pt; margin: 0; }
+  .withdrawal-print-heading h2 { font-size: 10pt; margin: 0; }
+  .withdrawal-print-meta { margin-top: 1.5mm; font-size: 8pt; }
+  #print-pharmacy-subtitle { font-weight: 700; }
+  .print-header p { font-size: 7.5pt; line-height: 1.3; margin: 1.5mm 0 0; }
+
+  .withdrawal-print-table { display: table !important; width: 100%; table-layout: fixed; border-collapse: collapse; color: #111; font: 9pt/1.15 Arial, sans-serif; }
+  .withdrawal-print-table .paper-col-din { width: 20mm; }
+  .withdrawal-print-table .paper-col-dose { width: 28mm; }
+  .withdrawal-print-table .paper-col-quantity { width: 10mm; }
+  .withdrawal-print-table .paper-col-removed, .withdrawal-print-table .paper-col-sold { width: 15mm; }
+  .withdrawal-print-table thead { display: table-header-group; }
+  .withdrawal-print-table tr { break-inside: avoid; page-break-inside: avoid; }
+  .withdrawal-print-table th, .withdrawal-print-table td { padding: .65mm 1.4mm; text-align: left; vertical-align: top; border-bottom: .4pt solid #bbb; overflow-wrap: anywhere; }
+  .withdrawal-print-table th { font-size: 8pt; font-weight: 700; border-bottom: .6pt solid #555; }
+  .withdrawal-print-table .paper-section { padding-top: 1.5mm; font-size: 9pt; border-top: .6pt solid #555; border-bottom: 0; }
+  .withdrawal-print-table .paper-section-month { float: right; font-size: 8pt; font-weight: 400; }
+  .withdrawal-print-table strong { font-weight: 600; }
+  .withdrawal-print-table td:nth-child(2) { font-variant-numeric: tabular-nums; white-space: nowrap; font-size: 8pt; }
+  .withdrawal-print-table td:nth-child(4), .withdrawal-print-table th:nth-child(n+4) { text-align: center; }
+  .withdrawal-print-table .paper-mark { text-align: center; white-space: nowrap; }
+  .withdrawal-print-table .paper-note { font-size: 8pt; font-style: italic; }
+  .print-signoff { display: flex !important; justify-content: space-between; gap: 5mm; margin-top: 3mm !important; padding-top: 2mm !important; font: 8pt/1.3 Arial, sans-serif; break-inside: avoid; }
+}

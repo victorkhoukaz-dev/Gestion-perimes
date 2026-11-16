@@ -12,7 +12,7 @@ const functions = html.slice(html.indexOf('    function matchesWithdrawalSearch(
     const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
     const errors = [];
     page.on('pageerror', error => errors.push(error.message));
-    await page.setContent('<html><head>' + [...html.matchAll(/<style[^>]*>[\s\S]*?<\/style>/g)].map(m => m[0]).join('') + '</head><body><div class="container">' + section + '</div>' + dialog + '</body></html>');
+    await page.setContent('<html><head>' + [...html.matchAll(/<style[^>]*>[\s\S]*?<\/style>/g)].map(m => m[0]).join('') + '<style>' + fs.readFileSync(path.join(__dirname, '../App/withdrawal-print.css'), 'utf8') + '</style></head><body><div class="container">' + section + '</div>' + dialog + '</body></html>');
     await page.addScriptTag({ content: `
       const state = { targetMonthDate: new Date(2027, 0, 1), currentDate: new Date(2027, 0, 1), products: [
         { id: '1', product: 'Acétaminophen', din: '01234567', dosage: '500 mg', format: '100 tablets', section: 'A', expiryDate: '2027-01', status: 'active', quantity: 10 },
@@ -86,7 +86,7 @@ const functions = html.slice(html.indexOf('    function matchesWithdrawalSearch(
     await page.locator('#withdrawal-print-confirm').click();
     assert.deepEqual(await page.evaluate(() => window.printed), ['A'], 'print selects only requested sections');
     await page.emulateMedia({ media: 'print' });
-    assert.equal(await page.locator('.section-group[data-section="A"] .product-row:visible').count(), 2, 'collapsed selected rows print');
+    assert.equal(await page.locator('.section-group[data-section="A"] .withdrawal-print-table tbody tr:visible').count(), 2, 'collapsed selected rows print');
     assert.equal(await page.locator('.section-group[data-section="B"]').isVisible(), false, 'other section excluded');
     assert.equal(await page.locator('#withdrawal-print-dialog').isVisible(), false);
     await page.evaluate(() => window.dispatchEvent(new Event('afterprint')));
@@ -117,7 +117,7 @@ const functions = html.slice(html.indexOf('    function matchesWithdrawalSearch(
     await page.locator('#withdrawal-collapse').click();
     await page.emulateMedia({ media: 'print' });
     assert.equal(await page.locator('#withdrawal-search').isVisible(), false, 'search controls do not print');
-    assert.equal(await page.locator('#checklist-container .product-row:visible').count(), 2, 'printing respects search');
+    assert.equal(await page.locator('#checklist-container .withdrawal-print-table tbody tr:visible').count(), 2, 'printing respects search');
     await page.emulateMedia({ media: 'screen' });
     assert.equal(await page.locator('.withdrawal-section-body:visible').count(), 0, 'printing preserves screen collapse state');
     await page.evaluate(() => { state.targetMonthDate = new Date(2028, 0, 1); renderChecklist(); });
