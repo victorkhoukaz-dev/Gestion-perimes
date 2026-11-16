@@ -1,1 +1,8 @@
 Mensuel 2026/
+
+# Local analysis data and generated previews; keep the files on this computer.
+/scratch/cost-preview/
+/scratch/withdrawal-*-preview.png
+/scratch/withdrawal-print-preview.pdf
+__pycache__/
+*.py[cod]

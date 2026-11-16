@@ -1,0 +1,23 @@
+# GitHub Pages publie main depuis la racine du dépôt.
+# Préserver les URL /App/ tout en excluant les données et outils internes.
+# Ces exclusions ne rendent pas privés les fichiers du dépôt GitHub public.
+exclude:
+  - "Archive"
+  - "Bases de données csv"
+  - "Fichiers de sauvegarde JSON"
+  - "Mensuel 2026"
+  - "Company Returns - Test Branch"
+  - "scratch"
+  - "supabase"
+  - "docs"
+  - "AGENTS.md"
+  - "PROJECT.md"
+  - "GUIDE_UTILISATION.md"
+  - "README.md"
+  - "*.bat"
+  - "*.ps1"
+  - "*.py"
+  - "node_modules"
+  - "vendor"
+  - "Gemfile"
+  - "Gemfile.lock"
