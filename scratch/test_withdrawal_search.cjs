@@ -45,13 +45,30 @@ const functions = html.slice(html.indexOf('    function matchesWithdrawalSearch(
     assert.equal(html.includes('exportAllToCSV'), false);
     assert.equal(await page.locator('#btn-export-csv-month').count(), 0);
     const layout = await page.evaluate(() => {
-      const row = document.querySelector('.withdrawal-section-navigation').getBoundingClientRect();
       const select = document.getElementById('withdrawal-section').getBoundingClientRect();
       const button = document.getElementById('withdrawal-expand').getBoundingClientRect();
-      return { rowWidth: row.width, selectWidth: select.width, sameRow: Math.abs(select.y + select.height / 2 - button.y - button.height / 2) < 2, adjacent: button.x >= select.right };
+      const count = document.getElementById('withdrawal-search-count').getBoundingClientRect();
+      const search = document.getElementById('withdrawal-search').getBoundingClientRect();
+      const filter = document.querySelector('.withdrawal-status-filter').getBoundingClientRect();
+      return {
+        sameRow: Math.abs(select.y + select.height / 2 - button.y - button.height / 2) < 2,
+        adjacent: button.x >= select.right && count.x >= button.right,
+        countOnRow: count.top >= select.top && count.bottom <= select.bottom,
+        filterBesideSearch: filter.x >= search.right && filter.bottom === search.bottom
+      };
     });
     assert.equal(layout.sameRow && layout.adjacent, true, 'dropdown and buttons share one row');
-    assert.ok(Math.abs(layout.selectWidth - (layout.rowWidth - 12) / 2) < 2, 'dropdown uses half the row');
+    assert.equal(layout.countOnRow, true, 'count shares the navigation row');
+    assert.equal(layout.filterBesideSearch, true, 'status filter fits beside search');
+    assert.equal(await page.locator('#withdrawal-search-count').textContent(), '1 sur 3 affichés');
+    const progress = page.locator('.withdrawal-progress summary');
+    assert.equal(await page.locator('#retrait-progress-percent').isVisible(), true);
+    assert.equal(await page.locator('#retrait-progress-body').isVisible(), false);
+    await progress.press('Enter');
+    assert.equal(await page.locator('#retrait-progress-body').isVisible(), true);
+    await progress.press('Enter');
+    assert.equal(await page.locator('#retrait-progress-body').isVisible(), false);
+    await progress.blur();
     await page.screenshot({ path: path.join(__dirname, 'withdrawal-compact-preview.png'), fullPage: true, animations: 'disabled' });
     await page.locator('#withdrawal-show-resolved').check();
     assert.equal(await count(), 3);
@@ -148,7 +165,7 @@ const functions = html.slice(html.indexOf('    function matchesWithdrawalSearch(
     await page.evaluate(() => { state.targetMonthDate = new Date(2028, 0, 1); renderChecklist(); });
     assert.equal(await count(), 0, 'empty month');
     assert.equal(await page.locator('#withdrawal-section option').count(), 1, 'empty month clears section navigation');
-    assert.equal(await page.locator('#withdrawal-search-count').textContent(), '0 produit(s) affiché(s) sur 0');
+    assert.equal(await page.locator('#withdrawal-search-count').textContent(), '0 sur 0 affichés');
     await page.locator('#withdrawal-print-open').click();
     assert.equal(await page.locator('#withdrawal-print-confirm').isDisabled(), true, 'empty month cannot print');
     await page.locator('#withdrawal-print-cancel').click();

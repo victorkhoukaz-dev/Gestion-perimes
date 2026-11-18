@@ -12,8 +12,9 @@ Read these instructions before changing the project.
 
 - The user is learning programming. Work in small, testable steps; explain major architectural choices in plain language before implementing them.
 - After each step, explain what changed, how to test it and what to learn from it.
-- Do not delete data, publish, or spend money without authorization. Authorization already given for the current action remains valid.
-- Check the branch and working tree before Git operations. Do not publish integration features prematurely. Follow the user's current merge and release instructions.
+- Commit each completed project change, push it to `main`, and verify publication on GitHub Pages unless the user instructs otherwise. The user has given standing authorization for this release workflow in this repository.
+- Ask before deleting data or spending money. Follow any release instructions specific to the current task.
+- Check the branch and working tree before Git operations. Work on `main` and treat `integration` as archived.
 
 ## Architecture and data protection
 

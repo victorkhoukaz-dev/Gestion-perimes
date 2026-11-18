@@ -1519,13 +1519,60 @@
     .withdrawal-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 12px; }
     .withdrawal-controls label { display: flex; align-items: center; gap: 6px; margin: 0; }
     .withdrawal-controls input[type="checkbox"] { width: 18px; height: 18px; flex: 0 0 18px; margin: 0; }
-    .withdrawal-section-navigation { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; gap: 12px; margin-top: 12px; }
+    #tab-retrait .stats-container { gap: 8px; margin-bottom: 12px; }
+    #tab-retrait .stat-card { padding: 8px 12px; gap: 8px; border-radius: 12px; }
+    #tab-retrait .stat-icon { width: 30px; height: 30px; flex: 0 0 auto; }
+    #tab-retrait .stat-icon svg { width: 18px; height: 18px; }
+    #tab-retrait .stat-info { display: flex; align-items: baseline; flex-wrap: wrap; gap: 0 6px; }
+    #tab-retrait .stat-info h3 { font-size: 1.15rem; line-height: 1.2; margin: 0; }
+    #tab-retrait .stat-info p { margin: 0; }
+    #tab-retrait .grid-dashboard { gap: 12px; align-items: start; }
+    #tab-retrait .withdrawal-main-card { padding: 16px; margin-bottom: 0; min-width: 0; }
+    #tab-retrait .month-selector-bar { padding: 8px 12px; margin-bottom: 12px; }
+    .withdrawal-sidebar { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+    .withdrawal-progress { margin: 0; padding: 10px 14px; }
+    .withdrawal-progress summary {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      list-style: none;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+    .withdrawal-progress summary::-webkit-details-marker { display: none; }
+    .withdrawal-progress summary::before { content: ''; width: 0.45rem; height: 0.45rem; border: solid currentColor; border-width: 0 2px 2px 0; transform: rotate(-45deg); }
+    .withdrawal-progress[open] summary::before { transform: rotate(45deg); }
+    #retrait-progress-percent { color: var(--primary-color); font-variant-numeric: tabular-nums; }
+    #retrait-progress-body { margin-top: 10px; border-top: 1px solid var(--border-color); padding-top: 10px; }
+    #retrait-sections-progress-list { display: grid; gap: 6px; }
+    .withdrawal-toolbar { display: block; margin-bottom: 12px; container-type: inline-size; }
+    .withdrawal-search-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 6px 14px; }
+    .withdrawal-search-field { min-width: 0; }
+    .withdrawal-search-field label { display: block; margin-bottom: 3px; font-size: 0.85rem; font-weight: 600; }
+    .withdrawal-status-filter { display: flex; align-items: center; gap: 6px; min-height: 40px; font-size: 0.85rem; cursor: pointer; }
+    .withdrawal-status-filter input[type="checkbox"] { width: 16px; height: 16px; flex: 0 0 16px; margin: 0; }
+    .withdrawal-section-navigation { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 8px 12px; margin-top: 8px; }
     .withdrawal-section-navigation .withdrawal-controls { margin-top: 0; flex-wrap: nowrap; gap: 8px; }
     .withdrawal-section-navigation .btn { flex: 1; padding: 8px 12px; white-space: nowrap; }
-    @media (max-width: 480px) {
-      .withdrawal-section-navigation { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+    .withdrawal-section-navigation select { width: 100%; min-width: 0; }
+    #withdrawal-search-count { margin: 0; text-align: end; font-size: 0.8rem; color: var(--text-muted); }
+    @container (max-width: 490px) {
+      .withdrawal-search-row { grid-template-columns: minmax(0, 1fr); }
+      .withdrawal-status-filter { min-height: 32px; }
+      .withdrawal-section-navigation { grid-template-columns: minmax(0, 1fr) auto; }
+      .withdrawal-section-navigation .btn { padding-inline: 9px; }
+      .withdrawal-section-navigation select { padding-inline: 10px; font-size: 0.9rem; }
+      #withdrawal-search-count { grid-column: 1 / -1; }
     }
-    .withdrawal-section-navigation select { width: 100%; }
+    @container (max-width: 310px) {
+      .withdrawal-section-navigation { grid-template-columns: minmax(0, 1fr); }
+    }
+    @media (max-width: 768px) {
+      #tab-retrait .stat-icon { display: none; }
+      #tab-retrait .stat-info { justify-content: center; }
+    }
     .withdrawal-section-toggle { width: 100%; border: 0; text-align: left; cursor: pointer; font: inherit; font-weight: 700; gap: 12px; }
     .withdrawal-section-toggle:focus-visible { outline: 3px solid var(--primary-color); outline-offset: -3px; }
     .withdrawal-section-body[hidden] { display: none; }
@@ -1535,8 +1582,8 @@
     #withdrawal-print-options label { display: flex; align-items: center; gap: 8px; margin: 0; }
     #withdrawal-print-options input { width: 18px; height: 18px; flex: 0 0 18px; margin: 0; }
     @media print {
-      #withdrawal-print-dialog, #tab-retrait > .stats-container, #tab-retrait > .card,
-      #tab-retrait .grid-dashboard > div:last-child, #past-due-alert-container,
+      #withdrawal-print-dialog, #tab-retrait > .stats-container, .withdrawal-sidebar,
+      #past-due-alert-container,
       .mobile-bottom-nav, #mobile-section-header, #batch-action-bar, .batch-select-cb { display: none !important; }
       #tab-retrait .grid-dashboard { display: block !important; }
       #checklist-container .withdrawal-print-excluded { display: none !important; }
@@ -2734,7 +2781,7 @@
           </div>
           <div class="stat-info">
             <h3 id="stat-total-target">0</h3>
-            <p>Produits ciblés ce mois</p>
+            <p>produits ciblés</p>
           </div>
         </div>
         <div class="stat-card">
@@ -2743,7 +2790,7 @@
           </div>
           <div class="stat-info">
             <h3 id="stat-removed-count">0</h3>
-            <p>Produits déjà résolus</p>
+            <p>résolus</p>
           </div>
         </div>
         <div class="stat-card">
@@ -2752,36 +2799,13 @@
           </div>
           <div class="stat-info">
             <h3 id="stat-remaining-count">0</h3>
-            <p>Restants sur les tablettes</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- CARTE DE SUIVI DE PROGRESSION DES SECTIONS (Onglet Retrait V3.9.6 - Collapsible) -->
-      <div class="card" style="margin-bottom: 20px; padding: 12px 16px;">
-        <div id="retrait-progress-toggle-header" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none;">
-          <h3 style="margin: 0; font-size: 0.95rem; color: var(--text-color); display: flex; align-items: center; gap: 8px;">
-            <span id="retrait-progress-arrow" style="transition: transform 0.2s ease; font-size: 0.8rem;">▶</span>
-            📊 Progression du retrait par section
-          </h3>
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <span id="retrait-progress-percent" style="font-weight: 700; color: var(--primary-color); font-size: 0.9rem;">0%</span>
-            <span style="font-size: 0.75rem; color: var(--text-muted);">(Afficher)</span>
-          </div>
-        </div>
-        
-        <div id="retrait-progress-body" style="display: none; margin-top: 14px; border-top: 1px solid var(--border-color); padding-top: 12px;">
-          <div class="progress-bar-bg" style="margin-bottom: 16px;">
-            <div id="retrait-progress-bar" class="progress-bar-fill" style="width: 0%;"></div>
-          </div>
-          <div id="retrait-sections-progress-list" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; overflow: hidden;">
-            <!-- Dynamique -->
+            <p>sur les tablettes</p>
           </div>
         </div>
       </div>
 
       <div class="grid-dashboard">
-        <div class="card" style="margin-bottom: 0;">
+        <div class="card withdrawal-main-card">
           <div class="month-selector-bar">
             <div class="month-navigation">
               <button class="btn-circle" id="prev-target-month" title="Mois précédent">&lt;</button>
@@ -2796,11 +2820,13 @@
             </div>
           </div>
 
-          <div class="filter-bar" style="display: block; margin-bottom: 20px;">
-            <label for="withdrawal-search">Rechercher un médicament</label>
-            <input type="search" id="withdrawal-search" class="form-control" placeholder="Nom, DIN, teneur ou format" autocomplete="off" aria-describedby="withdrawal-search-count">
-            <div class="withdrawal-controls">
-              <label><input type="checkbox" id="withdrawal-show-resolved"> Afficher les produits retirés / vendus</label>
+          <div class="filter-bar withdrawal-toolbar">
+            <div class="withdrawal-search-row">
+              <div class="withdrawal-search-field">
+                <label for="withdrawal-search">Rechercher un médicament</label>
+                <input type="search" id="withdrawal-search" class="form-control" placeholder="Nom, DIN, teneur ou format" autocomplete="off" aria-describedby="withdrawal-search-count">
+              </div>
+              <label class="withdrawal-status-filter"><input type="checkbox" id="withdrawal-show-resolved"> Afficher les produits retirés / vendus</label>
             </div>
             <div class="withdrawal-section-navigation">
               <select id="withdrawal-section" class="form-control" aria-label="Choisir une section"><option value="">Choisir une section</option></select>
@@ -2808,8 +2834,8 @@
                 <button type="button" class="btn btn-secondary" id="withdrawal-expand" aria-label="Déplier toutes les sections">Déplier</button>
                 <button type="button" class="btn btn-secondary" id="withdrawal-collapse" aria-label="Replier toutes les sections">Replier</button>
               </div>
+              <p id="withdrawal-search-count" role="status" aria-live="polite"></p>
             </div>
-            <p id="withdrawal-search-count" role="status" aria-live="polite" style="margin: 8px 0 0;"></p>
           </div>
 
           <div id="past-due-alert-container"></div>
@@ -2819,7 +2845,20 @@
           </div>
         </div>
 
-        <div style="display: flex; flex-direction: column; gap: 24px;">
+        <div class="withdrawal-sidebar">
+          <details class="card withdrawal-progress">
+            <summary>
+              <span>Progression du retrait par section</span>
+              <span id="retrait-progress-percent">0%</span>
+            </summary>
+            <div id="retrait-progress-body">
+              <div class="progress-bar-bg" style="margin-bottom: 10px;">
+                <div id="retrait-progress-bar" class="progress-bar-fill" style="width: 0%;"></div>
+              </div>
+              <div id="retrait-sections-progress-list"></div>
+            </div>
+          </details>
+
           <!-- CARD INITIALES SESS -->
           <div class="card" style="margin-bottom: 0;">
             <h3 class="card-title" style="font-size: 1rem; margin-bottom: 12px;">Session Technicien</h3>
@@ -5052,23 +5091,6 @@
         updateTourneeAssistant();
       });
 
-      // Toggle repliable pour la carte de progression de l'onglet Retrait
-      const toggleRetraitProgress = document.getElementById("retrait-progress-toggle-header");
-      if (toggleRetraitProgress) {
-        toggleRetraitProgress.addEventListener("click", () => {
-          const body = document.getElementById("retrait-progress-body");
-          const arrow = document.getElementById("retrait-progress-arrow");
-          if (!body) return;
-          if (body.style.display === "none" || body.style.display === "") {
-            body.style.display = "block";
-            if (arrow) arrow.textContent = "▼";
-          } else {
-            body.style.display = "none";
-            if (arrow) arrow.textContent = "▶";
-          }
-        });
-      }
-
       // Écouteur générique pour les accordéons repliables (Assistant Tournée, Suivi des Sections, Visualisation Pastille)
       document.addEventListener("click", (e) => {
         // Ignorer les clics sur les éléments select dans le header
@@ -6540,7 +6562,7 @@
         && (product.status === 'active' || showResolved));
       const sectionSelect = document.getElementById('withdrawal-section');
       sectionSelect.replaceChildren(new Option('Choisir une section', ''));
-      document.getElementById('withdrawal-search-count').textContent = `${visibleTarget.length} produit(s) affiché(s) sur ${totalCount}`;
+      document.getElementById('withdrawal-search-count').textContent = `${visibleTarget.length} sur ${totalCount} affichés`;
       const visibleActiveIds = new Set(visibleTarget.filter(product => product.status === 'active').map(product => product.id));
       for (const id of selectedBatchIds) if (!visibleActiveIds.has(id)) selectedBatchIds.delete(id);
       updateBatchActionBar();

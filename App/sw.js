@@ -1,5 +1,5 @@
 const CACHE_SCOPE = encodeURIComponent(self.registration.scope);
-const CACHE_NAME = 'expires-lab-v86-' + CACHE_SCOPE;
+const CACHE_NAME = 'expires-lab-v87-' + CACHE_SCOPE;
 const ASSETS = [
   './index.html',
   './Application - périmés.html',
