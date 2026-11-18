@@ -38,6 +38,7 @@ const functions = html.slice(html.indexOf('    function matchesWithdrawalSearch(
       document.getElementById('print-month-title').textContent = 'Mois à retirer : Janvier 2027';
       document.getElementById('print-pharmacy-subtitle').textContent = 'Pharmacie de démonstration';
       document.getElementById('print-date-subtitle').textContent = 'Imprimé le : 16 novembre 2026';
+      document.getElementById('withdrawal-show-resolved').checked = true; // Explicitly include all statuses for print coverage.
       renderChecklist();
     ` });
     assert.equal(await page.locator('.withdrawal-print-table:visible').count(), 0, 'paper table hidden on screen');

@@ -4,6 +4,7 @@ const path = require('node:path');
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const html = fs.readFileSync(path.join(__dirname, '../App/index.html'), 'utf8');
 const section = html.slice(html.indexOf('    <div class="tab-content active" id="tab-retrait">'), html.indexOf('    <div class="tab-content" id="tab-tournee">'));
+const navigation = html.slice(html.indexOf('      // Navigation des onglets'), html.indexOf('      // Basculement de thème'));
 const dialog = html.match(/  <dialog id="withdrawal-print-dialog"[\s\S]*?<\/dialog>/)[0];
 const functions = html.slice(html.indexOf('    function matchesWithdrawalSearch('), html.indexOf('    function handleChecklistAction('));
 (async () => {
@@ -12,7 +13,7 @@ const functions = html.slice(html.indexOf('    function matchesWithdrawalSearch(
     const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
     const errors = [];
     page.on('pageerror', error => errors.push(error.message));
-    await page.setContent('<html><head>' + [...html.matchAll(/<style[^>]*>[\s\S]*?<\/style>/g)].map(m => m[0]).join('') + '<style>' + fs.readFileSync(path.join(__dirname, '../App/withdrawal-print.css'), 'utf8') + '</style></head><body><div class="container">' + section + '</div>' + dialog + '</body></html>');
+    await page.setContent('<html><head>' + [...html.matchAll(/<style[^>]*>[\s\S]*?<\/style>/g)].map(m => m[0]).join('') + '<style>' + fs.readFileSync(path.join(__dirname, '../App/withdrawal-print.css'), 'utf8') + '</style></head><body><div class="container">' + '<button class="tab-btn" data-tab="tab-retrait">Retrait</button><button class="tab-btn" data-tab="tab-tournee">Saisie</button>' + section + '<div id="tab-tournee" class="tab-content"></div></div>' + dialog + '</body></html>');
     await page.addScriptTag({ content: `
       const state = { targetMonthDate: new Date(2027, 0, 1), currentDate: new Date(2027, 0, 1), products: [
         { id: '1', product: 'Acétaminophen', din: '01234567', dosage: '500 mg', format: '100 tablets', section: 'A', expiryDate: '2027-01', status: 'active', quantity: 10 },
@@ -29,11 +30,30 @@ const functions = html.slice(html.indexOf('    function matchesWithdrawalSearch(
       function formatMonthYearFrench() { return 'January 2027'; }
       function handleChecklistAction() { throw Error('Unexpected write'); }
       function undoChecklistAction() { throw Error('Unexpected write'); }
+      function populateSectionDropdowns() {}
       ${functions}
+      ${navigation}
       ${html.slice(html.indexOf('      // Medication search'), html.indexOf('      // Navigation des mois de retrait'))}
       renderChecklist();
     ` });
     const count = () => page.locator('#checklist-container .product-row').count();
+    assert.equal(await page.locator('#withdrawal-show-resolved').isChecked(), false, 'resolved products hidden by default');
+    assert.equal(await count(), 1);
+    assert.equal(await page.locator('#withdrawal-search-help').count(), 0);
+    assert.equal(await page.getByText('Accéder à une section', { exact: true }).count(), 0);
+    assert.equal(html.includes('exportMonthToCSV'), false);
+    assert.equal(html.includes('exportAllToCSV'), false);
+    assert.equal(await page.locator('#btn-export-csv-month').count(), 0);
+    const layout = await page.evaluate(() => {
+      const row = document.querySelector('.withdrawal-section-navigation').getBoundingClientRect();
+      const select = document.getElementById('withdrawal-section').getBoundingClientRect();
+      const button = document.getElementById('withdrawal-expand').getBoundingClientRect();
+      return { rowWidth: row.width, selectWidth: select.width, sameRow: Math.abs(select.y + select.height / 2 - button.y - button.height / 2) < 2, adjacent: button.x >= select.right };
+    });
+    assert.equal(layout.sameRow && layout.adjacent, true, 'dropdown and buttons share one row');
+    assert.ok(Math.abs(layout.selectWidth - (layout.rowWidth - 12) / 2) < 2, 'dropdown uses half the row');
+    await page.screenshot({ path: path.join(__dirname, 'withdrawal-compact-preview.png'), fullPage: true, animations: 'disabled' });
+    await page.locator('#withdrawal-show-resolved').check();
     assert.equal(await count(), 3);
     await page.evaluate(() => selectedBatchIds.add('1'));
     await page.locator('#withdrawal-search').fill('acetaminophen 500');
@@ -120,6 +140,11 @@ const functions = html.slice(html.indexOf('    function matchesWithdrawalSearch(
     assert.equal(await page.locator('#checklist-container .withdrawal-print-table tbody tr:visible').count(), 2, 'printing respects search');
     await page.emulateMedia({ media: 'screen' });
     assert.equal(await page.locator('.withdrawal-section-body:visible').count(), 0, 'printing preserves screen collapse state');
+    await page.locator('#withdrawal-search').fill('');
+    await page.locator('.tab-btn[data-tab="tab-tournee"]').click();
+    await page.locator('.tab-btn[data-tab="tab-retrait"]').click();
+    assert.equal(await page.locator('#withdrawal-show-resolved').isChecked(), false, 'returning to the tab resets the filter');
+    assert.equal(await count(), 1, 'returning shows only active products');
     await page.evaluate(() => { state.targetMonthDate = new Date(2028, 0, 1); renderChecklist(); });
     assert.equal(await count(), 0, 'empty month');
     assert.equal(await page.locator('#withdrawal-section option').count(), 1, 'empty month clears section navigation');
