@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="fr-CA">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Test du lecteur de codes-barres — PharmaOps</title>
+  <style>
+    body { font: 1rem/1.5 system-ui, sans-serif; margin: 0; background: #f5f7fa; color: #172536; }
+    main { max-width: 44rem; margin: 2rem auto; padding: 0 1rem; }
+    label { display: block; font-weight: 600; margin: 1rem 0 .4rem; }
+    textarea { box-sizing: border-box; width: 100%; font: 1rem monospace; padding: .6rem; }
+    button { font: inherit; margin: .6rem .5rem .2rem 0; padding: .4rem .8rem; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Test du lecteur de codes-barres</h1>
+    <p>Cliquez dans la zone de lecture, puis scannez une seule fois le code 2D d’un emballage. Le résultat reste sur cette page.</p>
+    <label for="scan">Zone de lecture</label>
+    <textarea id="scan" rows="3" autocomplete="off" spellcheck="false"></textarea>
+    <button id="reset" type="button">Recommencer le test</button>
+    <label for="result">Résultat à copier</label>
+    <textarea id="result" rows="8" readonly spellcheck="false"></textarea>
+    <button id="select-result" type="button">Sélectionner le résultat</button>
+    <p>Après avoir sélectionné le résultat, appuyez sur Ctrl+C pour le copier.</p>
+  </main>
+  <script>
+    const scan = document.getElementById('scan');
+    const result = document.getElementById('result');
+    const events = [];
+    function describe(value) {
+      return JSON.stringify(value).replace(/[\u007f-\u009f\u200b-\u200f\u2028-\u202e\ufeff]/g,
+        character => '\\u' + character.charCodeAt(0).toString(16).padStart(4, '0'));
+    }
+    function render() {
+      result.value = [
+        'Texte reçu : ' + describe(scan.value),
+        'Points de code : ' + Array.from(scan.value, character =>
+          'U+' + character.codePointAt(0).toString(16).toUpperCase().padStart(4, '0')).join(' '),
+        'Événements du navigateur :',
+        ...events
+      ].join('\n');
+    }
+    function record(event) {
+      if (events.length < 512) events.push(event);
+      render();
+    }
+    scan.addEventListener('keydown', event => {
+      const modifiers = [];
+      if (event.ctrlKey) modifiers.push('Ctrl');
+      if (event.altKey) modifiers.push('Alt');
+      if (event.shiftKey) modifiers.push('Maj');
+      if (event.metaKey) modifiers.push('Meta');
+      record('Touche ' + describe(event.key) + ' (' + event.code + ')' +
+        (modifiers.length ? ' · ' + modifiers.join('+') : ''));
+    });
+    scan.addEventListener('input', event => {
+      record('Saisie ' + event.inputType + (event.data != null ? ' ' + describe(event.data) : ''));
+    });
+    document.getElementById('reset').addEventListener('click', () => {
+      scan.value = '';
+      result.value = '';
+      events.length = 0;
+      scan.focus();
+    });
+    document.getElementById('select-result').addEventListener('click', () => {
+      result.focus();
+      result.select();
+    });
+  </script>
+</body>
+</html>
