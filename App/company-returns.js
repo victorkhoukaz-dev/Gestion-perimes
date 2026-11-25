@@ -29,6 +29,7 @@
                     </section>
                     <section class="cr-panel cr-report">
                         <div class="cr-section-heading cr-no-print"><h2>3. Vérifier le rapport</h2><button id="cr-print" type="button">Imprimer / Enregistrer en PDF</button></div>
+                        <div class="cr-sort-controls cr-no-print"><label for="cr-sort">Trier les produits</label><select id="cr-sort"><option value="recent">Ajoutés récemment</option><option value="name">Nom du produit (A à Z)</option></select></div>
                         <div class="cr-print-heading"><p id="cr-print-pharmacy"></p><h2 id="cr-print-company">Rapport de retour au fabricant</h2><p id="cr-report-meta"></p><p>Produits périmés · Quantités approximatives</p></div>
                         <div class="cr-table-wrap"><table><thead><tr><th>Produit / dosage</th><th>DIN</th><th>Lot</th><th>Péremption</th><th>Qté approx.</th><th class="cr-no-print">Actions</th></tr></thead><tbody id="cr-lines"></tbody></table></div>
                         <p id="cr-empty" class="cr-muted">Aucun produit pour le moment. Scannez un emballage ou saisissez ses renseignements ci-dessus.</p>
@@ -113,6 +114,8 @@
         $('reports').disabled = !store.reports.length;
         $('save').disabled = !store || remoteBusy;
         $('delete').disabled = !report;
+        $('sort').disabled = !report;
+        $('sort').value = report?.sortOrder === 'name' ? 'name' : 'recent';
         for (const id of ['company', 'code', 'camera', 'read', 'din', 'product', 'strength', 'format', 'lot', 'expiry', 'quantity', 'unit', 'add', 'clear']) $(id).disabled = !report;
         $('company').value = report?.company || '';
         fillEntry(report?.entry);
@@ -124,7 +127,7 @@
             $('entry-note').textContent = 'La quantité de la ligne sélectionnée sera remplacée.';
         }
         $('lines').replaceChildren();
-        for (const line of report?.lines || []) {
+        for (const line of D.sortLines(report?.lines || [], $('sort').value)) {
             const row = document.createElement('tr');
             const values = [line.product + (line.strength ? ' · ' + line.strength : '') + (line.format ? ' (' + line.format + ')' : ''), line.din || '—', line.lot, line.expiry, Number(line.quantity).toLocaleString('fr-CA', { maximumFractionDigits: 6 }) + ' ' + D.unitLabel(line.unit)];
             for (const value of values) { const cell = document.createElement('td'); cell.textContent = value; row.append(cell); }
@@ -138,6 +141,15 @@
         updateSync();
         updateHeading();
     }
+    $('sort').addEventListener('change', () => {
+        if (!active()) return;
+        const order = $('sort').value;
+        if (!saveDraft()) { $('sort').value = active().sortOrder || 'recent'; return; }
+        const next = copy(store), report = next.reports.find(item => item.id === next.activeId);
+        report.sortOrder = order === 'name' ? 'name' : 'recent';
+        if (commit(next)) render();
+        else $('sort').value = active().sortOrder || 'recent';
+    });
     function editLine(line) {
         if (!saveDraft()) return;
         fillEntry(line); editing = line.id;

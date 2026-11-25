@@ -99,6 +99,11 @@
         if (!units.includes(result.unit)) throw userError('Choisissez une unité de quantité.');
         return result;
     }
+    function sortLines(lines, order = 'recent') {
+        // Stored lines keep their insertion order; edits and quantity merges do not move them.
+        const recent = [...lines].reverse();
+        return order === 'name' ? recent.sort((a, b) => a.product.localeCompare(b.product, 'fr-CA', { sensitivity: 'base', numeric: true })) : recent;
+    }
     function lineKey(entry) {
         return JSON.stringify([entry.din || entry.code || entry.product.toLowerCase(), entry.strength.toLowerCase(),
             entry.format.toLowerCase(), entry.lot, entry.expiry, entry.unit]);
@@ -134,7 +139,7 @@
         storage.setItem(key, raw); // Callers replace in-memory state only after this succeeds.
         return raw;
     }
-    const api = { parseBarcode, findProduct, validateEntry, addLine, lineKey, units, unitLabel, userError, errorMessage, loadReports, saveReports };
+    const api = { parseBarcode, findProduct, validateEntry, addLine, sortLines, lineKey, units, unitLabel, userError, errorMessage, loadReports, saveReports };
     if (typeof module !== 'undefined' && module.exports) module.exports = api;
     if (typeof window !== 'undefined') window.CompanyReturnsData = api;
 })();

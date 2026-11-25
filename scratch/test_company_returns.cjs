@@ -5,6 +5,15 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 const gtin = '00012345678905';
+test('report sorting uses French names or insertion order without changing saved lines', () => {
+    const lines = [{ id: 'a', product: 'Zulu' }, { id: 'b', product: 'Éclair 10' }, { id: 'c', product: 'eclair 2' }];
+    assert.deepEqual(D.sortLines(lines, 'name').map(line => line.id), ['c', 'b', 'a']);
+    assert.deepEqual(D.sortLines(lines, 'recent').map(line => line.id), ['c', 'b', 'a']);
+    const edited = lines.map(line => line.id === 'a' ? { ...line, quantity: 100 } : line);
+    assert.deepEqual(D.sortLines(edited, 'recent').map(line => line.id), ['c', 'b', 'a']);
+    assert.deepEqual(lines.map(line => line.id), ['a', 'b', 'c']);
+    assert.deepEqual(D.sortLines([], 'name'), []);
+});
 test('GS1 parenthesized data keeps lots separate from serials and uses month/year', () => {
     assert.deepEqual(D.parseBarcode('(01)' + gtin + '(17)261130(10)LOT-A(21)SERIAL'), { code: gtin, lot: 'LOT-A', expiry: '2026-11', gs1: true });
 });

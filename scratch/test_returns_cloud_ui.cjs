@@ -5,10 +5,11 @@ const fs=require('node:fs');
 const D=require('../App/company-returns-data.js');
 test('simplified controls keep online reports and legacy copies, and save report deletion',async()=>{
  const elements=new Map(),values=new Map();
- function element(){return {value:'',style:{},options:[],events:{},classList:{add(){},remove(){}},addEventListener(e,f){this.events[e]=f;},replaceChildren(...children){this.options=children;},append(){},add(o){this.options.push(o);},focus(){},scrollIntoView(){},querySelectorAll(){return [];}};}
+ function element(){return {value:'',style:{},options:[],events:{},classList:{add(){},remove(){}},addEventListener(e,f){this.events[e]=f;},replaceChildren(...children){this.options=children;this.children=children;},append(...children){this.children=(this.children||[]).concat(children);},add(o){this.options.push(o);},focus(){},scrollIntoView(){},querySelectorAll(){return [];}};}
  const document={body:element(),createElement:element,getElementById(id){if(!elements.has(id))elements.set(id,element());return elements.get(id);},addEventListener(){}};
  const storage={getItem:k=>values.get(k)??null,setItem:(k,v)=>values.set(k,v)};
- const original=JSON.stringify({version:1,activeId:'old',reports:[{id:'old',company:'Apotex',lines:[],entry:{product:'unfinished'}}]});
+ const line=(id,product)=>({id,product,din:'01234567',strength:'10 mg',format:'100',lot:'LOT',expiry:'2027-12',quantity:1,unit:'tablets',code:''});
+ const original=JSON.stringify({version:1,activeId:'old',reports:[{id:'old',company:'Apotex',lines:[line('a','Alpha'),line('z','Zulu')],entry:{product:'unfinished'}}]});
  storage.setItem('pharmaops:company-returns:v1:p',original);
  let staged,online,dirty=false;
  const session={load:async()=>({value:JSON.parse(original)}),stage(v){staged=JSON.parse(JSON.stringify(v));dirty=true;},isDirty:()=>dirty,async save(v){online=JSON.parse(JSON.stringify(v));dirty=false;return {dirty:false};}};
@@ -20,10 +21,26 @@ test('simplified controls keep online reports and legacy copies, and save report
  assert.equal(elements.get('cr-unit').options[0].textContent,'comprimés');
  assert.equal(elements.get('cr-unit').options[0].value,'tablets');
  assert.equal(elements.get('cr-product').value,'unfinished');
+ const names=()=>elements.get('cr-lines').children.map(row=>row.children[0].textContent.split(' · ')[0]);
+ assert.deepEqual(names(),['Zulu','Alpha']);
+ elements.get('cr-sort').value='name';elements.get('cr-sort').events.change();
+ assert.deepEqual(names(),['Alpha','Zulu']);
+ assert.equal(elements.get('cr-product').value,'unfinished');
+
  const source=fs.readFileSync('App/company-returns.js','utf8');
  for(const id of ['cr-import','cr-reload','cr-download'])assert.equal(source.includes(id),false);
  assert.equal(storage.getItem('pharmaops:company-returns:v1:p'),original);
  await elements.get('cr-save').events.click();assert.equal(online.reports.length,1);assert.match(elements.get('cr-sync').textContent,/Enregistré pour votre pharmacie/);
+ assert.equal(online.reports[0].sortOrder,'name');
+ elements.get('cr-lines').children[0].children[5].children[0].events.click();
+ elements.get('cr-quantity').value='7';
+ elements.get('cr-sort').value='recent';elements.get('cr-sort').events.change();
+ assert.equal(elements.get('cr-product').value,'Alpha');
+ assert.equal(elements.get('cr-quantity').value,'7');
+ assert.equal(elements.get('cr-add').textContent,'Enregistrer la ligne');
+ assert.deepEqual(names(),['Zulu','Alpha']);
+ window.print=()=>assert.deepEqual(names(),['Zulu','Alpha']);
+ elements.get('cr-print').events.click();
  elements.get('cr-delete').events.click();
  assert.equal(staged.reports.length,0);assert.equal(elements.get('cr-save').disabled,false);
  await elements.get('cr-save').events.click();assert.equal(online.reports.length,0);
