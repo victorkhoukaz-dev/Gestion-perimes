@@ -15,6 +15,17 @@
         if (error?.code === '23505') return 'Une version existe déjà en ligne. Rouvrez Retours fabricants avant d’enregistrer.';
         return 'Impossible de terminer l’opération. Vérifiez votre connexion et réessayez.';
     }
+    function captureScannerSeparator(event, input) {
+        // A USB keyboard scanner can send ASCII separators as Ctrl key combinations.
+        if (!event.ctrlKey || event.altKey || event.metaKey || event.shiftKey ||
+            !['Backslash', 'BracketRight'].includes(event.code)) return false;
+        event.preventDefault();
+        input.setRangeText('\x1d', input.selectionStart, input.selectionEnd, 'end');
+        return true;
+    }
+    function isStructuredScan(value) {
+        return /[\x1d\x1e]|^\][a-zA-Z][0-9]|^\(01\)|^01\d{14}/.test(value);
+    }
     function parseBarcode(value) {
         // Scanner libraries can include a GS1 symbology prefix and may represent
         // the FNC1/group separator as GS, RS, or ETX depending on the device.
@@ -139,7 +150,7 @@
         storage.setItem(key, raw); // Callers replace in-memory state only after this succeeds.
         return raw;
     }
-    const api = { parseBarcode, findProduct, validateEntry, addLine, sortLines, lineKey, units, unitLabel, userError, errorMessage, loadReports, saveReports };
+    const api = { captureScannerSeparator, isStructuredScan, parseBarcode, findProduct, validateEntry, addLine, sortLines, lineKey, units, unitLabel, userError, errorMessage, loadReports, saveReports };
     if (typeof module !== 'undefined' && module.exports) module.exports = api;
     if (typeof window !== 'undefined') window.CompanyReturnsData = api;
 })();

@@ -22,16 +22,18 @@ class Element {
     appendChild(child) { this.children.push(child); }
     setAttribute() {}
     addEventListener(name, callback) { this[name] = callback; }
+    setRangeText(value, start, end) { this.value = this.value.slice(0, start) + value + this.value.slice(end); }
+    focus() {}
     querySelectorAll() { return this.children; }
     scrollIntoView() {}
     dispatchEvent() {}
 }
 function setup() {
     const ids = Object.fromEntries(['form-din-suggestions', 'form-product-suggestions', 'cr-din-suggestions', 'cr-product-suggestions',
-        'form-expiry', 'form-notes', 'camera-modal'].map(id => [id, new Element()]));
+        'form-expiry', 'form-notes', 'form-upc', 'camera-modal'].map(id => [id, new Element()]));
     const selected = [], lookups = [];
     const context = vm.createContext({
-        document: { getElementById: id => ids[id], querySelectorAll: () => Object.values(ids).filter(item => item !== ids['camera-modal']), createElement: () => new Element() },
+        document: { addEventListener() {}, getElementById: id => ids[id], querySelectorAll: () => Object.values(ids).filter(item => item !== ids['camera-modal']), createElement: () => new Element() },
         window: { CompanyReturnsData: D }, console, Event: class {},
         localCatalog: [
             { din: '01234567', product: 'ALPHA MEDICATION', dosage: '10 mg', format: '100 tablets', upc: '012345678905' },
@@ -43,6 +45,7 @@ function setup() {
         checkForExactCodeMatch: code => { lookups.push(code); return true; }
     });
     const source = [
+        section('setupAutocomplete', 'function closeAllSuggestions'),
         section('closeAllSuggestions', 'function normalizeUPC'),
         section('normalizeUPC', 'function normalizeDIN'),
         section('normalizeDIN', 'function formatDIN'),
@@ -56,6 +59,33 @@ function setup() {
     vm.runInContext(source, context);
     return { context, ids, selected, lookups };
 }
+test('QW2500 keyboard events preserve the GS separator and fill the expiry form once', () => {
+    const { context, ids, lookups } = setup();
+    context.setupAutocomplete();
+    const field = ids['form-upc'];
+    const key = (code, key, ctrlKey = false) => {
+        field.selectionStart = field.selectionEnd = field.value.length;
+        let prevented = false;
+        field.keydown({ code, key, ctrlKey, target: field, preventDefault() { prevented = true; } });
+        return prevented;
+    };
+    const type = value => {
+        for (const character of value) {
+            field.value += character;
+            field.input({ target: field });
+        }
+    };
+    assert.equal(key('Backslash', '<', true), true);
+    type('010077131320080621A91HVH9AHM');
+    assert.equal(key('BracketRight', 'Dead', true), true);
+    type('1726103110VF5691');
+    assert.deepEqual(lookups, []);
+    assert.equal(key('Enter', 'Enter'), true);
+    field.change({ target: field });
+    assert.deepEqual(lookups, ['00771313200806']);
+    assert.equal(ids['form-expiry'].value, '2026-10');
+    assert.equal(ids['form-notes'].value, 'Lot: VF5691');
+});
 test('partial DIN suggestions share catalogue filtering but target only the chosen form', () => {
     const { context, ids, selected } = setup(), returns = [];
     context.showSuggestions('12345', 'din', { prefix: 'cr', select: item => returns.push(item) });

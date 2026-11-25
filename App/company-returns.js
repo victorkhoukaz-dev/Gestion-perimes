@@ -73,7 +73,9 @@
         next.reports.unshift(report); next.activeId = report.id;
     }
     function readEntry() { return Object.fromEntries(fields.map(field => [field, $(field).value])); }
+    let resolvedBarcode;
     function fillEntry(entry = {}) {
+        resolvedBarcode = undefined;
         context?.closeSuggestions?.();
         fields.forEach(field => { $(field).value = entry[field] ?? (field === 'unit' ? 'tablets' : ''); });
     }
@@ -171,6 +173,7 @@
         const product = D.findProduct(context.catalog(), scanned.code, scanned.gs1 ? 'barcode' : 'auto');
         // Start each scan with empty lot/expiry; never carry these from a previous package.
         fillEntry({ code: scanned.code, ...product, lot: scanned.lot, expiry: scanned.expiry });
+        resolvedBarcode = scanned.code;
         resetEdit();
         $('lookup').textContent = product
             ? 'Produit trouvé dans le catalogue. Vérifiez le lot, la péremption et la quantité sur l’emballage.'
@@ -179,7 +182,16 @@
         (product ? $('quantity') : $('din')).focus();
     }
     $('read').addEventListener('click', () => resolveCode($('code').value));
-    $('code').addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); resolveCode($('code').value); } });
+    $('code').addEventListener('keydown', event => {
+        if (D.captureScannerSeparator(event, $('code'))) {
+            resolvedBarcode = undefined;
+            return;
+        }
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            if ($('code').value !== resolvedBarcode) resolveCode($('code').value);
+        }
+    });
     function selectMedication(item) {
         const clean = value => !value || value === 'N/A' ? '' : String(value);
         const din = clean(item.din);
@@ -217,10 +229,13 @@
         if (match) selectMedication({ ...match, dosage: match.strength });
     });
     $('code').addEventListener('input', () => {
-        if (context && D.findProduct(context.catalog(), $('code').value, 'barcode')) resolveCode($('code').value);
+        resolvedBarcode = undefined;
+        const value = $('code').value;
+        if (context && !D.isStructuredScan(value) && D.findProduct(context.catalog(), value, 'barcode')) resolveCode(value);
     });
     $('code').addEventListener('change', () => {
-        if (context && $('code').value.trim()) resolveCode($('code').value);
+        const value = $('code').value;
+        if (context && value.trim() && value !== resolvedBarcode) resolveCode(value);
     });
     $('entry').addEventListener('input', saveDraft);
     $('entry').addEventListener('change', saveDraft);

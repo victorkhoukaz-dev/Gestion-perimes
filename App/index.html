@@ -5462,7 +5462,9 @@
 
       // Événements sur l'input Code-barres (UPC)
       if (upcInput) {
+        let completedCode;
         upcInput.addEventListener("input", (e) => {
+          completedCode = undefined;
           const val = e.target.value.trim();
           const helperText = document.getElementById("scan-helper-text");
           if (!val) {
@@ -5471,6 +5473,7 @@
           }
 
           // Si le code correspond exactement à un produit du catalogue, l'afficher directement
+          if (window.CompanyReturnsData.isStructuredScan(val)) return;
           const found = checkForExactCodeMatch(val, "upc");
           if (found) {
             closeAllSuggestions();
@@ -5478,7 +5481,15 @@
         });
 
         const handleUPCComplete = (val) => {
-          if (!val || val.length < 5) return;
+          if (!val || val.length < 5 || val === completedCode) return;
+          const parsed = window.CompanyReturnsData.parseBarcode(val);
+          completedCode = parsed.gs1 ? parsed.code : val;
+          if (parsed.gs1) {
+            upcInput.value = parsed.code;
+            handleExpiryScan(val);
+            return;
+          }
+          val = parsed.code;
           const found = checkForExactCodeMatch(val, "upc");
           if (!found) {
             tempScannedUPC = val;
@@ -5519,6 +5530,10 @@
         };
 
         upcInput.addEventListener("keydown", (e) => {
+          if (window.CompanyReturnsData.captureScannerSeparator(e, upcInput)) {
+            completedCode = undefined;
+            return;
+          }
           if (e.key === "Enter") {
             e.preventDefault();
             handleUPCComplete(e.target.value.trim());
@@ -8806,8 +8821,10 @@
         consumer(decodedText);
         return;
       }
-      
-      // Vérifier s'il s'agit d'un code 2D GS1 DataMatrix
+      handleExpiryScan(decodedText);
+    }
+
+    function handleExpiryScan(decodedText) {
       const gs1Data = parseGS1DataMatrix(decodedText);
       let targetCode = decodedText;
 

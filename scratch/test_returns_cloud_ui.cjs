@@ -16,7 +16,8 @@ test('simplified controls keep online reports and legacy copies, and save report
  const window={CompanyReturnsData:D,CompanyReturnsCloud:{create:()=>session},addEventListener(){}};
  const sandbox={window,document,localStorage:storage,crypto:require('node:crypto').webcrypto,TextEncoder,confirm:()=>true,Option:function(text,value){this.textContent=text;this.value=value;},setTimeout,Blob,URL};
  vm.runInNewContext(fs.readFileSync('App/company-returns.js','utf8'),sandbox);
- await window.CompanyReturns.open({client:{},userId:'u',pharmacyId:'p',pharmacyName:'Test',catalog:()=>[]});
+ await window.CompanyReturns.open({client:{},userId:'u',pharmacyId:'p',pharmacyName:'Test',
+  catalog:()=>[{din:'01234567',product:'APO AMLODIPINE ATORVASTATINE',upc:'771313200806'}]});
  assert.equal(elements.get('cr-company').value,'Apotex');
  assert.equal(elements.get('cr-unit').options[0].textContent,'comprimés');
  assert.equal(elements.get('cr-unit').options[0].value,'tablets');
@@ -49,4 +50,22 @@ test('simplified controls keep online reports and legacy copies, and save report
  await elements.get('cr-save').events.click();
  assert.match(elements.get('cr-status').textContent,/Non enregistré en ligne/);
  assert.equal(elements.get('cr-status').textContent.includes('Network failed'),false);
+ const barcode=elements.get('cr-code');
+ barcode.setRangeText=(value,start,end)=>{barcode.value=barcode.value.slice(0,start)+value+barcode.value.slice(end);};
+ const key=(code,key,ctrlKey=false)=>{
+  barcode.selectionStart=barcode.selectionEnd=barcode.value.length;
+  barcode.events.keydown({code,key,ctrlKey,preventDefault(){}});
+ };
+ key('Backslash','<',true);
+ barcode.value+='010077131320080621A91HVH9AHM';
+ barcode.events.input();
+ key('BracketRight','Dead',true);
+ barcode.value+='1726103110VF5691';
+ barcode.events.input();
+ key('Enter','Enter');
+ barcode.events.change();
+ assert.equal(elements.get('cr-code').value,'00771313200806');
+ assert.equal(elements.get('cr-product').value,'APO AMLODIPINE ATORVASTATINE');
+ assert.equal(elements.get('cr-lot').value,'VF5691');
+ assert.equal(elements.get('cr-expiry').value,'2026-10');
 });
